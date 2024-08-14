@@ -62,7 +62,7 @@ where
         let user_data;
         unsafe {
             user_data = U::from_raw_const_ptr(this.raw().user_data.cast_const().cast());
-            sys::tb_client_release_packet(this.handle.raw, this.raw);
+            let _raw = Box::from_raw(this.raw);
         }
         user_data
     }
@@ -131,7 +131,6 @@ where
     fn drop(&mut self) {
         unsafe {
             U::from_raw_const_ptr(self.raw().user_data.cast_const().cast());
-            sys::tb_client_release_packet(self.handle.raw, self.raw);
         }
     }
 }
