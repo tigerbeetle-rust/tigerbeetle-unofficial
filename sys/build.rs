@@ -12,14 +12,27 @@ use std::{
 use quote::quote;
 use syn::visit::Visit;
 
-const TIGERBEETLE_RELEASE: &str = "0.15.3";
+const TIGERBEETLE_RELEASE: &str = "0.15.5";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
-        "aarch64-unknown-linux-gnu" => Some("aarch64-linux-gnu"),
+        "aarch64-unknown-linux-gnu" => Some("aarch64-linux-gnu.2.27"),
         "aarch64-unknown-linux-musl" => Some("aarch64-linux-musl"),
         "aarch64-apple-darwin" => Some("aarch64-macos"),
-        "x86_64-unknown-linux-gnu" => Some("x86_64-linux-gnu"),
+        "x86_64-unknown-linux-gnu" => Some("x86_64-linux-gnu.2.27"),
+        "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
+        "x86_64-apple-darwin" => Some("x86_64-macos"),
+        "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
+        _ => None,
+    }
+}
+
+fn target_to_tigerbeetle_target(target: &str) -> Option<&'static str> {
+    match target {
+        "aarch64-unknown-linux-gnu" => Some("aarch64-linux"),
+        "aarch64-unknown-linux-musl" => Some("aarch64-linux-musl"),
+        "aarch64-apple-darwin" => Some("aarch64-macos"),
+        "x86_64-unknown-linux-gnu" => Some("x86_64-linux"),
         "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         "x86_64-apple-darwin" => Some("x86_64-macos"),
         "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
@@ -37,6 +50,7 @@ fn main() {
     let out_dir: PathBuf = env::var("OUT_DIR").unwrap().into();
     let debug: bool = env::var("DEBUG").unwrap().parse().unwrap();
     let target = env::var("TARGET").unwrap();
+    println!("Target: {:?}", target);
 
     println!("cargo:rerun-if-env-changed=DOCS_RS");
     println!("cargo:rerun-if-changed=src/wrapper.h");
@@ -46,6 +60,9 @@ fn main() {
         wrapper = "src/wrapper.h".into();
     } else {
         let target_lib_subdir = target_to_lib_dir(&target)
+            .unwrap_or_else(|| panic!("target {target:?} is not supported"));
+
+        let tigerbeetle_target = target_to_tigerbeetle_target(&target)
             .unwrap_or_else(|| panic!("target {target:?} is not supported"));
 
         let tigerbeetle_root = out_dir.join("tigerbeetle");
@@ -61,23 +78,20 @@ fn main() {
         create_mirror(
             "tigerbeetle".as_ref(),
             &tigerbeetle_root,
-            &["src/clients/c/lib", "zig-cache", "zig-out", "zig", ".git"]
+            &["src/clients/c/lib", "zig-cache", "zig-out", ".git"]
                 .into_iter()
                 .collect(),
         );
 
         let status = Command::new(
             tigerbeetle_root
-                .join("scripts/install_zig")
+                .join("zig/download")
                 .with_extension(SCRIPT_EXTENSION),
         )
         .current_dir(&tigerbeetle_root)
         .status()
-        .expect("running install_zig script");
-        assert!(
-            status.success(),
-            "install_zig script failed with {status:?}"
-        );
+        .expect("running download script");
+        assert!(status.success(), "download script failed with {status:?}");
 
         let status = Command::new(
             tigerbeetle_root
@@ -87,15 +101,16 @@ fn main() {
                 .unwrap(),
         )
         .arg("build")
-        .arg("c_client")
+        .arg("clients:c")
         .args((!debug).then_some("-Drelease"))
-        .arg(format!("-Dtarget={target_lib_subdir}"))
+        .arg(format!("-Dtarget={tigerbeetle_target}"))
         .env("TIGERBEETLE_RELEASE", TIGERBEETLE_RELEASE)
         .current_dir(&tigerbeetle_root)
         .status()
         .expect("running zig build subcommand");
         assert!(status.success(), "zig build failed with {status:?}");
 
+        let c_dir = tigerbeetle_root.join("src/clients/c/");
         let lib_dir = tigerbeetle_root.join("src/clients/c/lib");
         let link_search = lib_dir.join(target_lib_subdir);
         println!(
@@ -106,8 +121,8 @@ fn main() {
         );
         println!("cargo:rustc-link-lib=static=tb_client");
 
-        wrapper = lib_dir.join("include/wrapper.h");
-        let generated_header = lib_dir.join("include/tb_client.h");
+        wrapper = c_dir.join("wrapper.h");
+        let generated_header = c_dir.join("tb_client.h");
         assert!(
             std::fs::read_to_string(&generated_header).expect("reading generated `tb_client.h`")
                 == std::fs::read_to_string("src/tb_client.h")
