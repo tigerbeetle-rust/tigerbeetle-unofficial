@@ -1,4 +1,8 @@
-use std::{mem, num::NonZeroU8};
+use std::{
+    mem::{self, ManuallyDrop},
+    num::NonZeroU8,
+    ptr,
+};
 
 use crate::error::{SendError, SendErrorKind};
 
@@ -13,7 +17,7 @@ pub struct Packet<'a, U>
 where
     U: UserDataPtr,
 {
-    pub(super) raw: *mut sys::tb_packet_t,
+    pub(super) raw: ManuallyDrop<*mut sys::tb_packet_t>,
     pub(super) handle: ClientHandle<'a, U>,
 }
 
@@ -32,6 +36,29 @@ impl<'a, U> Packet<'a, U>
 where
     U: UserDataPtr,
 {
+    pub fn new(handle: ClientHandle<'a, U>, user_data: U, operation: Operation) -> Self {
+        let user_data = U::into_raw_const_ptr(user_data)
+            .cast::<std::ffi::c_void>()
+            .cast_mut();
+
+        let raw = Box::new(sys::tb_packet_t {
+            next: ptr::null_mut(),
+            user_data,
+            operation: operation.0,
+            status: 0,
+            data_size: 0,
+            data: ptr::null_mut(),
+            batch_next: ptr::null_mut(),
+            batch_tail: ptr::null_mut(),
+            batch_size: 0,
+            reserved: [0; 8],
+        });
+
+        let ptr = ManuallyDrop::new(Box::into_raw(raw));
+
+        Self { raw: ptr, handle }
+    }
+
     pub fn submit(mut self) {
         let data = self.user_data().data();
         let Ok(data_size) = data.len().try_into() else {
@@ -45,16 +72,16 @@ where
         raw.data_size = data_size;
         raw.data = data.cast_mut().cast();
 
-        unsafe { sys::tb_client_submit(self.handle.raw, self.raw) };
+        unsafe { sys::tb_client_submit(self.handle.raw, self.raw.cast()) };
         mem::forget(self);
     }
 
     fn raw(&self) -> &sys::tb_packet_t {
-        unsafe { &*self.raw }
+        unsafe { &*self.raw.cast() }
     }
 
     fn raw_mut(&mut self) -> &mut sys::tb_packet_t {
-        unsafe { &mut *self.raw }
+        unsafe { &mut *self.raw.cast() }
     }
 
     pub fn into_user_data(self) -> U {
@@ -62,7 +89,7 @@ where
         let user_data;
         unsafe {
             user_data = U::from_raw_const_ptr(this.raw().user_data.cast_const().cast());
-            let _raw = Box::from_raw(this.raw);
+            this.raw.drop_in_place();
         }
         user_data
     }
@@ -131,6 +158,7 @@ where
     fn drop(&mut self) {
         unsafe {
             U::from_raw_const_ptr(self.raw().user_data.cast_const().cast());
+            self.raw.drop_in_place();
         }
     }
 }

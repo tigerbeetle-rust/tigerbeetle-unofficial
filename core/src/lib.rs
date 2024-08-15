@@ -124,14 +124,6 @@ where
             on_completion: unsafe { &*self.on_completion },
         }
     }
-
-    pub fn acquire(
-        &self,
-        user_data: F::UserDataPtr,
-        operation: packet::Operation,
-    ) -> Packet<'_, F::UserDataPtr> {
-        self.handle().acquire(user_data, operation)
-    }
 }
 
 /// Blocks until all pending requests finish

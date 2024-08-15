@@ -1,9 +1,4 @@
-use std::{ffi::c_void, ptr};
-
-use super::{
-    callback::{Callbacks, UserDataPtr},
-    packet, Packet,
-};
+use super::callback::{Callbacks, UserDataPtr};
 
 pub struct ClientHandle<'a, U>
 where
@@ -24,32 +19,5 @@ where
 {
     fn clone(&self) -> Self {
         *self
-    }
-}
-
-impl<'a, U> ClientHandle<'a, U>
-where
-    U: UserDataPtr,
-{
-    pub fn acquire(self, user_data: U, operation: packet::Operation) -> Packet<'a, U> {
-        let user_data = U::into_raw_const_ptr(user_data).cast::<c_void>().cast_mut();
-
-        let raw = Box::new(sys::tb_packet_t {
-            next: ptr::null_mut(),
-            user_data,
-            operation: operation.0,
-            status: 0,
-            data_size: 0,
-            data: ptr::null_mut(),
-            batch_next: ptr::null_mut(),
-            batch_tail: ptr::null_mut(),
-            batch_size: 0,
-            reserved: [0; 8],
-        });
-
-        Packet {
-            raw: Box::into_raw(raw).cast(),
-            handle: self,
-        }
     }
 }

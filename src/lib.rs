@@ -9,6 +9,7 @@ use tokio::sync::oneshot;
 use core::{
     error::{CreateAccountsError, CreateTransfersError, SendError},
     util::{RawConstPtr, SendAsBytesOwnedSlice, SendOwnedSlice},
+    Packet,
 };
 
 pub use core::{self, account, error, transfer, Account, Transfer};
@@ -136,7 +137,9 @@ impl Client {
     ) -> Result<Reply, SendError> {
         let (reply_sender, reply_receiver) = oneshot::channel();
         let user_data = Box::new(UserData { reply_sender, data });
-        let packet = self.inner.acquire(user_data, operation);
+
+        let packet = Packet::new(self.inner.handle(), user_data, operation);
+
         packet.submit();
         reply_receiver.await.unwrap()
     }
