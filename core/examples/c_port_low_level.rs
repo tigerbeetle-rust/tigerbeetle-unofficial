@@ -162,14 +162,14 @@ impl CompletionContext {
         &self,
         mut guard: MutexGuard<'a, CompletionState>,
         packet: tb::Packet<Box<UserData>>,
-    ) -> Result<(Box<UserData>, MutexGuard<'a, CompletionState>), tb::error::SendError> {
+    ) -> Result<(Box<UserData>, MutexGuard<'a, CompletionState>), tb::error::SubmitError> {
         guard.completed = None;
-        packet.submit();
+        packet.submit()?;
         loop {
             guard = self.cv.wait(guard).unwrap();
 
             if let Some(c) = guard.completed.take() {
-                break c.1.map(|()| (c.0, guard));
+                break Ok(c.1.map(|()| (c.0, guard))?);
             }
         }
     }

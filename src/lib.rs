@@ -7,7 +7,7 @@ use reply::Reply;
 use tokio::sync::oneshot;
 
 use core::{
-    error::{CreateAccountsError, CreateTransfersError, SendError},
+    error::{CreateAccountsError, CreateTransfersError, SendError, SubmitError},
     util::{RawConstPtr, SendAsBytesOwnedSlice, SendOwnedSlice},
     Packet,
 };
@@ -72,7 +72,7 @@ impl Client {
     pub async fn get_account_balances<T>(
         &self,
         filter: T,
-    ) -> Result<Vec<account::Balance>, SendError>
+    ) -> Result<Vec<account::Balance>, SubmitError>
     where
         T: RawConstPtr<Target = account::Filter> + Send + 'static,
     {
@@ -85,7 +85,7 @@ impl Client {
         .map(Reply::into_get_account_balances)
     }
 
-    pub async fn get_account_transfers<T>(&self, filter: T) -> Result<Vec<Transfer>, SendError>
+    pub async fn get_account_transfers<T>(&self, filter: T) -> Result<Vec<Transfer>, SubmitError>
     where
         T: RawConstPtr<Target = account::Filter> + Send + 'static,
     {
@@ -98,7 +98,7 @@ impl Client {
         .map(Reply::into_get_account_transfers)
     }
 
-    pub async fn lookup_accounts<T>(&self, ids: T) -> Result<Vec<Account>, SendError>
+    pub async fn lookup_accounts<T>(&self, ids: T) -> Result<Vec<Account>, SubmitError>
     where
         T: Into<SendOwnedSlice<u128>>,
     {
@@ -114,7 +114,7 @@ impl Client {
         .map(Reply::into_lookup_accounts)
     }
 
-    pub async fn lookup_transfers<T>(&self, ids: T) -> Result<Vec<Transfer>, SendError>
+    pub async fn lookup_transfers<T>(&self, ids: T) -> Result<Vec<Transfer>, SubmitError>
     where
         T: Into<SendOwnedSlice<u128>>,
     {
@@ -134,14 +134,14 @@ impl Client {
         &self,
         data: SendAsBytesOwnedSlice,
         operation: core::Operation,
-    ) -> Result<Reply, SendError> {
+    ) -> Result<Reply, SubmitError> {
         let (reply_sender, reply_receiver) = oneshot::channel();
         let user_data = Box::new(UserData { reply_sender, data });
 
         let packet = Packet::new(self.inner.handle(), user_data, operation);
 
-        packet.submit();
-        reply_receiver.await.unwrap()
+        packet.submit()?;
+        Ok(reply_receiver.await.unwrap()?)
     }
 }
 

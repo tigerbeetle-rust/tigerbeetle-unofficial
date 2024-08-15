@@ -11,8 +11,53 @@ pub use sys::tb_create_transfers_result_t as RawCreateTransfersIndividualApiResu
 #[derive(Clone, Copy)]
 pub struct NewClientError(pub(crate) NonZeroU32);
 
+#[derive(Debug, Clone, Copy)]
+pub struct ClientClosedError(());
+
+impl std::error::Error for ClientClosedError {}
+
+impl std::fmt::Display for ClientClosedError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 #[derive(Clone, Copy)]
 pub struct SendError(pub(crate) NonZeroU8);
+
+#[non_exhaustive]
+#[derive(Debug)]
+pub enum SubmitError {
+    ClientClosed(ClientClosedError),
+    Send(SendError),
+}
+
+impl std::fmt::Display for SubmitError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl std::error::Error for SubmitError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(match self {
+            SubmitError::Send(e) => e as _,
+            SubmitError::ClientClosed(e) => e as _,
+        })
+    }
+}
+
+impl From<ClientClosedError> for SubmitError {
+    fn from(value: ClientClosedError) -> Self {
+        SubmitError::ClientClosed(value)
+    }
+}
+
+impl From<SendError> for SubmitError {
+    fn from(value: SendError) -> Self {
+        SubmitError::Send(value)
+    }
+}
 
 #[derive(Clone, Copy)]
 pub struct CreateAccountError(pub(crate) NonZeroU32);
@@ -34,7 +79,7 @@ pub struct CreateAccountsApiError(Vec<CreateAccountsIndividualApiError>);
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum CreateAccountsError {
-    Send(SendError),
+    Submit(SubmitError),
     Api(CreateAccountsApiError),
 }
 
@@ -58,7 +103,7 @@ pub struct CreateTransfersApiError(Vec<CreateTransfersIndividualApiError>);
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum CreateTransfersError {
-    Send(SendError),
+    Submit(SubmitError),
     Api(CreateTransfersApiError),
 }
 
@@ -358,7 +403,7 @@ impl From<CreateAccountsIndividualApiError> for CreateAccountsApiError {
 impl std::error::Error for CreateAccountsError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         Some(match self {
-            CreateAccountsError::Send(e) => e as _,
+            CreateAccountsError::Submit(e) => e as _,
             CreateAccountsError::Api(e) => e as _,
         })
     }
@@ -367,7 +412,7 @@ impl std::error::Error for CreateAccountsError {
 impl std::fmt::Display for CreateAccountsError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            CreateAccountsError::Send(_) => {
+            CreateAccountsError::Submit(_) => {
                 "error occured while sending packets for accounts' creation"
             }
             CreateAccountsError::Api(_) => "api errors occured at accounts' creation",
@@ -376,9 +421,9 @@ impl std::fmt::Display for CreateAccountsError {
     }
 }
 
-impl From<SendError> for CreateAccountsError {
-    fn from(value: SendError) -> Self {
-        CreateAccountsError::Send(value)
+impl From<SubmitError> for CreateAccountsError {
+    fn from(value: SubmitError) -> Self {
+        CreateAccountsError::Submit(value)
     }
 }
 
@@ -582,7 +627,7 @@ impl From<CreateTransfersIndividualApiError> for CreateTransfersApiError {
 impl std::error::Error for CreateTransfersError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         Some(match self {
-            CreateTransfersError::Send(e) => e as _,
+            CreateTransfersError::Submit(e) => e as _,
             CreateTransfersError::Api(e) => e as _,
         })
     }
@@ -591,7 +636,7 @@ impl std::error::Error for CreateTransfersError {
 impl std::fmt::Display for CreateTransfersError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            CreateTransfersError::Send(_) => {
+            CreateTransfersError::Submit(_) => {
                 "error occured while sending packets for transfers' creation"
             }
             CreateTransfersError::Api(_) => "api errors occured at transfers' creation",
@@ -600,9 +645,9 @@ impl std::fmt::Display for CreateTransfersError {
     }
 }
 
-impl From<SendError> for CreateTransfersError {
-    fn from(value: SendError) -> Self {
-        CreateTransfersError::Send(value)
+impl From<SubmitError> for CreateTransfersError {
+    fn from(value: SubmitError) -> Self {
+        CreateTransfersError::Submit(value)
     }
 }
 

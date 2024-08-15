@@ -6,7 +6,12 @@ mod packet;
 pub mod transfer;
 pub mod util;
 
-use std::{marker::PhantomData, mem, num::NonZeroU32};
+use std::{
+    marker::PhantomData,
+    mem,
+    num::NonZeroU32,
+    sync::{Arc, Mutex},
+};
 
 use error::{NewClientError, NewClientErrorKind};
 
@@ -23,7 +28,7 @@ pub struct Client<F>
 where
     F: CallbacksPtr,
 {
-    raw: sys::tb_client_t,
+    raw: Arc<Mutex<sys::tb_client_t>>,
     on_completion: *const F::Target,
     marker: PhantomData<F>,
 }
@@ -106,7 +111,7 @@ where
                     on_completion_ctx,
                     on_completion_fn,
                 ) {
-                    Ok(x) => x,
+                    Ok(x) => Arc::new(Mutex::new(x)),
                     Err(err) => {
                         F::from_raw_const_ptr(on_completion);
                         return Err(err);
@@ -120,7 +125,7 @@ where
 
     pub fn handle(&self) -> ClientHandle<'_, F::UserDataPtr> {
         ClientHandle {
-            raw: self.raw,
+            raw: self.raw.clone(),
             on_completion: unsafe { &*self.on_completion },
         }
     }
@@ -140,12 +145,20 @@ where
                     tokio::runtime::RuntimeFlavor::MultiThread
                 )
             }) {
-                tokio::task::block_in_place(|| sys::tb_client_deinit(self.raw));
+                tokio::task::block_in_place(|| {
+                    let raw = self.raw.lock().unwrap();
+                    sys::tb_client_deinit(*raw)
+                });
             } else {
-                sys::tb_client_deinit(self.raw)
+                let raw = self.raw.lock().unwrap();
+                sys::tb_client_deinit(*raw)
             }
             #[cfg(not(feature = "tokio-rt-multi-thread"))]
-            sys::tb_client_deinit(self.raw);
+            {
+                let raw = self.raw.lock().unwrap();
+                sys::tb_client_deinit(*raw);
+            }
+
             F::from_raw_const_ptr(self.on_completion);
         }
     }

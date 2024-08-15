@@ -4,7 +4,7 @@ use std::{
     ptr,
 };
 
-use crate::error::{SendError, SendErrorKind};
+use crate::error::{ClientClosedError, SendError, SendErrorKind};
 
 pub use sys::generated_safe::OperationKind;
 
@@ -59,12 +59,12 @@ where
         Self { raw: ptr, handle }
     }
 
-    pub fn submit(mut self) {
+    pub fn submit(mut self) -> Result<(), ClientClosedError> {
         let data = self.user_data().data();
         let Ok(data_size) = data.len().try_into() else {
             self.set_status(Err(SendErrorKind::TooMuchData.into()));
             self.handle.on_completion.on_completion(self, &[]);
-            return;
+            return Ok(());
         };
         let data = data.as_ptr();
 
@@ -72,8 +72,12 @@ where
         raw.data_size = data_size;
         raw.data = data.cast_mut().cast();
 
-        unsafe { sys::tb_client_submit(self.handle.raw, self.raw.cast()) };
+        unsafe {
+            let raw = self.handle.raw.lock().unwrap();
+            sys::tb_client_submit(*raw, self.raw.cast())
+        };
         mem::forget(self);
+        Ok(())
     }
 
     fn raw(&self) -> &sys::tb_packet_t {
@@ -124,7 +128,7 @@ where
     }
 
     pub fn client_handle(&self) -> ClientHandle<'a, U> {
-        self.handle
+        self.handle.clone()
     }
 
     pub fn operation(&self) -> Operation {
