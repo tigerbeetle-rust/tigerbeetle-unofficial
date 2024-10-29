@@ -83,9 +83,7 @@ fn main() {
 
         let zig_cc = tigerbeetle_root
             .join("zig/zig")
-            .with_extension(env::consts::EXE_EXTENSION)
-            .canonicalize()
-            .unwrap();
+            .with_extension(env::consts::EXE_EXTENSION);
 
         // download and install zig if doesnt exist, else use existing one in dir
         if !zig_cc.exists() {
@@ -103,7 +101,7 @@ fn main() {
             );
         }
 
-        let status = Command::new(zig_cc)
+        let status = Command::new(zig_cc.canonicalize().unwrap())
             .arg("build")
             .arg("clients:c")
             .args((!debug).then_some("-Drelease"))
