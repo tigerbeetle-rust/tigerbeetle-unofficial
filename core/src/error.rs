@@ -3,7 +3,7 @@ use std::num::{NonZeroU32, NonZeroU8};
 
 pub use sys::generated_safe::{
     self as sys_safe, CreateAccountErrorKind, CreateTransferErrorKind,
-    PacketAcquireStatusErrorKind as AcquirePacketErrorKind, PacketStatusErrorKind as SendErrorKind,
+    PacketStatusErrorKind as AcquirePacketErrorKind, PacketStatusErrorKind as SendErrorKind,
     StatusErrorKind as NewClientErrorKind,
 };
 pub use sys::tb_create_accounts_result_t as RawCreateAccountsIndividualApiResult;
@@ -13,7 +13,7 @@ pub use sys::tb_create_transfers_result_t as RawCreateTransfersIndividualApiResu
 pub struct NewClientError(pub(crate) NonZeroU32);
 
 #[derive(Clone, Copy)]
-pub struct AcquirePacketError(pub(crate) NonZeroU32);
+pub struct AcquirePacketError(pub(crate) NonZeroU8);
 
 #[derive(Clone, Copy)]
 pub struct SendError(pub(crate) NonZeroU8);
@@ -118,8 +118,8 @@ impl From<NewClientErrorKind> for NewClientError {
 }
 
 impl AcquirePacketError {
-    const CODE_RANGE: std::ops::RangeInclusive<u32> = sys_safe::MIN_PACKET_ACQUIRE_STATUS_ERROR_CODE
-        ..=sys_safe::MAX_PACKET_ACQUIRE_STATUS_ERROR_CODE;
+    const CODE_RANGE: std::ops::RangeInclusive<u8> =
+        sys_safe::MIN_PACKET_STATUS_ERROR_CODE..=sys_safe::MAX_PACKET_STATUS_ERROR_CODE;
 
     pub fn kind(self) -> AcquirePacketErrorKind {
         let code = self.0.get();
@@ -131,7 +131,7 @@ impl AcquirePacketError {
         }
     }
 
-    pub fn code(self) -> NonZeroU32 {
+    pub fn code(self) -> NonZeroU8 {
         self.0
     }
 }
@@ -164,7 +164,7 @@ impl From<AcquirePacketErrorKind> for AcquirePacketError {
         if !Self::CODE_RANGE.contains(&code) {
             panic!("AcquirePacketErrorKind::{value:?}")
         }
-        AcquirePacketError(NonZeroU32::new(code).unwrap())
+        AcquirePacketError(NonZeroU8::new(code).unwrap())
     }
 }
 
