@@ -81,34 +81,37 @@ fn main() {
                 .collect(),
         );
 
-        let status = Command::new(
-            tigerbeetle_root
-                .join("zig/download")
-                .with_extension(SCRIPT_EXTENSION),
-        )
-        .current_dir(&tigerbeetle_root)
-        .status()
-        .expect("running zig download script");
-        assert!(
-            status.success(),
-            "zig download script failed with {status:?}"
-        );
+        let zig_cc = tigerbeetle_root
+            .join("zig/zig")
+            .with_extension(env::consts::EXE_EXTENSION)
+            .canonicalize()
+            .unwrap();
 
-        let status = Command::new(
-            tigerbeetle_root
-                .join("zig/zig")
-                .with_extension(env::consts::EXE_EXTENSION)
-                .canonicalize()
-                .unwrap(),
-        )
-        .arg("build")
-        .arg("clients:c")
-        .args((!debug).then_some("-Drelease"))
-        .arg(format!("-Dtarget={tb_target}"))
-        .env("TIGERBEETLE_RELEASE", TIGERBEETLE_RELEASE)
-        .current_dir(&tigerbeetle_root)
-        .status()
-        .expect("running zig build subcommand");
+        // download and install zig if doesnt exist, else use existing one in dir
+        if !zig_cc.exists() {
+            let status = Command::new(
+                tigerbeetle_root
+                    .join("zig/download")
+                    .with_extension(SCRIPT_EXTENSION),
+            )
+            .current_dir(&tigerbeetle_root)
+            .status()
+            .expect("running zig download script");
+            assert!(
+                status.success(),
+                "zig download script failed with {status:?}"
+            );
+        }
+
+        let status = Command::new(zig_cc)
+            .arg("build")
+            .arg("clients:c")
+            .args((!debug).then_some("-Drelease"))
+            .arg(format!("-Dtarget={tb_target}"))
+            .env("TIGERBEETLE_RELEASE", TIGERBEETLE_RELEASE)
+            .current_dir(&tigerbeetle_root)
+            .status()
+            .expect("running zig build subcommand");
         assert!(status.success(), "zig build failed with {status:?}");
 
         let c_dir = tigerbeetle_root.join("src/clients/c");
