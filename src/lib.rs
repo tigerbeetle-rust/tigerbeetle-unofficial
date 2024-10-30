@@ -2,48 +2,36 @@
 
 mod reply;
 
-use std::sync::Arc;
-
-use error::{NewClientError, NewClientErrorKind};
+use error::NewClientError;
 use reply::Reply;
-use tokio::sync::{oneshot, OwnedSemaphorePermit, Semaphore};
+use tokio::sync::oneshot;
 
 use core::{
-    error::{CreateAccountsError, CreateTransfersError, SendError},
+    error::{CreateAccountsError, CreateTransfersError, SendError, SubmitError},
     util::{RawConstPtr, SendAsBytesOwnedSlice, SendOwnedSlice},
+    Packet,
 };
 
 pub use core::{self, account, error, transfer, Account, Transfer};
 
 pub struct Client {
     inner: core::Client<&'static Callbacks>,
-    sema: Arc<Semaphore>,
 }
 
 struct Callbacks;
 
 struct UserData {
     reply_sender: oneshot::Sender<Result<Reply, SendError>>,
-    _permit: OwnedSemaphorePermit,
     data: SendAsBytesOwnedSlice,
 }
 
 impl Client {
-    pub fn new<A>(
-        cluster_id: u128,
-        address: A,
-        concurrency_max: u32,
-    ) -> Result<Self, NewClientError>
+    pub fn new<A>(cluster_id: u128, address: A) -> Result<Self, NewClientError>
     where
         A: AsRef<[u8]>,
     {
         Ok(Client {
-            sema: Arc::new(Semaphore::new(
-                concurrency_max
-                    .try_into()
-                    .map_err(|_| NewClientErrorKind::ConcurrencyMaxInvalid)?,
-            )),
-            inner: core::Client::with_callback(cluster_id, address, concurrency_max, &Callbacks)?,
+            inner: core::Client::with_callback(cluster_id, address, &Callbacks)?,
         })
     }
 
@@ -84,7 +72,7 @@ impl Client {
     pub async fn get_account_balances<T>(
         &self,
         filter: T,
-    ) -> Result<Vec<account::Balance>, SendError>
+    ) -> Result<Vec<account::Balance>, SubmitError>
     where
         T: RawConstPtr<Target = account::Filter> + Send + 'static,
     {
@@ -97,7 +85,7 @@ impl Client {
         .map(Reply::into_get_account_balances)
     }
 
-    pub async fn get_account_transfers<T>(&self, filter: T) -> Result<Vec<Transfer>, SendError>
+    pub async fn get_account_transfers<T>(&self, filter: T) -> Result<Vec<Transfer>, SubmitError>
     where
         T: RawConstPtr<Target = account::Filter> + Send + 'static,
     {
@@ -110,7 +98,7 @@ impl Client {
         .map(Reply::into_get_account_transfers)
     }
 
-    pub async fn lookup_accounts<T>(&self, ids: T) -> Result<Vec<Account>, SendError>
+    pub async fn lookup_accounts<T>(&self, ids: T) -> Result<Vec<Account>, SubmitError>
     where
         T: Into<SendOwnedSlice<u128>>,
     {
@@ -126,7 +114,7 @@ impl Client {
         .map(Reply::into_lookup_accounts)
     }
 
-    pub async fn lookup_transfers<T>(&self, ids: T) -> Result<Vec<Transfer>, SendError>
+    pub async fn lookup_transfers<T>(&self, ids: T) -> Result<Vec<Transfer>, SubmitError>
     where
         T: Into<SendOwnedSlice<u128>>,
     {
@@ -146,17 +134,14 @@ impl Client {
         &self,
         data: SendAsBytesOwnedSlice,
         operation: core::Operation,
-    ) -> Result<Reply, SendError> {
-        let permit = self.sema.clone().acquire_owned().await.unwrap();
+    ) -> Result<Reply, SubmitError> {
         let (reply_sender, reply_receiver) = oneshot::channel();
-        let user_data = Box::new(UserData {
-            reply_sender,
-            _permit: permit,
-            data,
-        });
-        let packet = self.inner.acquire(user_data, operation).unwrap();
-        packet.submit();
-        reply_receiver.await.unwrap()
+        let user_data = Box::new(UserData { reply_sender, data });
+
+        let packet = Packet::new(self.inner.handle(), user_data, operation);
+
+        packet.submit()?;
+        Ok(reply_receiver.await.unwrap()?)
     }
 }
 

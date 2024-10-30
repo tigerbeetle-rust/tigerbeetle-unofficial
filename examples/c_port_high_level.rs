@@ -11,7 +11,7 @@ async fn main() {
     println!("Connecting...");
     let address = std::env::var("TB_ADDRESS");
     let address = address.as_deref().unwrap_or("3000");
-    let client = tb::Client::new(0, address, 32).expect("creating a tigerbeetle client");
+    let client = tb::Client::new(0, address).expect("creating a tigerbeetle client");
 
     ////////////////////////////////////////////////////////////
     // Submitting a batch of accounts:                        //

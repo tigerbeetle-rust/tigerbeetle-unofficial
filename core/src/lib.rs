@@ -6,9 +6,14 @@ mod packet;
 pub mod transfer;
 pub mod util;
 
-use std::{marker::PhantomData, mem, num::NonZeroU32};
+use std::{
+    marker::PhantomData,
+    mem,
+    num::NonZeroU32,
+    sync::{Arc, Mutex},
+};
 
-use error::{AcquirePacketError, NewClientError, NewClientErrorKind};
+use error::{NewClientError, NewClientErrorKind};
 
 pub use account::Account;
 pub use callback::*;
@@ -23,7 +28,7 @@ pub struct Client<F>
 where
     F: CallbacksPtr,
 {
-    raw: sys::tb_client_t,
+    raw: Arc<Mutex<sys::tb_client_t>>,
     on_completion: *const F::Target,
     marker: PhantomData<F>,
 }
@@ -38,7 +43,6 @@ where
     pub fn with_callback<A>(
         cluster_id: u128,
         address: A,
-        concurrency_max: u32,
         on_completion: F,
     ) -> Result<Self, NewClientError>
     where
@@ -50,9 +54,7 @@ where
         F::UserDataPtr: 'static,
     {
         // SAFETY: F and UserData are 'static
-        unsafe {
-            Client::with_callback_unchecked(cluster_id, address, concurrency_max, on_completion)
-        }
+        unsafe { Client::with_callback_unchecked(cluster_id, address, on_completion) }
     }
 
     /// Highly unsafe method. Please use [`Self::with_callback`]
@@ -67,7 +69,6 @@ where
     pub unsafe fn with_callback_unchecked<A>(
         cluster_id: u128,
         address: A,
-        concurrency_max: u32,
         on_completion: F,
     ) -> Result<Self, NewClientError>
     where
@@ -80,7 +81,6 @@ where
         unsafe fn raw_with_callback(
             cluster_id: u128,
             address: &[u8],
-            concurrency_max: u32,
             on_completion_ctx: usize,
             on_completion_fn: OnCompletionRawFn,
         ) -> Result<sys::tb_client_t, NewClientError> {
@@ -93,7 +93,6 @@ where
                     .len()
                     .try_into()
                     .map_err(|_| NewClientErrorKind::AddressInvalid)?,
-                concurrency_max,
                 on_completion_ctx,
                 Some(on_completion_fn),
             );
@@ -109,11 +108,10 @@ where
                 match raw_with_callback(
                     cluster_id,
                     address.as_ref(),
-                    concurrency_max,
                     on_completion_ctx,
                     on_completion_fn,
                 ) {
-                    Ok(x) => x,
+                    Ok(x) => Arc::new(Mutex::new(x)),
                     Err(err) => {
                         F::from_raw_const_ptr(on_completion);
                         return Err(err);
@@ -127,17 +125,9 @@ where
 
     pub fn handle(&self) -> ClientHandle<'_, F::UserDataPtr> {
         ClientHandle {
-            raw: self.raw,
+            raw: self.raw.clone(),
             on_completion: unsafe { &*self.on_completion },
         }
-    }
-
-    pub fn acquire(
-        &self,
-        user_data: F::UserDataPtr,
-        operation: packet::Operation,
-    ) -> Result<Packet<'_, F::UserDataPtr>, AcquirePacketError> {
-        self.handle().acquire(user_data, operation)
     }
 }
 
@@ -155,12 +145,20 @@ where
                     tokio::runtime::RuntimeFlavor::MultiThread
                 )
             }) {
-                tokio::task::block_in_place(|| sys::tb_client_deinit(self.raw));
+                tokio::task::block_in_place(|| {
+                    let raw = self.raw.lock().unwrap();
+                    sys::tb_client_deinit(*raw)
+                });
             } else {
-                sys::tb_client_deinit(self.raw)
+                let raw = self.raw.lock().unwrap();
+                sys::tb_client_deinit(*raw)
             }
             #[cfg(not(feature = "tokio-rt-multi-thread"))]
-            sys::tb_client_deinit(self.raw);
+            {
+                let raw = self.raw.lock().unwrap();
+                sys::tb_client_deinit(*raw);
+            }
+
             F::from_raw_const_ptr(self.on_completion);
         }
     }
