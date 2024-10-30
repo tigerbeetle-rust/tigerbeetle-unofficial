@@ -104,7 +104,11 @@ fn main() {
         .args((!debug).then_some("-Drelease"))
         .arg(format!("-Dtarget={tigerbeetle_target}"))
         .arg("-Dconfig-log-level=debug")
-        .env("TIGERBEETLE_RELEASE", TIGERBEETLE_RELEASE)
+        .arg(format!("-Dconfig-release={}", TIGERBEETLE_RELEASE))
+        .arg(format!(
+            "-Dconfig-release-client-min={}",
+            TIGERBEETLE_RELEASE
+        ))
         .current_dir(&tigerbeetle_root)
         .status()
         .expect("running zig build subcommand");
