@@ -35,14 +35,15 @@ const SCRIPT_EXTENSION: &str = "bat";
 fn main() {
     assert!(env!("CARGO_PKG_VERSION").ends_with(TIGERBEETLE_RELEASE));
     let out_dir: PathBuf = env::var("OUT_DIR").unwrap().into();
-    let debug: bool = env::var("DEBUG").unwrap().parse().unwrap();
+    let release = env::var("TIGERBEETLE_RELEASE").map_or(false, |s| s.parse().unwrap())
+        || !env::var("DEBUG").unwrap().parse::<bool>().unwrap();
     let target = env::var("TARGET").unwrap();
 
     println!("cargo:rerun-if-env-changed=DOCS_RS");
     println!("cargo:rerun-if-changed=src/wrapper.h");
 
     let wrapper;
-    if std::env::var("DOCS_RS").is_ok() {
+    if env::var("DOCS_RS").is_ok() {
         wrapper = "src/wrapper.h".into();
     } else {
         let target_lib_subdir = target_to_lib_dir(&target)
@@ -88,7 +89,7 @@ fn main() {
         )
         .arg("build")
         .arg("c_client")
-        .args((!debug).then_some("-Drelease"))
+        .args(release.then_some("-Drelease"))
         .arg(format!("-Dtarget={target_lib_subdir}"))
         .env("TIGERBEETLE_RELEASE", TIGERBEETLE_RELEASE)
         .current_dir(&tigerbeetle_root)
