@@ -90,6 +90,8 @@ fn main() {
         .arg("c_client")
         .args((!debug).then_some("-Drelease"))
         .arg(format!("-Dtarget={target_lib_subdir}"))
+        // TODO: Remove once fixed in upstream.
+        .arg("-Dgit-commit=73bbc1a32ba2513e369764680350c099fe302285")
         .env("TIGERBEETLE_RELEASE", TIGERBEETLE_RELEASE)
         .current_dir(&tigerbeetle_root)
         .status()
