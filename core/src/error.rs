@@ -14,10 +14,6 @@ pub use sys::{
     tb_create_transfers_result_t as RawCreateTransfersIndividualApiResult,
 };
 
-#[derive(Clone, Copy, Debug, Display, StdError)]
-#[display("{_0:?}")]
-pub struct ClientClosedError(#[error(not(source))] ());
-
 #[derive(Clone, Copy, Display, StdError)]
 #[display("{_0:?}")]
 pub struct NewClientError(#[error(not(source))] pub(crate) NonZeroU32);

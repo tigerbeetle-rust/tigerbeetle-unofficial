@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, panic::catch_unwind, slice, mem};
+use std::{marker::PhantomData, mem, panic::catch_unwind, slice};
 
 use crate::util::RawConstPtr;
 
