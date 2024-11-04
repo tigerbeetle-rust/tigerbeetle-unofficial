@@ -1,6 +1,6 @@
+use std::{marker::PhantomData, panic::catch_unwind, slice, mem};
+
 use crate::util::RawConstPtr;
-use std::mem::ManuallyDrop;
-use std::{marker::PhantomData, panic::catch_unwind, slice};
 
 use super::Packet;
 
@@ -106,7 +106,7 @@ pub(crate) unsafe extern "C" fn on_completion_raw_fn<F>(
             &[]
         };
         let packet = Packet {
-            raw: ManuallyDrop::new(packet),
+            raw: mem::ManuallyDrop::new(packet),
             handle: super::ClientHandle {
                 raw: raw_client,
                 on_completion: cb,
