@@ -13,7 +13,7 @@ pub struct Packet<'a, U>
 where
     U: UserDataPtr,
 {
-    pub(super) raw: mem::ManuallyDrop<*mut sys::tb_packet_t>,
+    pub(super) raw: *mut sys::tb_packet_t,
     pub(super) handle: ClientHandle<'a, U>,
 }
 
@@ -46,15 +46,16 @@ where
         raw.data = data.cast_mut().cast();
 
         unsafe { sys::tb_client_submit(self.handle.raw, self.raw.cast()) };
+        // Avoid `Drop`ping `Packet`.
         mem::forget(self);
     }
 
     fn raw(&self) -> &sys::tb_packet_t {
-        unsafe { &*self.raw.cast() }
+        unsafe { &*self.raw }
     }
 
     fn raw_mut(&mut self) -> &mut sys::tb_packet_t {
-        unsafe { &mut *self.raw.cast() }
+        unsafe { &mut *self.raw }
     }
 
     pub fn into_user_data(self) -> U {
@@ -62,7 +63,6 @@ where
         let user_data;
         unsafe {
             user_data = U::from_raw_const_ptr(this.raw().user_data.cast_const().cast());
-            this.raw.drop_in_place();
         }
         user_data
     }
@@ -131,7 +131,7 @@ where
     fn drop(&mut self) {
         unsafe {
             U::from_raw_const_ptr(self.raw().user_data.cast_const().cast());
-            self.raw.drop_in_place();
+            _ = Box::from_raw(self.raw);
         }
     }
 }

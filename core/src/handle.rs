@@ -1,4 +1,4 @@
-use std::{ffi::c_void, mem::ManuallyDrop, ptr};
+use std::{ffi::c_void, ptr};
 
 use super::{
     callback::{Callbacks, UserDataPtr},
@@ -33,7 +33,7 @@ where
 {
     pub fn acquire(self, user_data: U, operation: packet::Operation) -> Packet<'a, U> {
         Packet {
-            raw: ManuallyDrop::new(Box::into_raw(Box::new(sys::tb_packet_t {
+            raw: Box::into_raw(Box::new(sys::tb_packet_t {
                 next: ptr::null_mut(),
                 user_data: U::into_raw_const_ptr(user_data).cast::<c_void>().cast_mut(),
                 operation: operation.0,
@@ -45,7 +45,7 @@ where
                 batch_size: 0,
                 batch_allowed: 0,
                 reserved: [0; 7],
-            }))),
+            })),
             handle: self,
         }
     }
