@@ -1,22 +1,32 @@
-# tigerbeetle-rs
+`tigerbeetle-unofficial`
+========================
 
-Unofficial [tigerbeetle] bindings for Rust.
+Unofficial [TigerBeetle] bindings for [Rust].
+
+
+
 
 ## Status
 
-Because this tigerbeetle client library implementation is not a part of the official tigerbeetle repo, it is hard to ensure and keep some of rust safety guarantees from the outside.
-For that reason I invite people to contribute to this repo or finally develop the official rust client library.
+Because this [TigerBeetle] client library implementation is not a part of the [official `tigerbeetle` repos][1], it is hard to ensure and keep some of [Rust] safety guarantees from the outside. For that reason I invite people to contribute to this repo or finally develop the official [Rust] client library.
+
+
+
 
 ## Repo Overview
 
 The repository hosts the following libraries:
 
  * [![Crates.io](https://img.shields.io/crates/v/tigerbeetle-unofficial.svg?label=tigerbeetle-unofficial)](https://crates.io/crates/tigerbeetle-unofficial)
-   [![docs.rs](https://docs.rs/tigerbeetle-unofficial/badge.svg)](https://docs.rs/tigerbeetle-unofficial/) - Safe high-level async bindings. Implemented with `#![forbid(unsafe_code)]` upon `tigerbeetle-unofficial-core`.
+   [![docs.rs](https://docs.rs/tigerbeetle-unofficial/badge.svg)](https://docs.rs/tigerbeetle-unofficial) - Safe high-level async bindings. Implemented with `#![forbid(unsafe_code)]` upon `tigerbeetle-unofficial-core`.
  * [![Crates.io](https://img.shields.io/crates/v/tigerbeetle-unofficial-core.svg?label=tigerbeetle-unofficial-core)](https://crates.io/crates/tigerbeetle-unofficial-core)
-   [![docs.rs](https://docs.rs/tigerbeetle-unofficial-core/badge.svg)](https://docs.rs/tigerbeetle-unofficial-core/) - Safe low-level callback-based async bindings.
+   [![docs.rs](https://docs.rs/tigerbeetle-unofficial-core/badge.svg)](https://docs.rs/tigerbeetle-unofficial-core) - Safe low-level callback-based async bindings.
  * [![Crates.io](https://img.shields.io/crates/v/tigerbeetle-unofficial-sys.svg?label=tigerbeetle-unofficial-sys)](https://crates.io/crates/tigerbeetle-unofficial-sys)
-   [![docs.rs](https://docs.rs/tigerbeetle-unofficial-sys/badge.svg)](https://docs.rs/tigerbeetle-unofficial-sys/) - Unsafe native bindings.
+   [![docs.rs](https://docs.rs/tigerbeetle-unofficial-sys/badge.svg)](https://docs.rs/tigerbeetle-unofficial-sys) - Unsafe native bindings.
+
+
+
+
 
 ## License
 
@@ -29,4 +39,9 @@ This project is licensed under either of
 
 at your option.
 
-[tigerbeetle]: https://tigerbeetle.com/
+
+
+
+[Rust]: https://www.rust-lang.org
+[TigerBeetle]: https://tigerbeetle.com
+[1]: https://github.com/tigerbeetle
