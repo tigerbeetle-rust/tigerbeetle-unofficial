@@ -14,18 +14,18 @@ include = ["/src/**", "/examples/**", "/Cargo.toml", "/LICENSE-*", "README.md"]
 tokio-rt-multi-thread = ["core/tokio-rt-multi-thread"]
 
 [dependencies]
+bytemuck = { version = "1.16", features = ["extern_crate_alloc"] }
 core = { package = "tigerbeetle-unofficial-core", version = "0.4.1", path = "core" }
-bytemuck = { version = "1.13.1", features = ["extern_crate_alloc"] }
-tokio = { version = "1.28.1", features = ["sync"] }
+tokio = { version = "1.41", features = ["sync"] }
 
 [dev-dependencies]
-pollster = { version = "0.3.0", features = ["macro"] }
+pollster = { version = "0.4.0", features = ["macro"] }
 
 [workspace]
 members = ["sys", "core"]
 
 [workspace.package]
-version = "0.4.1+0.15.3"
+version = "0.4.1+0.16.11"
 authors = ["Daria Sukhonina <dariasukhonina@gmail.com>"]
 rust-version = "1.78"
 repository = "https://github.com/ZetaNumbers/tigerbeetle-rs"

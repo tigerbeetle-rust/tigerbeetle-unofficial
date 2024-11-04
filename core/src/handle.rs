@@ -1,6 +1,4 @@
-use std::{ffi::c_void, num::NonZeroU32, ptr};
-
-use crate::error::AcquirePacketError;
+use std::{ffi::c_void, mem::ManuallyDrop, ptr};
 
 use super::{
     callback::{Callbacks, UserDataPtr},
@@ -33,35 +31,22 @@ impl<'a, U> ClientHandle<'a, U>
 where
     U: UserDataPtr,
 {
-    pub fn acquire(
-        self,
-        user_data: U,
-        operation: packet::Operation,
-    ) -> Result<Packet<'a, U>, AcquirePacketError> {
-        unsafe fn impl_(
-            raw_client: sys::tb_client_t,
-            user_data: *const c_void,
-            operation: u8,
-        ) -> Result<*mut sys::tb_packet_t, AcquirePacketError> {
-            let mut raw = ptr::null_mut();
-            let status = sys::tb_client_acquire_packet(raw_client, &mut raw);
-            if let Some(c) = NonZeroU32::new(status) {
-                return Err(AcquirePacketError(c));
-            }
-            raw.write(sys::tb_packet_t {
+    pub fn acquire(self, user_data: U, operation: packet::Operation) -> Packet<'a, U> {
+        Packet {
+            raw: ManuallyDrop::new(Box::into_raw(Box::new(sys::tb_packet_t {
                 next: ptr::null_mut(),
-                user_data: user_data.cast_mut(),
-                operation,
+                user_data: U::into_raw_const_ptr(user_data).cast::<c_void>().cast_mut(),
+                operation: operation.0,
                 status: 0,
                 data_size: 0,
                 data: ptr::null_mut(),
-            });
-            Ok(raw)
+                batch_next: ptr::null_mut(),
+                batch_tail: ptr::null_mut(),
+                batch_size: 0,
+                batch_allowed: 0,
+                reserved: [0; 7],
+            }))),
+            handle: self,
         }
-
-        let user_data = U::into_raw_const_ptr(user_data);
-
-        let raw = unsafe { impl_(self.raw, user_data.cast(), operation.0)? };
-        Ok(Packet { raw, handle: self })
     }
 }
