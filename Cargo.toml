@@ -16,7 +16,7 @@ tokio-rt-multi-thread = ["core/tokio-rt-multi-thread"]
 [dependencies]
 bytemuck = { version = "1.16", features = ["extern_crate_alloc"] }
 core = { package = "tigerbeetle-unofficial-core", version = "0.4.1", path = "core" }
-tokio = { version = "1.41", features = ["sync"] }
+tokio = { version = "1.0", features = ["sync"] }
 
 [dev-dependencies]
 pollster = { version = "0.4.0", features = ["macro"] }
