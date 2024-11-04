@@ -28,5 +28,5 @@ members = ["sys", "core"]
 version = "0.4.1+0.15.3"
 authors = ["Daria Sukhonina <dariasukhonina@gmail.com>"]
 rust-version = "1.78"
-repository = "https://github.com/ZetaNumbers/tigerbeetle-rs"
+repository = "https://github.com/tigerbeetle-rust/tigerbeetle-unofficial"
 license = "MIT OR Apache-2.0"
