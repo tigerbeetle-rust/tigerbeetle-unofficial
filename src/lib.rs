@@ -11,7 +11,7 @@ use core::{
     util::{RawConstPtr, SendAsBytesOwnedSlice, SendOwnedSlice},
 };
 
-pub use core::{self, account, error, transfer, Account, Transfer};
+pub use core::{self, account, error, transfer, Account, Packet, Transfer};
 
 pub struct Client {
     inner: core::Client<&'static Callbacks>,
@@ -136,7 +136,7 @@ impl Client {
     ) -> Result<Reply, SendError> {
         let (reply_sender, reply_receiver) = oneshot::channel();
         let user_data = Box::new(UserData { reply_sender, data });
-        self.inner.acquire(user_data, operation).submit();
+        Packet::new(self.inner.handle(), user_data, operation).submit();
         reply_receiver.await.unwrap()
     }
 }

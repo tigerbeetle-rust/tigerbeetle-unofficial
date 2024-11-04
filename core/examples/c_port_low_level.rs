@@ -51,7 +51,11 @@ fn main() {
         data_size: 0,
     });
     user_data.set_data(accounts);
-    let mut packet = client.acquire(user_data, tb::OperationKind::CreateAccounts.into());
+    let mut packet = tb::Packet::new(
+        client.handle(),
+        user_data,
+        tb::OperationKind::CreateAccounts.into(),
+    );
     println!("Creating accounts...");
     let mut state = CTX.state.lock().unwrap();
     (user_data, state) = CTX.send_request(state, packet).unwrap();
@@ -121,7 +125,11 @@ fn main() {
     println!("Looking up accounts ...");
     let ids = accounts.map(|a| a.id());
     user_data.set_data(ids);
-    packet = client.acquire(user_data, tb::OperationKind::LookupAccounts.into());
+    packet = tb::Packet::new(
+        client.handle(),
+        user_data,
+        tb::OperationKind::LookupAccounts.into(),
+    );
     (_, state) = CTX.send_request(state, packet).unwrap();
     let accounts = state.get_data::<tb::Account>();
     if accounts.is_empty() {
