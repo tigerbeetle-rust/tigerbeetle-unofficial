@@ -87,7 +87,11 @@ fn main() {
                 .with_amount(1)
         });
         user_data.set_data(transfers);
-        packet = client.acquire(user_data, tb::OperationKind::CreateTransfers.into());
+        packet = tb::Packet::new(
+            client.handle(),
+            user_data,
+            tb::OperationKind::CreateTransfers.into(),
+        );
 
         let now = Instant::now();
         (user_data, state) = CTX.send_request(state, packet).unwrap();
