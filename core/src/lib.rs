@@ -8,7 +8,7 @@ pub mod util;
 
 use std::{marker::PhantomData, mem, num::NonZeroU32};
 
-use error::{AcquirePacketError, NewClientError, NewClientErrorKind};
+use error::{NewClientError, NewClientErrorKind};
 
 pub use account::Account;
 pub use callback::*;
@@ -43,13 +43,13 @@ where
     ) -> Result<Self, NewClientError>
     where
         A: AsRef<[u8]>,
-        // `F` and `UserDataPtr` are 'static because we can `mem::forget(self)`
-        // and drop anything that is being refered from `F` or `UserDataPtr`,
+        // `F` and `UserDataPtr` are `'static`, because we can `mem::forget(self)`
+        // and drop anything that is being referred from `F` or `UserDataPtr`,
         // thus invalidating callback or user data.
         F: 'static,
         F::UserDataPtr: 'static,
     {
-        // SAFETY: F and UserData are 'static
+        // SAFETY: `F` and `UserDataPtr` are `'static`.
         unsafe {
             Client::with_callback_unchecked(cluster_id, address, concurrency_max, on_completion)
         }
@@ -130,14 +130,6 @@ where
             raw: self.raw,
             on_completion: unsafe { &*self.on_completion },
         }
-    }
-
-    pub fn acquire(
-        &self,
-        user_data: F::UserDataPtr,
-        operation: packet::Operation,
-    ) -> Result<Packet<'_, F::UserDataPtr>, AcquirePacketError> {
-        self.handle().acquire(user_data, operation)
     }
 }
 

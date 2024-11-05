@@ -11,11 +11,11 @@ categories = ["api-bindings", "asynchronous", "database", "finance"]
 include = ["/src/**", "/examples/**", "/Cargo.toml", "/LICENSE-*", "/README"]
 
 [features]
-tokio-rt-multi-thread = ["dep:tokio", "tokio/rt-multi-thread"]
 tokio = ["dep:tokio"]
+tokio-rt-multi-thread = ["dep:tokio", "tokio/rt-multi-thread"]
 
 [dependencies]
-sys = { version = "0.4.1", package = "tigerbeetle-unofficial-sys", path = "../sys", features = ["generated-safe"] }
-bytemuck = "1.13.1"
+bytemuck = "1.19"
 sptr = "0.3.2"
+sys = { version = "=0.4.1+0.15.3", package = "tigerbeetle-unofficial-sys", path = "../sys", features = ["generated-safe"] }
 tokio = { version = "1.28.1", optional = true }

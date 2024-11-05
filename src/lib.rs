@@ -13,7 +13,7 @@ use core::{
     util::{RawConstPtr, SendAsBytesOwnedSlice, SendOwnedSlice},
 };
 
-pub use core::{self, account, error, transfer, Account, Transfer};
+pub use core::{self, account, error, transfer, Account, Packet, Transfer};
 
 pub struct Client {
     inner: core::Client<&'static Callbacks>,
@@ -154,8 +154,9 @@ impl Client {
             _permit: permit,
             data,
         });
-        let packet = self.inner.acquire(user_data, operation).unwrap();
-        packet.submit();
+        Packet::new(self.inner.handle(), user_data, operation)
+            .unwrap()
+            .submit();
         reply_receiver.await.unwrap()
     }
 }

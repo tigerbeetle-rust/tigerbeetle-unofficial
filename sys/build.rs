@@ -2,7 +2,7 @@ use std::{
     collections::BTreeMap,
     env,
     ffi::{OsStr, OsString},
-    fs::File,
+    fs::{self, File},
     io::{self, Write},
     iter,
     path::{self, Path, PathBuf},
@@ -42,14 +42,14 @@ fn main() {
     println!("cargo:rerun-if-changed=src/wrapper.h");
 
     let wrapper;
-    if std::env::var("DOCS_RS").is_ok() {
+    if env::var("DOCS_RS").is_ok() {
         wrapper = "src/wrapper.h".into();
     } else {
         let target_lib_subdir = target_to_lib_dir(&target)
             .unwrap_or_else(|| panic!("target {target:?} is not supported"));
 
         let tigerbeetle_root = out_dir.join("tigerbeetle");
-        std::fs::remove_dir_all(&tigerbeetle_root)
+        fs::remove_dir_all(&tigerbeetle_root)
             .or_else(|e| {
                 if let io::ErrorKind::NotFound = e.kind() {
                     Ok(())
@@ -93,8 +93,8 @@ fn main() {
         .env("TIGERBEETLE_RELEASE", TIGERBEETLE_RELEASE)
         .current_dir(&tigerbeetle_root)
         .status()
-        .expect("running zig build subcommand");
-        assert!(status.success(), "zig build failed with {status:?}");
+        .expect("running `zig build` subcommand");
+        assert!(status.success(), "`zig build` failed with {status:?}");
 
         let lib_dir = tigerbeetle_root.join("src/clients/c/lib");
         let link_search = lib_dir.join(target_lib_subdir);
@@ -108,13 +108,13 @@ fn main() {
 
         wrapper = lib_dir.join("include/wrapper.h");
         let generated_header = lib_dir.join("include/tb_client.h");
-        assert!(
-            std::fs::read_to_string(&generated_header).expect("reading generated `tb_client.h`")
-                == std::fs::read_to_string("src/tb_client.h")
-                    .expect("reading pregenerated `tb_client.h`"),
-            "generated and pregenerated `tb_client.h` headers must be equal, generated at: {generated_header:?}",
+        assert_eq!(
+            fs::read_to_string(&generated_header).expect("reading generated `tb_client.h`"),
+            fs::read_to_string("src/tb_client.h").expect("reading pregenerated `tb_client.h`"),
+            "generated and pregenerated `tb_client.h` headers must be equal, \
+             generated at: {generated_header:?}",
         );
-        std::fs::copy("src/wrapper.h", &wrapper).expect("copying wrapper.h");
+        fs::copy("src/wrapper.h", &wrapper).expect("copying wrapper.h");
     };
 
     let bindings = bindgen::Builder::default()
@@ -125,6 +125,7 @@ fn main() {
         )
         .default_enum_style(bindgen::EnumVariation::ModuleConsts)
         .parse_callbacks(Box::new(TigerbeetleCallbacks {
+            inner: bindgen::CargoCallbacks::default(),
             out_dir: out_dir.clone(),
         }))
         .generate()
@@ -134,7 +135,7 @@ fn main() {
         .write_to_file(out_dir.join("bindings.rs"))
         .expect("writing tb_client bindings");
 
-    if std::env::var("CARGO_FEATURE_GENERATED_SAFE").is_ok() {
+    if env::var("CARGO_FEATURE_GENERATED_SAFE").is_ok() {
         let bindings = syn::parse_file(&bindings.to_string()).unwrap();
 
         let mut visitor = TigerbeetleVisitor::default();
@@ -145,7 +146,7 @@ fn main() {
         write!(f, "{}", visitor.output).unwrap();
         drop(f);
 
-        Command::new(std::env::var("RUSTFMT").unwrap_or_else(|_| "rustfmt".into()))
+        Command::new(env::var("RUSTFMT").unwrap_or_else(|_| "rustfmt".into()))
             .arg(&generated_path)
             .status()
             .unwrap();
@@ -208,6 +209,8 @@ impl Visit<'_> for TigerbeetleVisitor {
                         .into()
                 });
             }
+
+            variants.sort_unstable_by_key(|(_, _, i)| *i);
 
             let mut new_enum_name =
                 screaming_snake_case_into_camel_case(enum_name.strip_prefix("TB_").unwrap());
@@ -318,7 +321,7 @@ impl Visit<'_> for TigerbeetleVisitor {
                         let s = camel_case_into_snake_case(s);
                         quote!(#s => Some(Self:: #n))
                     })
-                    .chain(std::iter::once(quote!(
+                    .chain(iter::once(quote!(
                         _ => None
                     )));
 
@@ -329,7 +332,7 @@ impl Visit<'_> for TigerbeetleVisitor {
                         let s = camel_case_into_snake_case(s);
                         quote!(Self:: #n => #s)
                     })
-                    .chain(std::iter::once(quote!(
+                    .chain(iter::once(quote!(
                         Self::UnstableUncategorized => unimplemented!("variant is not supported yet")
                     )));
 
@@ -339,7 +342,7 @@ impl Visit<'_> for TigerbeetleVisitor {
                         let n = syn::Ident::new(n, v.span());
                         quote!(#n = super:: #enum_ident :: #v as #repr_type)
                     })
-                    .chain(std::iter::once(quote!(
+                    .chain(iter::once(quote!(
                         #[doc(hidden)]
                         UnstableUncategorized
                     )));
@@ -388,6 +391,7 @@ impl Visit<'_> for TigerbeetleVisitor {
 
 #[derive(Debug)]
 struct TigerbeetleCallbacks {
+    inner: bindgen::CargoCallbacks,
     out_dir: PathBuf,
 }
 
@@ -408,38 +412,38 @@ impl bindgen::callbacks::ParseCallbacks for TigerbeetleCallbacks {
         {
             out.extend(["::bytemuck::Pod".into(), "::bytemuck::Zeroable".into()]);
         };
-        out.append(&mut bindgen::CargoCallbacks.add_derives(info));
+        out.append(&mut self.inner.add_derives(info));
         out
     }
 
     fn will_parse_macro(&self, name: &str) -> bindgen::callbacks::MacroParsingBehavior {
-        bindgen::CargoCallbacks.will_parse_macro(name)
+        self.inner.will_parse_macro(name)
     }
 
     fn generated_name_override(
         &self,
         item_info: bindgen::callbacks::ItemInfo<'_>,
     ) -> Option<String> {
-        bindgen::CargoCallbacks.generated_name_override(item_info)
+        self.inner.generated_name_override(item_info)
     }
 
     fn generated_link_name_override(
         &self,
         item_info: bindgen::callbacks::ItemInfo<'_>,
     ) -> Option<String> {
-        bindgen::CargoCallbacks.generated_link_name_override(item_info)
+        self.inner.generated_link_name_override(item_info)
     }
 
     fn int_macro(&self, name: &str, value: i64) -> Option<bindgen::callbacks::IntKind> {
-        bindgen::CargoCallbacks.int_macro(name, value)
+        self.inner.int_macro(name, value)
     }
 
     fn str_macro(&self, name: &str, value: &[u8]) {
-        bindgen::CargoCallbacks.str_macro(name, value)
+        self.inner.str_macro(name, value)
     }
 
     fn func_macro(&self, name: &str, value: &[&[u8]]) {
-        bindgen::CargoCallbacks.func_macro(name, value)
+        self.inner.func_macro(name, value)
     }
 
     fn enum_variant_behavior(
@@ -448,11 +452,8 @@ impl bindgen::callbacks::ParseCallbacks for TigerbeetleCallbacks {
         original_variant_name: &str,
         variant_value: bindgen::callbacks::EnumVariantValue,
     ) -> Option<bindgen::callbacks::EnumVariantCustomBehavior> {
-        bindgen::CargoCallbacks.enum_variant_behavior(
-            enum_name,
-            original_variant_name,
-            variant_value,
-        )
+        self.inner
+            .enum_variant_behavior(enum_name, original_variant_name, variant_value)
     }
 
     fn enum_variant_name(
@@ -461,21 +462,22 @@ impl bindgen::callbacks::ParseCallbacks for TigerbeetleCallbacks {
         original_variant_name: &str,
         variant_value: bindgen::callbacks::EnumVariantValue,
     ) -> Option<String> {
-        bindgen::CargoCallbacks.enum_variant_name(enum_name, original_variant_name, variant_value)
+        self.inner
+            .enum_variant_name(enum_name, original_variant_name, variant_value)
     }
 
     fn item_name(&self, original_item_name: &str) -> Option<String> {
-        bindgen::CargoCallbacks.item_name(original_item_name)
+        self.inner.item_name(original_item_name)
     }
 
     fn include_file(&self, filename: &str) {
         if !Path::new(filename).starts_with(&self.out_dir) {
-            bindgen::CargoCallbacks.include_file(filename)
+            self.inner.include_file(filename)
         }
     }
 
     fn read_env_var(&self, key: &str) {
-        bindgen::CargoCallbacks.read_env_var(key)
+        self.inner.read_env_var(key)
     }
 
     fn blocklisted_type_implements_trait(
@@ -483,11 +485,12 @@ impl bindgen::callbacks::ParseCallbacks for TigerbeetleCallbacks {
         name: &str,
         derive_trait: bindgen::callbacks::DeriveTrait,
     ) -> Option<bindgen::callbacks::ImplementsTrait> {
-        bindgen::CargoCallbacks.blocklisted_type_implements_trait(name, derive_trait)
+        self.inner
+            .blocklisted_type_implements_trait(name, derive_trait)
     }
 
     fn process_comment(&self, comment: &str) -> Option<String> {
-        bindgen::CargoCallbacks.process_comment(comment)
+        self.inner.process_comment(comment)
     }
 }
 
