@@ -35,7 +35,7 @@ fn main() {
     println!("Connecting...");
     let address = std::env::var("TB_ADDRESS");
     let address = address.as_deref().unwrap_or("3000");
-    let client = tb::Client::with_callback(0, address.as_bytes(), 32, &Callbacks)
+    let client = tb::Client::with_callback(0, address.as_bytes(), &Callbacks)
         .expect("Failed to initialize tigerbeetle client");
 
     static CTX: CompletionContext = CompletionContext::new();
@@ -44,16 +44,21 @@ fn main() {
     // Submitting a batch of accounts:                        //
     ////////////////////////////////////////////////////////////
 
-    let accounts = [tb::Account::new(1, 777, 2), tb::Account::new(2, 777, 2)];
+    let accounts = [
+        tb::Account::new(1, 777, 2).with_user_data_32(1),
+        tb::Account::new(2, 777, 2),
+    ];
     let mut user_data = Box::new(UserData {
         ctx: &CTX,
         data: [0; MAX_MESSAGE_SIZE],
         data_size: 0,
     });
     user_data.set_data(accounts);
-    let mut packet = client
-        .acquire(user_data, tb::OperationKind::CreateAccounts.into())
-        .unwrap();
+    let mut packet = tb::Packet::new(
+        client.handle(),
+        user_data,
+        tb::OperationKind::CreateAccounts,
+    );
     println!("Creating accounts...");
     let mut state = CTX.state.lock().unwrap();
     (user_data, state) = CTX.send_request(state, packet).unwrap();
@@ -83,11 +88,14 @@ fn main() {
                 .with_code(2)
                 .with_ledger(777)
                 .with_amount(1)
+                .with_user_data_32(1)
         });
         user_data.set_data(transfers);
-        packet = client
-            .acquire(user_data, tb::OperationKind::CreateTransfers.into())
-            .unwrap();
+        packet = tb::Packet::new(
+            client.handle(),
+            user_data,
+            tb::OperationKind::CreateTransfers,
+        );
 
         let now = Instant::now();
         (user_data, state) = CTX.send_request(state, packet).unwrap();
@@ -125,19 +133,61 @@ fn main() {
     println!("Looking up accounts ...");
     let ids = accounts.map(|a| a.id());
     user_data.set_data(ids);
-    packet = client
-        .acquire(user_data, tb::OperationKind::LookupAccounts.into())
-        .unwrap();
-    (_, state) = CTX.send_request(state, packet).unwrap();
+    packet = tb::Packet::new(
+        client.handle(),
+        user_data,
+        tb::OperationKind::LookupAccounts,
+    );
+    (user_data, state) = CTX.send_request(state, packet).unwrap();
     let accounts = state.get_data::<tb::Account>();
     if accounts.is_empty() {
         panic!("No accounts found");
     }
 
-    // Printing the account's balance:
+    // Printing the accounts:
     println!("{} Account(s) found", accounts.len());
     println!("============================================");
     println!("{accounts:#?}");
+
+    ////////////////////////////////////////////////////////////
+    // Querying accounts:                                     //
+    ////////////////////////////////////////////////////////////
+
+    println!("Querying accounts ...");
+    user_data.set_data([tb::QueryFilter::new(u32::MAX).with_user_data_32(1)]);
+    packet = tb::Packet::new(client.handle(), user_data, tb::OperationKind::QueryAccounts);
+    (user_data, state) = CTX.send_request(state, packet).unwrap();
+    let accounts = state.get_data::<tb::Account>();
+    if accounts.is_empty() {
+        panic!("No accounts found");
+    }
+
+    // Printing the accounts:
+    println!("{} Account(s) found", accounts.len());
+    println!("============================================");
+    println!("{accounts:#?}");
+
+    ////////////////////////////////////////////////////////////
+    // Querying transfers:                                    //
+    ////////////////////////////////////////////////////////////
+
+    println!("Querying transfers ...");
+    user_data.set_data([tb::QueryFilter::new(u32::MAX).with_user_data_32(1)]);
+    packet = tb::Packet::new(
+        client.handle(),
+        user_data,
+        tb::OperationKind::QueryTransfers,
+    );
+    (_, state) = CTX.send_request(state, packet).unwrap();
+    let transfers = state.get_data::<tb::Transfer>();
+    if transfers.is_empty() {
+        panic!("No transfers found");
+    }
+
+    // Printing the transfers:
+    println!("{} Transfer(s) found", transfers.len());
+    println!("============================================");
+    println!("{transfers:#?}");
 }
 
 impl CompletionContext {

@@ -13,6 +13,8 @@ pub enum Reply {
     GetAccountTransfers(Vec<Transfer>),
     LookupAccounts(Vec<Account>),
     LookupTransfers(Vec<Transfer>),
+    QueryAccounts(Vec<Account>),
+    QueryTransfers(Vec<Transfer>),
 }
 
 impl Reply {
@@ -39,6 +41,12 @@ impl Reply {
             }
             OperationKind::LookupTransfers => {
                 Reply::LookupTransfers(bytemuck::pod_collect_to_vec(payload))
+            }
+            OperationKind::QueryAccounts => {
+                Reply::QueryAccounts(bytemuck::pod_collect_to_vec(payload))
+            }
+            OperationKind::QueryTransfers => {
+                Reply::QueryTransfers(bytemuck::pod_collect_to_vec(payload))
             }
             _ => unimplemented!("unknown operation kind"),
         }
@@ -89,6 +97,22 @@ impl Reply {
             out
         } else {
             panic!("wrong reply variant, expected LookupTransfers but found: {self:?}")
+        }
+    }
+
+    pub fn into_query_accounts(self) -> Vec<Account> {
+        if let Reply::QueryAccounts(out) = self {
+            out
+        } else {
+            panic!("wrong reply variant, expected QueryAccounts but found: {self:?}")
+        }
+    }
+
+    pub fn into_query_transfers(self) -> Vec<Transfer> {
+        if let Reply::QueryTransfers(out) = self {
+            out
+        } else {
+            panic!("wrong reply variant, expected QueryTransfers but found: {self:?}")
         }
     }
 }
