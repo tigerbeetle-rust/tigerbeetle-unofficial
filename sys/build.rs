@@ -236,8 +236,8 @@ impl Visit<'_> for TigerbeetleVisitor {
             if enum_name.ends_with("_FLAGS") {
                 let ty = syn::Ident::new(
                     match enum_name.as_str() {
-                        "TB_ACCOUNT_FILTER_FLAGS" => "u32",
-                        "TB_ACCOUNT_FLAGS" | "TB_TRANSFER_FLAGS" | "TB_QUERY_FILTER_FLAGS" => "u16",
+                        "TB_ACCOUNT_FILTER_FLAGS" | "TB_QUERY_FILTER_FLAGS" => "u32",
+                        "TB_ACCOUNT_FLAGS" | "TB_TRANSFER_FLAGS" => "u16",
                         other => panic!("unexpected flags type name: {other}"),
                     },
                     enum_ident.span(),
@@ -423,6 +423,7 @@ impl bindgen::callbacks::ParseCallbacks for TigerbeetleCallbacks {
                 | "tb_account_filter_t"
                 | "tb_create_accounts_result_t"
                 | "tb_transfer_t"
+                | "tb_query_filter_t"
                 | "tb_create_transfers_result_t",
             ..
         } = info

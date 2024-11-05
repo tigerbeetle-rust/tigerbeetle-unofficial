@@ -15,6 +15,7 @@ tokio = ["dep:tokio"]
 tokio-rt-multi-thread = ["dep:tokio", "tokio/rt-multi-thread"]
 
 [dependencies]
+derive_more = { version = "1.0", features = ["from", "into"] }
 bytemuck = "1.19"
 sptr = "0.3.2"
 sys = { version = "=0.5.0+0.16.11", package = "tigerbeetle-unofficial-sys", path = "../sys", features = ["generated-safe"] }
