@@ -1,11 +1,6 @@
-use std::{
-    ffi::c_void,
-    mem,
-    num::{NonZeroU32, NonZeroU8},
-    ptr,
-};
+use std::{ffi::c_void, mem, num::NonZeroU8, ptr};
 
-use crate::error::{AcquirePacketError, SendError, SendErrorKind};
+use crate::error::{SendError, SendErrorKind};
 
 pub use sys::{generated_safe::OperationKind, tb_packet_t as Raw};
 
@@ -38,36 +33,24 @@ where
     U: UserDataPtr,
 {
     /// Creates a new [`Packet`].
-    pub fn new(
-        handle: ClientHandle<'a, U>,
-        user_data: U,
-        operation: impl Into<Operation>,
-    ) -> Result<Self, AcquirePacketError> {
-        unsafe fn impl_(
-            raw_client: sys::tb_client_t,
-            user_data: *const c_void,
-            operation: u8,
-        ) -> Result<*mut sys::tb_packet_t, AcquirePacketError> {
-            let mut raw = ptr::null_mut();
-            let status = sys::tb_client_acquire_packet(raw_client, &mut raw);
-            if let Some(c) = NonZeroU32::new(status) {
-                return Err(AcquirePacketError(c));
-            }
-            raw.write(Raw {
+    #[must_use]
+    pub fn new(handle: ClientHandle<'a, U>, user_data: U, operation: impl Into<Operation>) -> Self {
+        Self {
+            raw: Box::into_raw(Box::new(Raw {
                 next: ptr::null_mut(),
-                user_data: user_data.cast_mut(),
-                operation,
+                user_data: U::into_raw_const_ptr(user_data).cast::<c_void>().cast_mut(),
+                operation: operation.into().0,
                 status: 0,
                 data_size: 0,
                 data: ptr::null_mut(),
-            });
-            Ok(raw)
+                batch_next: ptr::null_mut(),
+                batch_tail: ptr::null_mut(),
+                batch_size: 0,
+                batch_allowed: 0,
+                reserved: [0; 7],
+            })),
+            handle,
         }
-
-        let user_data = U::into_raw_const_ptr(user_data);
-
-        let raw = unsafe { impl_(handle.raw, user_data.cast(), operation.into().0)? };
-        Ok(Self { raw, handle })
     }
 
     pub fn submit(mut self) {
@@ -100,7 +83,7 @@ where
         let user_data;
         unsafe {
             user_data = U::from_raw_const_ptr(this.raw().user_data.cast_const().cast());
-            sys::tb_client_release_packet(this.handle.raw, this.raw);
+            drop(Box::from_raw(this.raw));
         }
         user_data
     }
@@ -171,7 +154,7 @@ where
             drop(U::from_raw_const_ptr(
                 self.raw().user_data.cast_const().cast(),
             ));
-            sys::tb_client_release_packet(self.handle.raw, self.raw);
+            drop(Box::from_raw(self.raw));
         }
     }
 }

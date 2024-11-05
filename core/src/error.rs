@@ -7,7 +7,6 @@ use std::{
 pub use sys::{
     generated_safe::{
         self as sys_safe, CreateAccountErrorKind, CreateTransferErrorKind,
-        PacketAcquireStatusErrorKind as AcquirePacketErrorKind,
         PacketStatusErrorKind as SendErrorKind, StatusErrorKind as NewClientErrorKind,
     },
     tb_create_accounts_result_t as RawCreateAccountsIndividualApiResult,
@@ -16,9 +15,6 @@ pub use sys::{
 
 #[derive(Clone, Copy)]
 pub struct NewClientError(pub(crate) NonZeroU32);
-
-#[derive(Clone, Copy)]
-pub struct AcquirePacketError(pub(crate) NonZeroU32);
 
 #[derive(Clone, Copy)]
 pub struct SendError(pub(crate) NonZeroU8);
@@ -122,62 +118,6 @@ impl From<NewClientErrorKind> for NewClientError {
         let this = Self(NonZeroU32::new(value as _).unwrap());
         if matches!(this.kind(), NewClientErrorKind::UnstableUncategorized) {
             panic!("NewClientErrorKind::{value:?}")
-        }
-        this
-    }
-}
-
-impl AcquirePacketError {
-    const CODE_RANGE: std::ops::RangeInclusive<u32> = sys_safe::MIN_PACKET_ACQUIRE_STATUS_ERROR_CODE
-        ..=sys_safe::MAX_PACKET_ACQUIRE_STATUS_ERROR_CODE;
-
-    pub fn kind(self) -> AcquirePacketErrorKind {
-        let code = self.0.get();
-        if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above.
-            unsafe { mem::transmute(code) }
-        } else {
-            AcquirePacketErrorKind::UnstableUncategorized
-        }
-    }
-
-    pub fn code(self) -> NonZeroU32 {
-        self.0
-    }
-}
-
-impl fmt::Debug for AcquirePacketError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut d = f.debug_tuple("AcquirePacketError");
-        let kind = self.kind();
-        if matches!(kind, AcquirePacketErrorKind::UnstableUncategorized) {
-            let code = self.code().get();
-            d.field(&code);
-        } else {
-            d.field(&kind);
-        }
-        d.finish()
-    }
-}
-
-impl fmt::Display for AcquirePacketError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self.kind())
-    }
-}
-
-impl Error for AcquirePacketError {}
-
-impl From<AcquirePacketErrorKind> for AcquirePacketError {
-    /// Constructs a [`AcquirePacketError`] out of the provided [`AcquirePacketErrorKind`].
-    ///
-    /// # Panics
-    ///
-    /// Panics on the hidden [`AcquirePacketErrorKind::UnstableUncategorized`] variant.
-    fn from(value: AcquirePacketErrorKind) -> Self {
-        let this = Self(NonZeroU32::new(value as _).unwrap());
-        if matches!(this.kind(), AcquirePacketErrorKind::UnstableUncategorized) {
-            panic!("AcquirePacketErrorKind::{value:?}")
         }
         this
     }

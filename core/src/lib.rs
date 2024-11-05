@@ -38,7 +38,6 @@ where
     pub fn with_callback<A>(
         cluster_id: u128,
         address: A,
-        concurrency_max: u32,
         on_completion: F,
     ) -> Result<Self, NewClientError>
     where
@@ -50,9 +49,7 @@ where
         F::UserDataPtr: 'static,
     {
         // SAFETY: `F` and `UserDataPtr` are `'static`.
-        unsafe {
-            Client::with_callback_unchecked(cluster_id, address, concurrency_max, on_completion)
-        }
+        unsafe { Client::with_callback_unchecked(cluster_id, address, on_completion) }
     }
 
     /// Highly unsafe method. Please use [`Self::with_callback`]
@@ -67,7 +64,6 @@ where
     pub unsafe fn with_callback_unchecked<A>(
         cluster_id: u128,
         address: A,
-        concurrency_max: u32,
         on_completion: F,
     ) -> Result<Self, NewClientError>
     where
@@ -80,7 +76,6 @@ where
         unsafe fn raw_with_callback(
             cluster_id: u128,
             address: &[u8],
-            concurrency_max: u32,
             on_completion_ctx: usize,
             on_completion_fn: OnCompletionRawFn,
         ) -> Result<sys::tb_client_t, NewClientError> {
@@ -93,7 +88,6 @@ where
                     .len()
                     .try_into()
                     .map_err(|_| NewClientErrorKind::AddressInvalid)?,
-                concurrency_max,
                 on_completion_ctx,
                 Some(on_completion_fn),
             );
@@ -109,7 +103,6 @@ where
                 match raw_with_callback(
                     cluster_id,
                     address.as_ref(),
-                    concurrency_max,
                     on_completion_ctx,
                     on_completion_fn,
                 ) {
