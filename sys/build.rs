@@ -90,8 +90,8 @@ fn main() {
         )
         .current_dir(&tigerbeetle_root)
         .status()
-        .expect("running download script");
-        assert!(status.success(), "download script failed with {status:?}");
+        .expect("running `download` script");
+        assert!(status.success(), "`download` script failed with {status:?}");
 
         let status = Command::new(
             tigerbeetle_root
@@ -109,8 +109,8 @@ fn main() {
         .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
         .current_dir(&tigerbeetle_root)
         .status()
-        .expect("running zig build subcommand");
-        assert!(status.success(), "zig build failed with {status:?}");
+        .expect("running `zig build` subcommand");
+        assert!(status.success(), "`zig build` failed with {status:?}");
 
         let c_dir = tigerbeetle_root.join("src/clients/c/");
         let lib_dir = tigerbeetle_root.join("src/clients/c/lib");

@@ -42,13 +42,13 @@ where
     ) -> Result<Self, NewClientError>
     where
         A: AsRef<[u8]>,
-        // `F` and `UserDataPtr` are 'static because we can `mem::forget(self)`
-        // and drop anything that is being refered from `F` or `UserDataPtr`,
+        // `F` and `UserDataPtr` are `'static`, because we can `mem::forget(self)`
+        // and drop anything that is being referred from `F` or `UserDataPtr`,
         // thus invalidating callback or user data.
         F: 'static,
         F::UserDataPtr: 'static,
     {
-        // SAFETY: F and UserData are 'static
+        // SAFETY: `F` and `UserDataPtr` are `'static`.
         unsafe { Client::with_callback_unchecked(cluster_id, address, on_completion) }
     }
 

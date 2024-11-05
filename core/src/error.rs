@@ -1,5 +1,5 @@
 use std::{
-    error::Error as StdError,
+    error::Error,
     fmt, mem,
     num::{NonZeroU32, NonZeroU8},
 };
@@ -74,7 +74,7 @@ impl NewClientError {
     pub fn kind(self) -> NewClientErrorKind {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above
+            // SAFETY: We checked if it's in range right above.
             unsafe { mem::transmute(code) }
         } else {
             NewClientErrorKind::UnstableUncategorized
@@ -106,14 +106,14 @@ impl fmt::Display for NewClientError {
     }
 }
 
-impl StdError for NewClientError {}
+impl Error for NewClientError {}
 
 impl From<NewClientErrorKind> for NewClientError {
-    /// Constructs a [`NewClientError`] out of [`NewClientErrorKind`].
+    /// Constructs a [`NewClientError`] out of the provided [`NewClientErrorKind`].
     ///
     /// # Panics
     ///
-    /// Panics on hidden `NewClientErrorKind::UnstableUncategorized` variant.
+    /// Panics on the hidden [`NewClientErrorKind::UnstableUncategorized`] variant.
     fn from(value: NewClientErrorKind) -> Self {
         let this = Self(NonZeroU32::new(value as _).unwrap());
         if matches!(this.kind(), NewClientErrorKind::UnstableUncategorized) {
@@ -130,7 +130,7 @@ impl SendError {
     pub fn kind(self) -> SendErrorKind {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above
+            // SAFETY: We checked if it's in range right above.
             unsafe { mem::transmute(code) }
         } else {
             SendErrorKind::UnstableUncategorized
@@ -158,18 +158,18 @@ impl fmt::Debug for SendError {
 
 impl fmt::Display for SendError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "error occured while sending packets")
+        write!(f, "error occurred while sending packets")
     }
 }
 
-impl StdError for SendError {}
+impl Error for SendError {}
 
 impl From<SendErrorKind> for SendError {
-    /// Constructs a [`SendError`] out of [`SendErrorKind`].
+    /// Constructs a [`SendError`] out of the provided [`SendErrorKind`].
     ///
     /// # Panics
     ///
-    /// Panics on hidden `SendErrorKind::UnstableUncategorized` variant.
+    /// Panics on the hidden [`SendErrorKind::UnstableUncategorized`] variant.
     fn from(value: SendErrorKind) -> Self {
         let this = Self(NonZeroU8::new(value as _).unwrap());
         if matches!(this.kind(), SendErrorKind::UnstableUncategorized) {
@@ -186,7 +186,7 @@ impl CreateAccountError {
     pub fn kind(self) -> CreateAccountErrorKind {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above
+            // SAFETY: We checked if it's in range right above.
             unsafe { mem::transmute(code) }
         } else {
             CreateAccountErrorKind::UnstableUncategorized
@@ -218,14 +218,14 @@ impl fmt::Display for CreateAccountError {
     }
 }
 
-impl StdError for CreateAccountError {}
+impl Error for CreateAccountError {}
 
 impl From<CreateAccountErrorKind> for CreateAccountError {
-    /// Constructs a [`CreateAccountError`] out of [`CreateAccountErrorKind`].
+    /// Constructs a [`CreateAccountError`] out of the provided [`CreateAccountErrorKind`].
     ///
     /// # Panics
     ///
-    /// Panics on hidden `CreateAccountErrorKind::UnstableUncategorized` variant.
+    /// Panics on the hidden [`CreateAccountErrorKind::UnstableUncategorized`] variant.
     fn from(value: CreateAccountErrorKind) -> Self {
         let this = Self(NonZeroU32::new(value as _).unwrap());
         if matches!(this.kind(), CreateAccountErrorKind::UnstableUncategorized) {
@@ -315,14 +315,14 @@ impl fmt::Display for CreateAccountsIndividualApiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "`{}` error occured at account with index {}",
+            "`{}` error occurred at account with index {}",
             self.inner(),
-            self.index()
+            self.index(),
         )
     }
 }
 
-impl StdError for CreateAccountsIndividualApiError {}
+impl Error for CreateAccountsIndividualApiError {}
 
 impl CreateAccountsApiError {
     /// Get a slice of individual errors. Never empty.
@@ -357,14 +357,14 @@ impl fmt::Display for CreateAccountsApiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{} api errors occured at accounts' creation",
+            "{} api errors occurred at accounts' creation",
             self.0.len()
         )
     }
 }
 
-impl StdError for CreateAccountsApiError {
-    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+impl Error for CreateAccountsApiError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
         self.0.first().map(|e| e as _)
     }
 }
@@ -375,8 +375,8 @@ impl From<CreateAccountsIndividualApiError> for CreateAccountsApiError {
     }
 }
 
-impl StdError for CreateAccountsError {
-    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+impl Error for CreateAccountsError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
         Some(match self {
             Self::Send(e) => e as _,
             Self::Api(e) => e as _,
@@ -445,14 +445,14 @@ impl fmt::Display for CreateTransferError {
     }
 }
 
-impl StdError for CreateTransferError {}
+impl Error for CreateTransferError {}
 
 impl From<CreateTransferErrorKind> for CreateTransferError {
-    /// Constructs a [`CreateTransferError`] out of [`CreateTransferErrorKind`].
+    /// Constructs a [`CreateTransferError`] out of the provided [`CreateTransferErrorKind`].
     ///
     /// # Panics
     ///
-    /// Panics on hidden `CreateTransferErrorKind::UnstableUncategorized` variant.
+    /// Panics on the hidden [`CreateTransferErrorKind::UnstableUncategorized`] variant.
     fn from(value: CreateTransferErrorKind) -> Self {
         let this = Self(NonZeroU32::new(value as _).unwrap());
         if matches!(this.kind(), CreateTransferErrorKind::UnstableUncategorized) {
@@ -542,14 +542,14 @@ impl fmt::Display for CreateTransfersIndividualApiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "`{}` error occured at account with index {}",
+            "`{}` error occurred at account with index {}",
             self.inner(),
             self.index()
         )
     }
 }
 
-impl StdError for CreateTransfersIndividualApiError {}
+impl Error for CreateTransfersIndividualApiError {}
 
 impl CreateTransfersApiError {
     /// Get a slice of individual errors. Never empty.
@@ -584,14 +584,14 @@ impl fmt::Display for CreateTransfersApiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{} api errors occured at transfers' creation",
+            "{} api errors occurred at transfers' creation",
             self.0.len()
         )
     }
 }
 
-impl StdError for CreateTransfersApiError {
-    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+impl Error for CreateTransfersApiError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
         self.0.first().map(|e| e as _)
     }
 }
@@ -602,8 +602,8 @@ impl From<CreateTransfersIndividualApiError> for CreateTransfersApiError {
     }
 }
 
-impl StdError for CreateTransfersError {
-    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+impl Error for CreateTransfersError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
         Some(match self {
             Self::Send(e) => e as _,
             Self::Api(e) => e as _,

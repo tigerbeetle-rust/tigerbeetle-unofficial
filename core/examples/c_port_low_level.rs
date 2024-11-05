@@ -54,7 +54,7 @@ fn main() {
     let mut packet = tb::Packet::new(
         client.handle(),
         user_data,
-        tb::OperationKind::CreateAccounts.into(),
+        tb::OperationKind::CreateAccounts,
     );
     println!("Creating accounts...");
     let mut state = CTX.state.lock().unwrap();
@@ -87,7 +87,11 @@ fn main() {
                 .with_amount(1)
         });
         user_data.set_data(transfers);
-        packet = client.acquire(user_data, tb::OperationKind::CreateTransfers.into());
+        packet = tb::Packet::new(
+            client.handle(),
+            user_data,
+            tb::OperationKind::CreateTransfers,
+        );
 
         let now = Instant::now();
         (user_data, state) = CTX.send_request(state, packet).unwrap();
@@ -128,7 +132,7 @@ fn main() {
     packet = tb::Packet::new(
         client.handle(),
         user_data,
-        tb::OperationKind::LookupAccounts.into(),
+        tb::OperationKind::LookupAccounts,
     );
     (_, state) = CTX.send_request(state, packet).unwrap();
     let accounts = state.get_data::<tb::Account>();

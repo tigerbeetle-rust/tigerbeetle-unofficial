@@ -15,17 +15,17 @@ tokio-rt-multi-thread = ["core/tokio-rt-multi-thread"]
 
 [dependencies]
 bytemuck = { version = "1.16", features = ["extern_crate_alloc"] }
-core = { package = "tigerbeetle-unofficial-core", version = "0.4.1", path = "core" }
-tokio = { version = "1.0", features = ["sync"] }
+core = { version = "=0.5.0+0.16.11", package = "tigerbeetle-unofficial-core", path = "core" }
+tokio = { version = "1.28.1", features = ["sync"] }
 
 [dev-dependencies]
-pollster = { version = "0.4.0", features = ["macro"] }
+pollster = { version = "0.4", features = ["macro"] }
 
 [workspace]
 members = ["sys", "core"]
 
 [workspace.package]
-version = "0.4.1+0.16.11"
+version = "0.5.0+0.16.11"
 authors = ["Daria Sukhonina <dariasukhonina@gmail.com>"]
 rust-version = "1.78"
 repository = "https://github.com/tigerbeetle-rust/tigerbeetle-unofficial"
