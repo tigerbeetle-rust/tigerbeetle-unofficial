@@ -1,36 +1,27 @@
-use std::time::{Duration, SystemTime};
+use std::{
+    fmt,
+    time::{Duration, SystemTime},
+};
 
 use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use derive_more::{From, Into};
 
-pub use sys::generated_safe::AccountFilterFlags as Flags;
-pub use sys::tb_account_filter_t as Raw;
+pub use sys::{generated_safe::AccountFilterFlags as Flags, tb_account_filter_t as Raw};
 
+#[derive(Clone, Copy, From, Into, Pod, TransparentWrapper, Zeroable)]
 #[repr(transparent)]
-#[derive(Clone, Copy, TransparentWrapper, Pod, Zeroable)]
 pub struct Filter(Raw);
-
-impl std::fmt::Debug for Filter {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("AccountFilter")
-            .field("account_id", &self.0.account_id)
-            .field("timestamp_min", &self.timestamp_min())
-            .field("timestamp_max", &self.timestamp_max())
-            .field("limit", &self.0.limit)
-            .field("flags", &self.flags())
-            .finish_non_exhaustive()
-    }
-}
 
 impl Filter {
     #[track_caller]
     pub fn new(account_id: u128, limit: u32) -> Self {
-        Filter(Raw::zeroed())
+        Self(Raw::zeroed())
             .with_account_id(account_id)
             .with_limit(limit)
     }
 
     pub const fn from_raw(raw: Raw) -> Self {
-        Filter(raw)
+        Self(raw)
     }
     pub const fn into_raw(self) -> Raw {
         self.0
@@ -112,13 +103,14 @@ impl Filter {
     }
 }
 
-impl From<Raw> for Filter {
-    fn from(value: Raw) -> Self {
-        Filter(value)
-    }
-}
-impl From<Filter> for Raw {
-    fn from(value: Filter) -> Self {
-        value.0
+impl fmt::Debug for Filter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AccountFilter")
+            .field("account_id", &self.0.account_id)
+            .field("timestamp_min", &self.timestamp_min())
+            .field("timestamp_max", &self.timestamp_max())
+            .field("limit", &self.0.limit)
+            .field("flags", &self.flags())
+            .finish_non_exhaustive()
     }
 }

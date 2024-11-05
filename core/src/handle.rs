@@ -18,8 +18,10 @@ where
 unsafe impl<U> Send for ClientHandle<'_, U> where U: UserDataPtr {}
 unsafe impl<U> Sync for ClientHandle<'_, U> where U: UserDataPtr {}
 
+// Manual implementation is done to avoid redundant `U: Copy` bound.
 impl<U> Copy for ClientHandle<'_, U> where U: UserDataPtr {}
 
+// Manual implementation is done to avoid redundant `U: Clone` bound.
 impl<U> Clone for ClientHandle<'_, U>
 where
     U: UserDataPtr,

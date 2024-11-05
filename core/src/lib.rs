@@ -10,11 +10,13 @@ use std::{marker::PhantomData, mem, num::NonZeroU32};
 
 use error::{AcquirePacketError, NewClientError, NewClientErrorKind};
 
-pub use account::Account;
-pub use callback::*;
-pub use handle::ClientHandle;
-pub use packet::*;
-pub use transfer::Transfer;
+pub use self::{
+    account::Account,
+    callback::{on_completion_fn, Callbacks, CallbacksFn, CallbacksPtr, UserData, UserDataPtr},
+    handle::ClientHandle,
+    packet::{Operation, OperationKind, Packet},
+    transfer::Transfer,
+};
 
 type OnCompletionRawFn =
     unsafe extern "C" fn(usize, sys::tb_client_t, *mut sys::tb_packet_t, *const u8, u32);

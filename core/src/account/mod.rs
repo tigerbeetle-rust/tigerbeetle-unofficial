@@ -1,17 +1,23 @@
-use std::time::{Duration, SystemTime};
-
-use bytemuck::{Pod, TransparentWrapper, Zeroable};
-
 mod balance;
 mod filter;
 
-pub use balance::{Balance, Raw as RawBalance};
-pub use filter::{Filter, Flags as FilterFlags, Raw as RawFilter};
-pub use sys::generated_safe::AccountFlags as Flags;
-pub use sys::tb_account_t as Raw;
+use std::{
+    fmt,
+    time::{Duration, SystemTime},
+};
 
+use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use derive_more::{From, Into};
+
+pub use sys::{generated_safe::AccountFlags as Flags, tb_account_t as Raw};
+
+pub use self::{
+    balance::{Balance, Raw as RawBalance},
+    filter::{Filter, Flags as FilterFlags, Raw as RawFilter},
+};
+
+#[derive(Clone, Copy, From, Into, Pod, TransparentWrapper, Zeroable)]
 #[repr(transparent)]
-#[derive(Clone, Copy, TransparentWrapper, Pod, Zeroable)]
 pub struct Account(Raw);
 
 impl Account {
@@ -145,8 +151,8 @@ impl Account {
     }
 }
 
-impl std::fmt::Debug for Account {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for Account {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Account")
             .field("id", &self.id())
             .field("debits_pending", &self.debits_pending())
@@ -161,16 +167,5 @@ impl std::fmt::Debug for Account {
             .field("flags", &self.flags())
             .field("timestamp", &self.timestamp())
             .finish_non_exhaustive()
-    }
-}
-
-impl From<Raw> for Account {
-    fn from(value: Raw) -> Self {
-        Account(value)
-    }
-}
-impl From<Account> for Raw {
-    fn from(value: Account) -> Self {
-        value.0
     }
 }

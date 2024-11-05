@@ -1,12 +1,15 @@
-use std::time::{Duration, SystemTime};
+use std::{
+    fmt,
+    time::{Duration, SystemTime},
+};
 
 use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use derive_more::{From, Into};
 
-pub use sys::generated_safe::TransferFlags as Flags;
-pub use sys::tb_transfer_t as Raw;
+pub use sys::{generated_safe::TransferFlags as Flags, tb_transfer_t as Raw};
 
+#[derive(Clone, Copy, From, Into, Pod, TransparentWrapper, Zeroable)]
 #[repr(transparent)]
-#[derive(Clone, Copy, TransparentWrapper, Pod, Zeroable)]
 pub struct Transfer(Raw);
 
 impl Transfer {
@@ -175,8 +178,8 @@ impl Transfer {
     }
 }
 
-impl std::fmt::Debug for Transfer {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for Transfer {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Transfer")
             .field("id", &self.id())
             .field("debit_account_id", &self.debit_account_id())
@@ -192,16 +195,5 @@ impl std::fmt::Debug for Transfer {
             .field("flags", &self.flags())
             .field("timestamp", &self.timestamp())
             .finish_non_exhaustive()
-    }
-}
-
-impl From<Raw> for Transfer {
-    fn from(value: Raw) -> Self {
-        Transfer(value)
-    }
-}
-impl From<Transfer> for Raw {
-    fn from(value: Transfer) -> Self {
-        value.0
     }
 }

@@ -16,13 +16,13 @@ const TIGERBEETLE_RELEASE: &str = "0.15.3";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
+        "aarch64-apple-darwin" => Some("aarch64-macos"),
         "aarch64-unknown-linux-gnu" => Some("aarch64-linux-gnu"),
         "aarch64-unknown-linux-musl" => Some("aarch64-linux-musl"),
-        "aarch64-apple-darwin" => Some("aarch64-macos"),
-        "x86_64-unknown-linux-gnu" => Some("x86_64-linux-gnu"),
-        "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         "x86_64-apple-darwin" => Some("x86_64-macos"),
         "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
+        "x86_64-unknown-linux-gnu" => Some("x86_64-linux-gnu"),
+        "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         _ => None,
     }
 }
@@ -247,8 +247,13 @@ impl Visit<'_> for TigerbeetleVisitor {
                     errorize = true;
                 }
                 match new_enum_name.as_str() {
-                    "Status" => {
-                        new_enum_name = "StatusErrorKind".to_string();
+                    "Operation" => {
+                        new_enum_name = "OperationKind".to_string();
+                        new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
+                        repr_type = "u8"
+                    }
+                    "PacketAcquireStatus" => {
+                        new_enum_name = "PacketAcquireStatusErrorKind".to_string();
                         new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
                         errorize = true;
                     }
@@ -258,15 +263,10 @@ impl Visit<'_> for TigerbeetleVisitor {
                         repr_type = "u8";
                         errorize = true;
                     }
-                    "PacketAcquireStatus" => {
-                        new_enum_name = "PacketAcquireStatusErrorKind".to_string();
+                    "Status" => {
+                        new_enum_name = "StatusErrorKind".to_string();
                         new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
                         errorize = true;
-                    }
-                    "Operation" => {
-                        new_enum_name = "OperationKind".to_string();
-                        new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
-                        repr_type = "u8"
                     }
                     _ => (),
                 }
@@ -397,12 +397,12 @@ impl bindgen::callbacks::ParseCallbacks for TigerbeetleCallbacks {
         if let bindgen::callbacks::DeriveInfo {
             kind: bindgen::callbacks::TypeKind::Struct,
             name:
-                "tb_account_t"
-                | "tb_account_balance_t"
+                "tb_account_balance_t"
                 | "tb_account_filter_t"
+                | "tb_account_t"
                 | "tb_create_accounts_result_t"
-                | "tb_transfer_t"
-                | "tb_create_transfers_result_t",
+                | "tb_create_transfers_result_t"
+                | "tb_transfer_t",
             ..
         } = info
         {

@@ -1,16 +1,20 @@
-use std::time::{Duration, SystemTime};
+use std::{
+    fmt,
+    time::{Duration, SystemTime},
+};
 
 use bytemuck::{Pod, TransparentWrapper, Zeroable};
+use derive_more::{From, Into};
 
 pub use sys::tb_account_balance_t as Raw;
 
+#[derive(Clone, Copy, From, Into, Pod, TransparentWrapper, Zeroable)]
 #[repr(transparent)]
-#[derive(Clone, Copy, TransparentWrapper, Pod, Zeroable)]
 pub struct Balance(Raw);
 
 impl Balance {
     pub const fn from_raw(raw: Raw) -> Self {
-        Balance(raw)
+        Self(raw)
     }
     pub const fn into_raw(self) -> Raw {
         self.0
@@ -71,8 +75,8 @@ impl Balance {
     }
 }
 
-impl std::fmt::Debug for Balance {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for Balance {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("AccountBalance")
             .field("debits_pending", &self.0.debits_pending)
             .field("debits_posted", &self.0.debits_posted)
@@ -80,16 +84,5 @@ impl std::fmt::Debug for Balance {
             .field("credits_pending", &self.0.credits_pending)
             .field("timestamp", &self.0.timestamp)
             .finish_non_exhaustive()
-    }
-}
-
-impl From<Raw> for Balance {
-    fn from(value: Raw) -> Self {
-        Balance(value)
-    }
-}
-impl From<Balance> for Raw {
-    fn from(value: Balance) -> Self {
-        value.0
     }
 }

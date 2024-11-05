@@ -1,8 +1,6 @@
 use std::{marker::PhantomData, panic::catch_unwind, slice};
 
-use crate::util::RawConstPtr;
-
-use super::Packet;
+use crate::{util::RawConstPtr, Packet};
 
 pub trait CallbacksPtr: RawConstPtr<Target = Self::Pointee> + callbacks_ptr::Sealed {
     type Pointee: Callbacks<UserDataPtr = Self::UserDataPtr> + Sized;

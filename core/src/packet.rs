@@ -1,13 +1,12 @@
-use std::{mem, num::NonZeroU8};
+use std::{fmt, mem, num::NonZeroU8};
 
-use crate::error::{SendError, SendErrorKind};
-
-pub use sys::generated_safe::OperationKind;
-
-use super::{
+use crate::{
     callback::{UserData, UserDataPtr},
+    error::{SendError, SendErrorKind},
     ClientHandle,
 };
+
+pub use sys::generated_safe::OperationKind;
 
 pub struct Packet<'a, U>
 where
@@ -16,17 +15,6 @@ where
     pub(super) raw: *mut sys::tb_packet_t,
     pub(super) handle: ClientHandle<'a, U>,
 }
-
-#[derive(Clone, Copy)]
-pub struct Operation(pub(crate) u8);
-
-unsafe impl<U> Sync for Packet<'_, U>
-where
-    U: UserDataPtr,
-    U::Pointee: Sync,
-{
-}
-unsafe impl<U> Send for Packet<'_, U> where U: UserDataPtr {}
 
 impl<'a, U> Packet<'a, U>
 where
@@ -136,6 +124,9 @@ where
     }
 }
 
+#[derive(Clone, Copy)]
+pub struct Operation(pub(crate) u8);
+
 impl Operation {
     const CODE_RANGE: std::ops::RangeInclusive<u8> =
         sys::generated_safe::MIN_OPERATION_CODE..=sys::generated_safe::MAX_OPERATION_CODE;
@@ -143,7 +134,7 @@ impl Operation {
     pub fn kind(self) -> OperationKind {
         if Self::CODE_RANGE.contains(&self.0) {
             // SAFETY: We checked if it's in range right above
-            unsafe { std::mem::transmute(self.0) }
+            unsafe { mem::transmute(self.0) }
         } else {
             OperationKind::UnstableUncategorized
         }
@@ -154,25 +145,38 @@ impl Operation {
     }
 }
 
-impl std::fmt::Debug for Operation {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for Operation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut d = f.debug_tuple("Operation");
-        if Self::CODE_RANGE.contains(&self.0) {
-            d.field(&self.kind());
-        } else {
+        let kind = self.kind();
+        if matches!(kind, OperationKind::UnstableUncategorized) {
             d.field(&self.0);
+        } else {
+            d.field(&kind);
         }
         d.finish()
     }
 }
 
 impl From<OperationKind> for Operation {
+    /// Constructs a new [`Operation`] from [`OperationKind`].
+    ///
+    /// # Panics
+    ///
     /// Panics on hidden `OperationKind::UnstableUncategorized` variant.
     fn from(value: OperationKind) -> Self {
-        let code = value as _;
-        if !Self::CODE_RANGE.contains(&code) {
+        let this = Self(value as _);
+        if matches!(this.kind(), OperationKind::UnstableUncategorized) {
             panic!("OperationKind::{value:?}")
         }
-        Operation(code)
+        this
     }
 }
+
+unsafe impl<U> Sync for Packet<'_, U>
+where
+    U: UserDataPtr,
+    U::Pointee: Sync,
+{
+}
+unsafe impl<U> Send for Packet<'_, U> where U: UserDataPtr {}
