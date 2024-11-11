@@ -2,7 +2,7 @@ use std::{ffi::c_void, mem, num::NonZeroU8, ptr};
 
 use crate::error::{SendError, SendErrorKind};
 
-pub use sys::{generated_safe::OperationKind, tb_packet_t as Raw};
+pub use sys::generated_safe::OperationKind;
 
 use super::{
     callback::{UserData, UserDataPtr},
@@ -13,7 +13,7 @@ pub struct Packet<'a, U>
 where
     U: UserDataPtr,
 {
-    pub(super) raw: *mut Raw,
+    pub(super) raw: *mut sys::tb_packet_t,
     pub(super) handle: ClientHandle<'a, U>,
 }
 
@@ -36,7 +36,7 @@ where
     #[must_use]
     pub fn new(handle: ClientHandle<'a, U>, user_data: U, operation: impl Into<Operation>) -> Self {
         Self {
-            raw: Box::into_raw(Box::new(Raw {
+            raw: Box::into_raw(Box::new(sys::tb_packet_t {
                 next: ptr::null_mut(),
                 user_data: U::into_raw_const_ptr(user_data).cast::<c_void>().cast_mut(),
                 operation: operation.into().0,
