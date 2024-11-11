@@ -136,7 +136,7 @@ impl Client {
     ) -> Result<Reply, SendError> {
         let (reply_sender, reply_receiver) = oneshot::channel();
         let user_data = Box::new(UserData { reply_sender, data });
-        Packet::new(self.inner.handle(), user_data, operation).submit();
+        self.inner.packet(user_data, operation).submit();
         reply_receiver.await.unwrap()
     }
 }

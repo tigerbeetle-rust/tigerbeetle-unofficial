@@ -1,4 +1,7 @@
-use super::callback::{Callbacks, UserDataPtr};
+use super::{
+    callback::{Callbacks, UserDataPtr},
+    packet, Packet,
+};
 
 pub struct ClientHandle<'a, U>
 where
@@ -19,5 +22,14 @@ where
 {
     fn clone(&self) -> Self {
         *self
+    }
+}
+
+impl<'a, U> ClientHandle<'a, U>
+where
+    U: UserDataPtr,
+{
+    pub fn packet(self, user_data: U, operation: packet::Operation) -> Packet<'a, U> {
+        Packet::new(self, user_data, operation)
     }
 }
