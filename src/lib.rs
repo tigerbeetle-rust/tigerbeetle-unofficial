@@ -2,48 +2,35 @@
 
 mod reply;
 
-use std::sync::Arc;
-
-use error::{NewClientError, NewClientErrorKind};
+use error::NewClientError;
 use reply::Reply;
-use tokio::sync::{oneshot, OwnedSemaphorePermit, Semaphore};
+use tokio::sync::oneshot;
 
 use core::{
     error::{CreateAccountsError, CreateTransfersError, SendError},
     util::{RawConstPtr, SendAsBytesOwnedSlice, SendOwnedSlice},
 };
 
-pub use core::{self, account, error, transfer, Account, Transfer};
+pub use core::{self, account, error, transfer, Account, Packet, Transfer};
 
 pub struct Client {
     inner: core::Client<&'static Callbacks>,
-    sema: Arc<Semaphore>,
 }
 
 struct Callbacks;
 
 struct UserData {
     reply_sender: oneshot::Sender<Result<Reply, SendError>>,
-    _permit: OwnedSemaphorePermit,
     data: SendAsBytesOwnedSlice,
 }
 
 impl Client {
-    pub fn new<A>(
-        cluster_id: u128,
-        address: A,
-        concurrency_max: u32,
-    ) -> Result<Self, NewClientError>
+    pub fn new<A>(cluster_id: u128, address: A) -> Result<Self, NewClientError>
     where
         A: AsRef<[u8]>,
     {
         Ok(Client {
-            sema: Arc::new(Semaphore::new(
-                concurrency_max
-                    .try_into()
-                    .map_err(|_| NewClientErrorKind::ConcurrencyMaxInvalid)?,
-            )),
-            inner: core::Client::with_callback(cluster_id, address, concurrency_max, &Callbacks)?,
+            inner: core::Client::with_callback(cluster_id, address, &Callbacks)?,
         })
     }
 
@@ -147,15 +134,9 @@ impl Client {
         data: SendAsBytesOwnedSlice,
         operation: core::Operation,
     ) -> Result<Reply, SendError> {
-        let permit = self.sema.clone().acquire_owned().await.unwrap();
         let (reply_sender, reply_receiver) = oneshot::channel();
-        let user_data = Box::new(UserData {
-            reply_sender,
-            _permit: permit,
-            data,
-        });
-        let packet = self.inner.acquire(user_data, operation).unwrap();
-        packet.submit();
+        let user_data = Box::new(UserData { reply_sender, data });
+        self.inner.packet(user_data, operation).submit();
         reply_receiver.await.unwrap()
     }
 }
