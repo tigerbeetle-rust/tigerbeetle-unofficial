@@ -3,7 +3,7 @@ mod callback;
 pub mod error;
 mod handle;
 mod packet;
-mod query_filter;
+pub mod query_filter;
 pub mod transfer;
 pub mod util;
 
