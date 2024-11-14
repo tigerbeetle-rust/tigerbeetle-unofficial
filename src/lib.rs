@@ -45,7 +45,7 @@ impl Client {
         Ok(self
             .submit(
                 accounts.into_as_bytes(),
-                core::OperationKind::CreateAccounts.into(),
+                core::OperationKind::CreateAccounts,
             )
             .await?
             .into_create_accounts()?)
@@ -62,7 +62,7 @@ impl Client {
         Ok(self
             .submit(
                 transfers.into_as_bytes(),
-                core::OperationKind::CreateTransfers.into(),
+                core::OperationKind::CreateTransfers,
             )
             .await?
             .into_create_transfers()?)
@@ -78,7 +78,7 @@ impl Client {
         let filter: SendOwnedSlice<account::Filter> = SendOwnedSlice::from_single(filter);
         self.submit(
             filter.into_as_bytes(),
-            core::OperationKind::GetAccountBalances.into(),
+            core::OperationKind::GetAccountBalances,
         )
         .await
         .map(Reply::into_get_account_balances)
@@ -91,7 +91,7 @@ impl Client {
         let filter: SendOwnedSlice<account::Filter> = SendOwnedSlice::from_single(filter);
         self.submit(
             filter.into_as_bytes(),
-            core::OperationKind::GetAccountTransfers.into(),
+            core::OperationKind::GetAccountTransfers,
         )
         .await
         .map(Reply::into_get_account_transfers)
@@ -107,7 +107,7 @@ impl Client {
         }
         self.submit(
             ids.into_as_bytes(),
-            core::OperationKind::LookupAccounts.into(),
+            core::OperationKind::LookupAccounts,
         )
         .await
         .map(Reply::into_lookup_accounts)
@@ -123,7 +123,7 @@ impl Client {
         }
         self.submit(
             ids.into_as_bytes(),
-            core::OperationKind::LookupTransfers.into(),
+            core::OperationKind::LookupTransfers,
         )
         .await
         .map(Reply::into_lookup_transfers)
@@ -136,7 +136,7 @@ impl Client {
         let filter: SendOwnedSlice<QueryFilter> = SendOwnedSlice::from_single(filter);
         self.submit(
             filter.into_as_bytes(),
-            core::OperationKind::QueryAccounts.into(),
+            core::OperationKind::QueryAccounts,
         )
         .await
         .map(Reply::into_query_accounts)
@@ -149,7 +149,7 @@ impl Client {
         let filter: SendOwnedSlice<QueryFilter> = SendOwnedSlice::from_single(filter);
         self.submit(
             filter.into_as_bytes(),
-            core::OperationKind::QueryTransfers.into(),
+            core::OperationKind::QueryTransfers,
         )
         .await
         .map(Reply::into_query_transfers)
@@ -158,11 +158,11 @@ impl Client {
     async fn submit(
         &self,
         data: SendAsBytesOwnedSlice,
-        operation: core::Operation,
+        operation: impl Into<core::Operation>,
     ) -> Result<Reply, SendError> {
         let (reply_sender, reply_receiver) = oneshot::channel();
         let user_data = Box::new(UserData { reply_sender, data });
-        Packet::new(self.inner.handle(), user_data, operation).submit();
+        self.inner.packet(user_data, operation).submit();
         reply_receiver.await.unwrap()
     }
 }

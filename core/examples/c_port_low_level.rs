@@ -54,11 +54,7 @@ fn main() {
         data_size: 0,
     });
     user_data.set_data(accounts);
-    let mut packet = tb::Packet::new(
-        client.handle(),
-        user_data,
-        tb::OperationKind::CreateAccounts,
-    );
+    let mut packet = client.packet(user_data, tb::OperationKind::CreateAccounts.into());
     println!("Creating accounts...");
     let mut state = CTX.state.lock().unwrap();
     (user_data, state) = CTX.send_request(state, packet).unwrap();
@@ -91,11 +87,7 @@ fn main() {
                 .with_user_data_32(1)
         });
         user_data.set_data(transfers);
-        packet = tb::Packet::new(
-            client.handle(),
-            user_data,
-            tb::OperationKind::CreateTransfers,
-        );
+        packet = client.packet(user_data, tb::OperationKind::CreateTransfers.into());
 
         let now = Instant::now();
         (user_data, state) = CTX.send_request(state, packet).unwrap();
@@ -133,11 +125,7 @@ fn main() {
     println!("Looking up accounts ...");
     let ids = accounts.map(|a| a.id());
     user_data.set_data(ids);
-    packet = tb::Packet::new(
-        client.handle(),
-        user_data,
-        tb::OperationKind::LookupAccounts,
-    );
+    packet = client.packet(user_data, tb::OperationKind::LookupAccounts.into());
     (user_data, state) = CTX.send_request(state, packet).unwrap();
     let accounts = state.get_data::<tb::Account>();
     if accounts.is_empty() {
@@ -155,7 +143,7 @@ fn main() {
 
     println!("Querying accounts ...");
     user_data.set_data([tb::QueryFilter::new(u32::MAX).with_user_data_32(1)]);
-    packet = tb::Packet::new(client.handle(), user_data, tb::OperationKind::QueryAccounts);
+    packet = client.packet(user_data, tb::OperationKind::QueryAccounts.into());
     (user_data, state) = CTX.send_request(state, packet).unwrap();
     let accounts = state.get_data::<tb::Account>();
     if accounts.is_empty() {
@@ -173,11 +161,7 @@ fn main() {
 
     println!("Querying transfers ...");
     user_data.set_data([tb::QueryFilter::new(u32::MAX).with_user_data_32(1)]);
-    packet = tb::Packet::new(
-        client.handle(),
-        user_data,
-        tb::OperationKind::QueryTransfers,
-    );
+    packet = client.packet(user_data, tb::OperationKind::QueryTransfers.into());
     (_, state) = CTX.send_request(state, packet).unwrap();
     let transfers = state.get_data::<tb::Transfer>();
     if transfers.is_empty() {

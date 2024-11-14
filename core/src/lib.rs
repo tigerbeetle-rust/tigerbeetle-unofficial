@@ -126,6 +126,14 @@ where
             on_completion: unsafe { &*self.on_completion },
         }
     }
+
+    pub fn packet(
+        &self,
+        user_data: F::UserDataPtr,
+        operation: impl Into<packet::Operation>,
+    ) -> Packet<'_, F::UserDataPtr> {
+        self.handle().packet(user_data, operation)
+    }
 }
 
 /// Blocks until all pending requests finish

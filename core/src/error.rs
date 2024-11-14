@@ -1,17 +1,12 @@
-use std::{
-    error::Error,
-    fmt, mem,
-    num::{NonZeroU32, NonZeroU8},
-};
+use std::mem;
+use std::num::{NonZeroU32, NonZeroU8};
 
-pub use sys::{
-    generated_safe::{
-        self as sys_safe, CreateAccountErrorKind, CreateTransferErrorKind,
-        PacketStatusErrorKind as SendErrorKind, StatusErrorKind as NewClientErrorKind,
-    },
-    tb_create_accounts_result_t as RawCreateAccountsIndividualApiResult,
-    tb_create_transfers_result_t as RawCreateTransfersIndividualApiResult,
+pub use sys::generated_safe::{
+    self as sys_safe, CreateAccountErrorKind, CreateTransferErrorKind,
+    PacketStatusErrorKind as SendErrorKind, StatusErrorKind as NewClientErrorKind,
 };
+pub use sys::tb_create_accounts_result_t as RawCreateAccountsIndividualApiResult;
+pub use sys::tb_create_transfers_result_t as RawCreateTransfersIndividualApiResult;
 
 #[derive(Clone, Copy)]
 pub struct NewClientError(pub(crate) NonZeroU32);
@@ -28,8 +23,8 @@ pub struct CreateAccountError(pub(crate) NonZeroU32);
 /// if [`Self::from_raw_result_unchecked`] would also be safe.
 //
 // INVARIANT: self.0.result must not be zero
-#[derive(Clone, Copy)]
 #[repr(transparent)]
+#[derive(Clone, Copy)]
 pub struct CreateAccountsIndividualApiError(RawCreateAccountsIndividualApiResult);
 
 // INVARIANT: self.0 must not be empty
@@ -52,8 +47,8 @@ pub struct CreateTransferError(pub(crate) NonZeroU32);
 /// if [`Self::from_raw_result_unchecked`] would also be safe.
 //
 // INVARIANT: self.0.result must not be zero
-#[derive(Clone, Copy)]
 #[repr(transparent)]
+#[derive(Clone, Copy)]
 pub struct CreateTransfersIndividualApiError(RawCreateTransfersIndividualApiResult);
 
 // INVARIANT: self.0 must not be empty
@@ -74,8 +69,8 @@ impl NewClientError {
     pub fn kind(self) -> NewClientErrorKind {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above.
-            unsafe { mem::transmute(code) }
+            // SAFETY: We checked if it's in range right above
+            unsafe { std::mem::transmute(code) }
         } else {
             NewClientErrorKind::UnstableUncategorized
         }
@@ -86,40 +81,35 @@ impl NewClientError {
     }
 }
 
-impl fmt::Debug for NewClientError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Debug for NewClientError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let code = self.0.get();
         let mut d = f.debug_tuple("NewClientErrorError");
-        let kind = self.kind();
-        if matches!(kind, NewClientErrorKind::UnstableUncategorized) {
-            let code = self.code().get();
-            d.field(&code);
+        if Self::CODE_RANGE.contains(&code) {
+            d.field(&self.kind());
         } else {
-            d.field(&kind);
+            d.field(&code);
         }
         d.finish()
     }
 }
 
-impl fmt::Display for NewClientError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for NewClientError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.kind())
     }
 }
 
-impl Error for NewClientError {}
+impl std::error::Error for NewClientError {}
 
 impl From<NewClientErrorKind> for NewClientError {
-    /// Constructs a [`NewClientError`] out of the provided [`NewClientErrorKind`].
-    ///
-    /// # Panics
-    ///
-    /// Panics on the hidden [`NewClientErrorKind::UnstableUncategorized`] variant.
+    /// Panics on hidden `NewClientErrorKind::UnstableUncategorized` variant.
     fn from(value: NewClientErrorKind) -> Self {
-        let this = Self(NonZeroU32::new(value as _).unwrap());
-        if matches!(this.kind(), NewClientErrorKind::UnstableUncategorized) {
+        let code = value as _;
+        if !Self::CODE_RANGE.contains(&code) {
             panic!("NewClientErrorKind::{value:?}")
         }
-        this
+        NewClientError(NonZeroU32::new(code).unwrap())
     }
 }
 
@@ -130,8 +120,8 @@ impl SendError {
     pub fn kind(self) -> SendErrorKind {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above.
-            unsafe { mem::transmute(code) }
+            // SAFETY: We checked if it's in range right above
+            unsafe { std::mem::transmute(code) }
         } else {
             SendErrorKind::UnstableUncategorized
         }
@@ -142,40 +132,35 @@ impl SendError {
     }
 }
 
-impl fmt::Debug for SendError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Debug for SendError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let code = self.0.get();
         let mut d = f.debug_tuple("SendError");
-        let kind = self.kind();
-        if matches!(kind, SendErrorKind::UnstableUncategorized) {
-            let code = self.code().get();
-            d.field(&code);
+        if Self::CODE_RANGE.contains(&code) {
+            d.field(&self.kind());
         } else {
-            d.field(&kind);
+            d.field(&code);
         }
         d.finish()
     }
 }
 
-impl fmt::Display for SendError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "error occurred while sending packets")
+impl std::fmt::Display for SendError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.kind())
     }
 }
 
-impl Error for SendError {}
+impl std::error::Error for SendError {}
 
 impl From<SendErrorKind> for SendError {
-    /// Constructs a [`SendError`] out of the provided [`SendErrorKind`].
-    ///
-    /// # Panics
-    ///
-    /// Panics on the hidden [`SendErrorKind::UnstableUncategorized`] variant.
+    /// Panics on hidden `SendErrorKind::UnstableUncategorized` variant.
     fn from(value: SendErrorKind) -> Self {
-        let this = Self(NonZeroU8::new(value as _).unwrap());
-        if matches!(this.kind(), SendErrorKind::UnstableUncategorized) {
+        let code = value as _;
+        if !Self::CODE_RANGE.contains(&code) {
             panic!("SendErrorKind::{value:?}")
         }
-        this
+        SendError(NonZeroU8::new(code).unwrap())
     }
 }
 
@@ -186,8 +171,8 @@ impl CreateAccountError {
     pub fn kind(self) -> CreateAccountErrorKind {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above.
-            unsafe { mem::transmute(code) }
+            // SAFETY: We checked if it's in range right above
+            unsafe { std::mem::transmute(code) }
         } else {
             CreateAccountErrorKind::UnstableUncategorized
         }
@@ -198,40 +183,35 @@ impl CreateAccountError {
     }
 }
 
-impl fmt::Debug for CreateAccountError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Debug for CreateAccountError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let code = self.0.get();
         let mut d = f.debug_tuple("CreateAccountError");
-        let kind = self.kind();
-        if matches!(kind, CreateAccountErrorKind::UnstableUncategorized) {
-            let code = self.0.get();
-            d.field(&code);
+        if Self::CODE_RANGE.contains(&code) {
+            d.field(&self.kind());
         } else {
-            d.field(&kind);
+            d.field(&code);
         }
         d.finish()
     }
 }
 
-impl fmt::Display for CreateAccountError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for CreateAccountError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.kind())
     }
 }
 
-impl Error for CreateAccountError {}
+impl std::error::Error for CreateAccountError {}
 
 impl From<CreateAccountErrorKind> for CreateAccountError {
-    /// Constructs a [`CreateAccountError`] out of the provided [`CreateAccountErrorKind`].
-    ///
-    /// # Panics
-    ///
-    /// Panics on the hidden [`CreateAccountErrorKind::UnstableUncategorized`] variant.
+    /// Panics on hidden `CreateAccountErrorKind::UnstableUncategorized` variant.
     fn from(value: CreateAccountErrorKind) -> Self {
-        let this = Self(NonZeroU32::new(value as _).unwrap());
-        if matches!(this.kind(), CreateAccountErrorKind::UnstableUncategorized) {
+        let code = value as _;
+        if !Self::CODE_RANGE.contains(&code) {
             panic!("CreateAccountErrorKind::{value:?}")
         }
-        this
+        CreateAccountError(NonZeroU32::new(code).unwrap())
     }
 }
 
@@ -242,7 +222,7 @@ impl CreateAccountsIndividualApiError {
     ///
     /// Returns `None` if `raw.result` is zero.
     pub fn from_raw_result(raw: RawCreateAccountsIndividualApiResult) -> Option<Self> {
-        (raw.result != 0).then_some(Self(raw))
+        (raw.result != 0).then_some(CreateAccountsIndividualApiError(raw))
     }
 
     /// Create error from raw result. Unchecked version of [`Self::from_raw_result`].
@@ -251,7 +231,7 @@ impl CreateAccountsIndividualApiError {
     ///
     /// This function is unsafe. `raw.result` must not be zero.
     pub unsafe fn from_raw_result_unchecked(raw: RawCreateAccountsIndividualApiResult) -> Self {
-        Self(raw)
+        CreateAccountsIndividualApiError(raw)
     }
 
     /// Create vec of errors from vec of raw results.
@@ -302,27 +282,27 @@ impl CreateAccountsIndividualApiError {
     }
 }
 
-impl fmt::Debug for CreateAccountsIndividualApiError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("CreateAccountsIndividualApiError")
+impl std::fmt::Debug for CreateAccountsIndividualApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CreateAccountsError")
             .field("index", &self.index())
             .field("inner", &self.inner())
             .finish()
     }
 }
 
-impl fmt::Display for CreateAccountsIndividualApiError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for CreateAccountsIndividualApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "`{}` error occurred at account with index {}",
+            "`{}` error occured at account with index {}",
             self.inner(),
-            self.index(),
+            self.index()
         )
     }
 }
 
-impl Error for CreateAccountsIndividualApiError {}
+impl std::error::Error for CreateAccountsIndividualApiError {}
 
 impl CreateAccountsApiError {
     /// Get a slice of individual errors. Never empty.
@@ -353,18 +333,18 @@ impl AsRef<[CreateAccountsIndividualApiError]> for CreateAccountsApiError {
     }
 }
 
-impl fmt::Display for CreateAccountsApiError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for CreateAccountsApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{} api errors occurred at accounts' creation",
+            "{} api errors occured at accounts' creation",
             self.0.len()
         )
     }
 }
 
-impl Error for CreateAccountsApiError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
+impl std::error::Error for CreateAccountsApiError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         self.0.first().map(|e| e as _)
     }
 }
@@ -375,34 +355,36 @@ impl From<CreateAccountsIndividualApiError> for CreateAccountsApiError {
     }
 }
 
-impl Error for CreateAccountsError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
+impl std::error::Error for CreateAccountsError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         Some(match self {
-            Self::Send(e) => e as _,
-            Self::Api(e) => e as _,
+            CreateAccountsError::Send(e) => e as _,
+            CreateAccountsError::Api(e) => e as _,
         })
     }
 }
 
-impl fmt::Display for CreateAccountsError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "failed to create accounts: ")?;
+impl std::fmt::Display for CreateAccountsError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Send(e) => write!(f, "{e}"),
-            Self::Api(e) => write!(f, "{e}"),
+            CreateAccountsError::Send(_) => {
+                "error occured while sending packets for accounts' creation"
+            }
+            CreateAccountsError::Api(_) => "api errors occured at accounts' creation",
         }
+        .fmt(f)
     }
 }
 
 impl From<SendError> for CreateAccountsError {
     fn from(value: SendError) -> Self {
-        Self::Send(value)
+        CreateAccountsError::Send(value)
     }
 }
 
 impl From<CreateAccountsApiError> for CreateAccountsError {
     fn from(value: CreateAccountsApiError) -> Self {
-        Self::Api(value)
+        CreateAccountsError::Api(value)
     }
 }
 
@@ -414,7 +396,7 @@ impl CreateTransferError {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
             // SAFETY: We checked if it's in range right above
-            unsafe { mem::transmute(code) }
+            unsafe { std::mem::transmute(code) }
         } else {
             CreateTransferErrorKind::UnstableUncategorized
         }
@@ -425,40 +407,35 @@ impl CreateTransferError {
     }
 }
 
-impl fmt::Debug for CreateTransferError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Debug for CreateTransferError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let code = self.0.get();
         let mut d = f.debug_tuple("CreateTransferError");
-        let kind = self.kind();
-        if matches!(kind, CreateTransferErrorKind::UnstableUncategorized) {
-            let code = self.code().get();
-            d.field(&code);
+        if Self::CODE_RANGE.contains(&code) {
+            d.field(&self.kind());
         } else {
-            d.field(&kind);
+            d.field(&code);
         }
         d.finish()
     }
 }
 
-impl fmt::Display for CreateTransferError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for CreateTransferError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.kind())
     }
 }
 
-impl Error for CreateTransferError {}
+impl std::error::Error for CreateTransferError {}
 
 impl From<CreateTransferErrorKind> for CreateTransferError {
-    /// Constructs a [`CreateTransferError`] out of the provided [`CreateTransferErrorKind`].
-    ///
-    /// # Panics
-    ///
-    /// Panics on the hidden [`CreateTransferErrorKind::UnstableUncategorized`] variant.
+    /// Panics on hidden `CreateTransferErrorKind::UnstableUncategorized` variant.
     fn from(value: CreateTransferErrorKind) -> Self {
-        let this = Self(NonZeroU32::new(value as _).unwrap());
-        if matches!(this.kind(), CreateTransferErrorKind::UnstableUncategorized) {
+        let code = value as _;
+        if !Self::CODE_RANGE.contains(&code) {
             panic!("CreateTransferErrorKind::{value:?}")
         }
-        this
+        CreateTransferError(NonZeroU32::new(code).unwrap())
     }
 }
 
@@ -469,7 +446,7 @@ impl CreateTransfersIndividualApiError {
     ///
     /// Returns `None` if `raw.result` is zero.
     pub fn from_raw_result(raw: RawCreateTransfersIndividualApiResult) -> Option<Self> {
-        (raw.result != 0).then_some(Self(raw))
+        (raw.result != 0).then_some(CreateTransfersIndividualApiError(raw))
     }
 
     /// Create error from raw struct. Unchecked version of [`Self::from_raw_result`].
@@ -478,7 +455,7 @@ impl CreateTransfersIndividualApiError {
     ///
     /// This function is unsafe. `raw.result` must not be zero.
     pub unsafe fn from_raw_result_unchecked(raw: RawCreateTransfersIndividualApiResult) -> Self {
-        Self(raw)
+        CreateTransfersIndividualApiError(raw)
     }
 
     /// Create vec of errors from vec of raw results.
@@ -529,27 +506,27 @@ impl CreateTransfersIndividualApiError {
     }
 }
 
-impl fmt::Debug for CreateTransfersIndividualApiError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("CreateTransfersIndividualApiError")
+impl std::fmt::Debug for CreateTransfersIndividualApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CreateTransfersError")
             .field("index", &self.index())
             .field("inner", &self.inner())
             .finish()
     }
 }
 
-impl fmt::Display for CreateTransfersIndividualApiError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for CreateTransfersIndividualApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "`{}` error occurred at account with index {}",
+            "`{}` error occured at account with index {}",
             self.inner(),
             self.index()
         )
     }
 }
 
-impl Error for CreateTransfersIndividualApiError {}
+impl std::error::Error for CreateTransfersIndividualApiError {}
 
 impl CreateTransfersApiError {
     /// Get a slice of individual errors. Never empty.
@@ -580,55 +557,57 @@ impl AsRef<[CreateTransfersIndividualApiError]> for CreateTransfersApiError {
     }
 }
 
-impl fmt::Display for CreateTransfersApiError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for CreateTransfersApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{} api errors occurred at transfers' creation",
+            "{} api errors occured at transfers' creation",
             self.0.len()
         )
     }
 }
 
-impl Error for CreateTransfersApiError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
+impl std::error::Error for CreateTransfersApiError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         self.0.first().map(|e| e as _)
     }
 }
 
 impl From<CreateTransfersIndividualApiError> for CreateTransfersApiError {
     fn from(value: CreateTransfersIndividualApiError) -> Self {
-        Self(vec![value])
+        CreateTransfersApiError(vec![value])
     }
 }
 
-impl Error for CreateTransfersError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
+impl std::error::Error for CreateTransfersError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         Some(match self {
-            Self::Send(e) => e as _,
-            Self::Api(e) => e as _,
+            CreateTransfersError::Send(e) => e as _,
+            CreateTransfersError::Api(e) => e as _,
         })
     }
 }
 
-impl fmt::Display for CreateTransfersError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "failed to create transfers: ")?;
+impl std::fmt::Display for CreateTransfersError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Send(e) => write!(f, "{e}"),
-            Self::Api(e) => write!(f, "{e}"),
+            CreateTransfersError::Send(_) => {
+                "error occured while sending packets for transfers' creation"
+            }
+            CreateTransfersError::Api(_) => "api errors occured at transfers' creation",
         }
+        .fmt(f)
     }
 }
 
 impl From<SendError> for CreateTransfersError {
     fn from(value: SendError) -> Self {
-        Self::Send(value)
+        CreateTransfersError::Send(value)
     }
 }
 
 impl From<CreateTransfersApiError> for CreateTransfersError {
     fn from(value: CreateTransfersApiError) -> Self {
-        Self::Api(value)
+        CreateTransfersError::Api(value)
     }
 }
