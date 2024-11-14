@@ -105,12 +105,9 @@ impl Client {
         if ids.is_empty() {
             return Ok(Vec::new());
         }
-        self.submit(
-            ids.into_as_bytes(),
-            core::OperationKind::LookupAccounts,
-        )
-        .await
-        .map(Reply::into_lookup_accounts)
+        self.submit(ids.into_as_bytes(), core::OperationKind::LookupAccounts)
+            .await
+            .map(Reply::into_lookup_accounts)
     }
 
     pub async fn lookup_transfers<T>(&self, ids: T) -> Result<Vec<Transfer>, SendError>
@@ -121,12 +118,9 @@ impl Client {
         if ids.is_empty() {
             return Ok(Vec::new());
         }
-        self.submit(
-            ids.into_as_bytes(),
-            core::OperationKind::LookupTransfers,
-        )
-        .await
-        .map(Reply::into_lookup_transfers)
+        self.submit(ids.into_as_bytes(), core::OperationKind::LookupTransfers)
+            .await
+            .map(Reply::into_lookup_transfers)
     }
 
     pub async fn query_accounts<T>(&self, filter: T) -> Result<Vec<Account>, SendError>
@@ -134,12 +128,9 @@ impl Client {
         T: RawConstPtr<Target = QueryFilter> + Send + 'static,
     {
         let filter: SendOwnedSlice<QueryFilter> = SendOwnedSlice::from_single(filter);
-        self.submit(
-            filter.into_as_bytes(),
-            core::OperationKind::QueryAccounts,
-        )
-        .await
-        .map(Reply::into_query_accounts)
+        self.submit(filter.into_as_bytes(), core::OperationKind::QueryAccounts)
+            .await
+            .map(Reply::into_query_accounts)
     }
 
     pub async fn query_transfers<T>(&self, filter: T) -> Result<Vec<Transfer>, SendError>
@@ -147,12 +138,9 @@ impl Client {
         T: RawConstPtr<Target = QueryFilter> + Send + 'static,
     {
         let filter: SendOwnedSlice<QueryFilter> = SendOwnedSlice::from_single(filter);
-        self.submit(
-            filter.into_as_bytes(),
-            core::OperationKind::QueryTransfers,
-        )
-        .await
-        .map(Reply::into_query_transfers)
+        self.submit(filter.into_as_bytes(), core::OperationKind::QueryTransfers)
+            .await
+            .map(Reply::into_query_transfers)
     }
 
     async fn submit(

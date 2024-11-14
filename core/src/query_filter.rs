@@ -4,11 +4,11 @@ use std::{
 };
 
 use bytemuck::{Pod, TransparentWrapper, Zeroable};
-use derive_more::{From, Into};
 
-pub use sys::{generated_safe::QueryFilterFlags as Flags, tb_query_filter_t as Raw};
+pub use sys::generated_safe::QueryFilterFlags as Flags;
+pub use sys::tb_query_filter_t as Raw;
 
-#[derive(Clone, Copy, From, Into, Pod, TransparentWrapper, Zeroable)]
+#[derive(Clone, Copy, Pod, TransparentWrapper, Zeroable)]
 #[repr(transparent)]
 pub struct QueryFilter(Raw);
 
@@ -157,5 +157,16 @@ impl fmt::Debug for QueryFilter {
             .field("limit", &self.0.limit)
             .field("flags", &self.flags())
             .finish_non_exhaustive()
+    }
+}
+
+impl From<Raw> for QueryFilter {
+    fn from(value: Raw) -> Self {
+        Self(value)
+    }
+}
+impl From<QueryFilter> for Raw {
+    fn from(value: QueryFilter) -> Self {
+        value.0
     }
 }
