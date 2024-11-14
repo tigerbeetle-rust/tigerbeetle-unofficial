@@ -13,11 +13,11 @@ categories = ["external-ffi-bindings"]
 generated-safe = []
 
 [dependencies]
-bitflags = "2.3.0"
-bytemuck = { version = "1.13.1", features = ["derive", "min_const_generics"] }
+bitflags = "2.6"
+bytemuck = { version = "1.19", features = ["derive", "min_const_generics"] }
 
 [build-dependencies]
-bindgen = "0.65.1"
-syn = { version = "2.0.28", features = ["parsing", "full", "printing", "visit"], default-features = false }
-quote = { version = "1.0.27", default-features = false }
-proc-macro2 = { version = "1.0.57", default-features = false }
+bindgen = "0.70"
+proc-macro2 = { version = "1.0", default-features = false }
+quote = { version = "1.0", default-features = false }
+syn = { version = "2.0", features = ["parsing", "full", "printing", "visit"], default-features = false }
