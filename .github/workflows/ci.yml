@@ -72,10 +72,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        crate:
-          - tigerbeetle-unofficial-sys
-          - tigerbeetle-unofficial-core
-          - tigerbeetle-unofficial
         toolchain: ["stable", "beta", "nightly"]
         os: ["ubuntu", "macOS", "windows"]
     runs-on: ${{ matrix.os }}-latest
@@ -86,12 +82,19 @@ jobs:
       - uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
+          components: rust-src
 
       - run: cargo install cargo-careful
         if: ${{ matrix.toolchain == 'nightly' }}
 
       - run: cargo ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }} test
-             -p ${{ matrix.crate }} --all-features
+             -p tigerbeetle-unofficial-sys --all-features
+
+      - run: cargo ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }} test
+             -p tigerbeetle-unofficial-core --all-features
+
+      - run: cargo ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }} test
+             -p tigerbeetle-unofficial --all-features
 
 
 
