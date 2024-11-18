@@ -90,9 +90,8 @@ jobs:
       - run: cargo install cargo-careful
         if: ${{ matrix.toolchain == 'nightly' }}
 
-      - run: cargo test
-             ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }}
-             -p ${{ matrix.toolchain }} --all-features
+      - run: cargo test ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }}
+             -p ${{ matrix.crate }} --all-features
 
 
 
