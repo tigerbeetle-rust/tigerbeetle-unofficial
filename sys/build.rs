@@ -16,10 +16,10 @@ const TIGERBEETLE_RELEASE: &str = "0.16.11";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
-        "aarch64-unknown-linux-gnu" => Some("aarch64-linux-gnu"),
+        "aarch64-unknown-linux-gnu" => Some("aarch64-linux-gnu.2.27"),
         "aarch64-unknown-linux-musl" => Some("aarch64-linux-musl"),
         "aarch64-apple-darwin" => Some("aarch64-macos"),
-        "x86_64-unknown-linux-gnu" => Some("x86_64-linux-gnu"),
+        "x86_64-unknown-linux-gnu" => Some("x86_64-linux-gnu.2.27"),
         "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         "x86_64-apple-darwin" => Some("x86_64-macos"),
         "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
@@ -119,7 +119,7 @@ fn main() {
             "cargo:rustc-link-search=native={}",
             link_search
                 .to_str()
-                .expect("link search directory path is not valid unicode")
+                .expect("link search directory path is not valid unicode"),
         );
         println!("cargo:rustc-link-lib=static=tb_client");
 
@@ -127,8 +127,8 @@ fn main() {
         let generated_header = c_dir.join("tb_client.h");
         assert_eq!(
             fs::read_to_string(&generated_header).expect("reading generated `tb_client.h`"),
-            fs::read_to_string("src/tb_client.h").expect("reading pregenerated `tb_client.h`"),
-            "generated and pregenerated `tb_client.h` headers must be equal, \
+            fs::read_to_string("src/tb_client.h").expect("reading pre-generated `tb_client.h`"),
+            "generated and pre-generated `tb_client.h` headers must be equal, \
              generated at: {generated_header:?}",
         );
         fs::copy("src/wrapper.h", &wrapper).expect("copying wrapper.h");
