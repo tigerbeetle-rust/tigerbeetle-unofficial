@@ -93,6 +93,8 @@ jobs:
       - run: cargo ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }} test
              -p tigerbeetle-unofficial-sys --all-features -vv
 
+      - run: cat target/debug/build/tigerbeetle-unofficial-sys-*/out/bindings.rs
+
       - run: cargo ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }} test
              -p tigerbeetle-unofficial-core --all-features
 
