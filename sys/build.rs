@@ -108,6 +108,7 @@ fn main() {
         .arg(format!("-Dconfig-release={TIGERBEETLE_RELEASE}"))
         .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
         .current_dir(&tigerbeetle_root)
+        .env("CI", "false")
         .status()
         .expect("running `zig build` subcommand");
         assert!(status.success(), "`zig build` failed with {status:?}");
