@@ -127,10 +127,10 @@ fn main() {
         wrapper = c_dir.join("wrapper.h");
         let generated_header = c_dir.join("tb_client.h");
         assert_eq!(
-            fs::read_to_string(&generated_header)
-                .expect("reading generated `tb_client.h`")
+            fs::read_to_string(&generated_header).expect("reading generated `tb_client.h`"),
+            fs::read_to_string("src/tb_client.h")
+                .expect("reading pre-generated `tb_client.h`")
                 .replace("\r\n", "\n"),
-            fs::read_to_string("src/tb_client.h").expect("reading pre-generated `tb_client.h`"),
             "generated and pre-generated `tb_client.h` headers must be equal, \
              generated at: {generated_header:?}",
         );
