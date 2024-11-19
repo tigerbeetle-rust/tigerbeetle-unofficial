@@ -91,7 +91,10 @@ where
                 on_completion_ctx,
                 Some(on_completion_fn),
             );
-            if let Some(c) = NonZeroU32::new(status) {
+
+            // PANIC: Unwrapping is OK here, because the returned `TB_STATUS` is actually an enum
+            //        with positive discriminant.
+            if let Some(c) = NonZeroU32::new(status.try_into().unwrap_unchecked()) {
                 Err(NewClientError(c))
             } else {
                 Ok(raw)

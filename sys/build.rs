@@ -60,10 +60,10 @@ fn main() {
         wrapper = "src/wrapper.h".into();
     } else {
         let target_lib_subdir = target_to_lib_dir(&target)
-            .unwrap_or_else(|| panic!("target {target:?} is not supported"));
+            .unwrap_or_else(|| panic!("target `{target:?}` is not supported"));
 
         let tigerbeetle_target = target_to_tigerbeetle_target(&target)
-            .unwrap_or_else(|| panic!("target {target:?} is not supported"));
+            .unwrap_or_else(|| panic!("target `{target:?}` is not supported"));
 
         let tigerbeetle_root = out_dir.join("tigerbeetle");
         fs::remove_dir_all(&tigerbeetle_root)
@@ -134,14 +134,14 @@ fn main() {
             "generated and pre-generated `tb_client.h` headers must be equal, \
              generated at: {generated_header:?}",
         );
-        fs::copy("src/wrapper.h", &wrapper).expect("copying wrapper.h");
+        fs::copy("src/wrapper.h", &wrapper).expect("copying `wrapper.h`");
     };
 
     let bindings = bindgen::Builder::default()
         .header(
             wrapper
                 .to_str()
-                .expect("wrapper.h out path is not valid unicode"),
+                .expect("`wrapper.h` out path is not valid unicode"),
         )
         .default_enum_style(bindgen::EnumVariation::ModuleConsts)
         .parse_callbacks(Box::new(TigerbeetleCallbacks {
@@ -149,11 +149,11 @@ fn main() {
             out_dir: out_dir.clone(),
         }))
         .generate()
-        .expect("generating tb_client bindings");
+        .expect("generating `tb_client` bindings");
 
     bindings
         .write_to_file(out_dir.join("bindings.rs"))
-        .expect("writing tb_client bindings");
+        .expect("writing `tb_client` bindings");
 
     if env::var("CARGO_FEATURE_GENERATED_SAFE").is_ok() {
         let bindings = syn::parse_file(&bindings.to_string()).unwrap();
