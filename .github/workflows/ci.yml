@@ -93,6 +93,7 @@ jobs:
       - run: cargo ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }} test
              -p tigerbeetle-unofficial-sys --all-features -vv
 
+      - run: cat target/debug/build/tigerbeetle-unofficial-sys-*/out/tigerbeetle/src/clients/c/tb_client.h
       - run: cat target/debug/build/tigerbeetle-unofficial-sys-*/out/bindings.rs
 
       - run: cargo ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }} test
@@ -120,6 +121,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: stable
+          components: rustfmt
 
       - run: cargo publish -p tigerbeetle-unofficial-sys
         env:
