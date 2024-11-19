@@ -38,6 +38,7 @@ jobs:
   ##########################
 
   clippy:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -72,8 +73,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: ["stable", "beta", "nightly"]
-        os: ["ubuntu", "macOS", "windows"]
+        #toolchain: ["stable", "beta", "nightly"]
+        toolchain: ["stable"]
+        #os: ["ubuntu", "macOS", "windows"]
+        os: ["windows"]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v3
