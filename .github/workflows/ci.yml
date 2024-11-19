@@ -83,8 +83,10 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           components: rust-src
+          targets: ${{ matrix.os == 'windows' && 'x86_64-pc-windows-gnu' || '' }}
 
       - run: rustup toolchain list
+        if: ${{ matrix.os == 'windows' }}
 
       - run: cargo install cargo-careful
         if: ${{ matrix.toolchain == 'nightly' }}
