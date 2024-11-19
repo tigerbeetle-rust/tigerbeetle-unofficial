@@ -85,7 +85,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}${{ matrix.os == 'windows' && '-gnu' || '' }}
-          components: rust-src
+          components: rust-src,rustfmt
 
       - run: cargo install cargo-careful
         if: ${{ matrix.toolchain == 'nightly' }}

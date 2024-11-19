@@ -115,8 +115,8 @@ fn main() {
         .expect("running `zig build` subcommand");
         assert!(status.success(), "`zig build` failed with {status:?}");
 
-        let c_dir = tigerbeetle_root.join(PathBuf::from("src/clients/c/"));
-        let lib_dir = tigerbeetle_root.join(PathBuf::from("src/clients/c/lib"));
+        let c_dir = tigerbeetle_root.join("src/clients/c/");
+        let lib_dir = tigerbeetle_root.join("src/clients/c/lib").canonicalize().unwrap();
         let link_search = lib_dir.join(target_lib_subdir);
         println!(
             "cargo:rustc-link-search=native={}",
