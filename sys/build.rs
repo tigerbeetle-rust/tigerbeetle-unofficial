@@ -22,7 +22,6 @@ fn target_to_lib_dir(target: &str) -> Option<&'static str> {
         "x86_64-unknown-linux-gnu" => Some("x86_64-linux-gnu.2.27"),
         "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         "x86_64-apple-darwin" => Some("x86_64-macos"),
-        "x86_64-pc-windows-gnu" => Some("x86_64-windows"),
         "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
         _ => None,
     }
@@ -36,7 +35,6 @@ fn target_to_tigerbeetle_target(target: &str) -> Option<&'static str> {
         "x86_64-unknown-linux-gnu" => Some("x86_64-linux"),
         "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         "x86_64-apple-darwin" => Some("x86_64-macos"),
-        "x86_64-pc-windows-gnu" => Some("x86_64-windows"),
         "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
         _ => None,
     }
@@ -116,7 +114,7 @@ fn main() {
         assert!(status.success(), "`zig build` failed with {status:?}");
 
         let c_dir = tigerbeetle_root.join("src/clients/c/");
-        let lib_dir = tigerbeetle_root.join("src/clients/c/lib").canonicalize().unwrap();
+        let lib_dir = tigerbeetle_root.join("src/clients/c/lib");
         let link_search = lib_dir.join(target_lib_subdir);
         println!(
             "cargo:rustc-link-search=native={}",

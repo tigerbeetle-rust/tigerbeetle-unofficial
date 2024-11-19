@@ -47,7 +47,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: stable
-          components: clippy
+          components: clippy,rustfmt
 
       - run: cargo clippy --all-features -- -D warnings
 
@@ -84,7 +84,7 @@ jobs:
           submodules: true
       - uses: dtolnay/rust-toolchain@v1
         with:
-          toolchain: ${{ matrix.toolchain }}${{ matrix.os == 'windows' && '-gnu' || '' }}
+          toolchain: ${{ matrix.toolchain }}
           components: rust-src,rustfmt
 
       - run: cargo install cargo-careful
