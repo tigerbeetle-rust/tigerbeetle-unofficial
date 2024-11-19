@@ -81,9 +81,9 @@ jobs:
           submodules: true
       - uses: dtolnay/rust-toolchain@v1
         with:
-          toolchain: ${{ matrix.toolchain }}
+          toolchain: ${{ matrix.toolchain }}${{ matrix.os == 'windows' && '-gnu' || '' }}
           components: rust-src
-          targets: ${{ matrix.os == 'windows' && 'x86_64-pc-windows-gnu' || '' }}
+          #targets: ${{ matrix.os == 'windows' && 'x86_64-pc-windows-gnu' || '' }}
 
       - run: rustup toolchain list
         if: ${{ matrix.os == 'windows' }}
