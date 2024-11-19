@@ -83,9 +83,7 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}${{ matrix.os == 'windows' && '-gnu' || '' }}
           components: rust-src
-          #targets: ${{ matrix.os == 'windows' && 'x86_64-pc-windows-gnu' || '' }}
-
-      - run: rustup toolchain list
+      - run: rustup set default-host x86_64-pc-windows-gnu
         if: ${{ matrix.os == 'windows' }}
 
       - run: cargo install cargo-careful
