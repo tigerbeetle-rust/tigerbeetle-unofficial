@@ -22,6 +22,7 @@ fn target_to_lib_dir(target: &str) -> Option<&'static str> {
         "x86_64-unknown-linux-gnu" => Some("x86_64-linux-gnu.2.27"),
         "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         "x86_64-apple-darwin" => Some("x86_64-macos"),
+        "x86_64-pc-windows-gnu" => Some("x86_64-windows"),
         "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
         _ => None,
     }
@@ -35,6 +36,7 @@ fn target_to_tigerbeetle_target(target: &str) -> Option<&'static str> {
         "x86_64-unknown-linux-gnu" => Some("x86_64-linux"),
         "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         "x86_64-apple-darwin" => Some("x86_64-macos"),
+        "x86_64-pc-windows-gnu" => Some("x86_64-windows"),
         "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
         _ => None,
     }
