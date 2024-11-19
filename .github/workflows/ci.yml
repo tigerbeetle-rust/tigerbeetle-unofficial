@@ -84,6 +84,8 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           components: rust-src
 
+      - run: rustup toolchain list
+
       - run: cargo install cargo-careful
         if: ${{ matrix.toolchain == 'nightly' }}
 
