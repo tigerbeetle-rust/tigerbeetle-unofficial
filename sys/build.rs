@@ -118,11 +118,6 @@ fn main() {
         let c_dir = tigerbeetle_root.join("src/clients/c/");
         let lib_dir = tigerbeetle_root.join("src/clients/c/lib");
         let link_search = lib_dir.join(target_lib_subdir);
-        for entry in fs::read_dir(&link_search).unwrap() {
-            let dir = entry.unwrap();
-            println!("{:?}", dir.path());
-        }
-        panic!("wut?");
         println!(
             "cargo:rustc-link-search=native={}",
             link_search
