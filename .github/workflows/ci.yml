@@ -76,7 +76,7 @@ jobs:
         #toolchain: ["stable", "beta", "nightly"]
         toolchain: ["stable"]
         #os: ["ubuntu", "macOS", "windows"]
-        os: ["windows"]
+        os: ["ubuntu", "windows"]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v3
