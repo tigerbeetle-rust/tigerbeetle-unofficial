@@ -12,3 +12,27 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 pub mod generated_safe {
     include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 }
+
+#[cfg(test)]
+mod linked {
+    //! Bunch of dummies to ensure linker does its job before linked functions are actually used in
+    //! other crates.
+
+    use std::{mem, ptr};
+
+    #[test]
+    fn tb_client_init() {
+        unsafe {
+            let mut raw = mem::zeroed();
+            let address = "3000".as_bytes();
+            _ = crate::tb_client_init(
+                &mut raw,
+                1,
+                address.as_ptr().cast(),
+                address.len().try_into().unwrap(),
+                ptr::null::<()>() as usize,
+                None,
+            );
+        }
+    }
+}
