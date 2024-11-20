@@ -8,7 +8,7 @@ use std::{
     path::{self, Path, PathBuf},
     process::Command,
 };
-
+use std::process::Stdio;
 use quote::quote;
 use syn::visit::Visit;
 
@@ -109,6 +109,7 @@ fn main() {
         .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
         .current_dir(&tigerbeetle_root)
         .env_remove("CI")
+        .stderr(Stdio::inherit())
         .status()
         .expect("running `zig build` subcommand");
         assert!(status.success(), "`zig build` failed with {status:?}");
@@ -123,9 +124,6 @@ fn main() {
                 .expect("link search directory path is not valid unicode"),
         );
         println!("cargo:rustc-link-lib=static=tb_client");
-        if target == "x86_64-pc-windows-msvc" {
-            println!("cargo:rustc-link-lib=ws2_32");
-        }
 
         wrapper = c_dir.join("wrapper.h");
         let generated_header = c_dir.join("tb_client.h");
