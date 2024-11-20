@@ -109,6 +109,7 @@ fn main() {
         .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
         .current_dir(&tigerbeetle_root)
         .env_remove("CI")
+        .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status()
         .expect("running `zig build` subcommand");
