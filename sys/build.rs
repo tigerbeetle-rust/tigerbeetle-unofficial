@@ -123,6 +123,9 @@ fn main() {
                 .expect("link search directory path is not valid unicode"),
         );
         println!("cargo:rustc-link-lib=static=tb_client");
+        if target == "x86_64-pc-windows-msvc" {
+            println!("cargo:rustc-link-lib=ws2_32");
+        }
 
         wrapper = c_dir.join("wrapper.h");
         let generated_header = c_dir.join("tb_client.h");
