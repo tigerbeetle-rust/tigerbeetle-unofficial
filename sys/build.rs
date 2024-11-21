@@ -22,7 +22,7 @@ fn target_to_lib_dir(target: &str) -> Option<&'static str> {
         "x86_64-unknown-linux-gnu" => Some("x86_64-linux-gnu.2.27"),
         "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         "x86_64-apple-darwin" => Some("x86_64-macos"),
-        "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
+        "x86_64-pc-windows-gnu" => Some("x86_64-windows"),
         _ => None,
     }
 }
@@ -35,7 +35,7 @@ fn target_to_tigerbeetle_target(target: &str) -> Option<&'static str> {
         "x86_64-unknown-linux-gnu" => Some("x86_64-linux"),
         "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         "x86_64-apple-darwin" => Some("x86_64-macos"),
-        "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
+        "x86_64-pc-windows-gnu" => Some("x86_64-windows"),
         _ => None,
     }
 }
@@ -101,7 +101,6 @@ fn main() {
                 .unwrap(),
         )
         .arg("build")
-        .arg("-target=x86_64-windows-msvc")
         .arg("clients:c")
         .args((!debug).then_some("-Drelease"))
         .arg(format!("-Dtarget={tigerbeetle_target}"))
@@ -125,7 +124,11 @@ fn main() {
                 .to_str()
                 .expect("link search directory path is not valid unicode"),
         );
-        println!("cargo:rustc-link-lib=static=tb_client");
+        if target == "x86_64-pc-windows-gnu" {
+            println!("cargo:rustc-link-lib=static:+verbatim=tb_client.lib");
+        } else {
+            println!("cargo:rustc-link-lib=static=tb_client");
+        }
 
         wrapper = c_dir.join("wrapper.h");
         let generated_header = c_dir.join("tb_client.h");
