@@ -101,7 +101,7 @@ fn main() {
                 .unwrap(),
         )
         .arg("build")
-        .arg("-target=x86_64-pc-windows-msvc")
+        .arg("-target=x86_64-windows-msvc")
         .arg("clients:c")
         .args((!debug).then_some("-Drelease"))
         .arg(format!("-Dtarget={tigerbeetle_target}"))
