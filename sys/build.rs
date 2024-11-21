@@ -107,6 +107,8 @@ fn main() {
         .arg(format!("-Dconfig-log-level={log_level}"))
         .arg(format!("-Dconfig-release={TIGERBEETLE_RELEASE}"))
         .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
+        .arg("--verbose")
+        .arg("--verbose-link")
         .current_dir(&tigerbeetle_root)
         .env_remove("CI")
         .output()
