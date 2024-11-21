@@ -123,7 +123,7 @@ fn main() {
                 .expect("link search directory path is not valid unicode"),
         );
         if target == "x86_64-pc-windows-gnu" {
-            // `-gnu` toolchain looks for `lib<hame>.a` file of a static library by default, but
+            // `-gnu` toolchain looks for `lib<name>.a` file of a static library by default, but
             // `zig build` produces `<name>.lib` despite using MinGW under-the-hood.
             println!("cargo:rustc-link-lib=static:+verbatim=tb_client.lib");
         } else {
