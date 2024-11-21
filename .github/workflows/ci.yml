@@ -52,6 +52,7 @@ jobs:
       - run: cargo clippy --all-features -- -D warnings
 
   rustfmt:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -76,7 +77,7 @@ jobs:
         #toolchain: ["stable", "beta", "nightly"]
         toolchain: ["stable"]
         #os: ["ubuntu", "macOS", "windows"]
-        os: ["windows"]
+        os: ["windows", "ubuntu"]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v3

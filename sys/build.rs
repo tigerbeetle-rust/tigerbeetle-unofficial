@@ -93,7 +93,7 @@ fn main() {
         .expect("running `download` script");
         assert!(status.success(), "`download` script failed with {status:?}");
 
-        let output = Command::new(
+        let status = Command::new(
             tigerbeetle_root
                 .join("zig/zig")
                 .with_extension(env::consts::EXE_EXTENSION)
@@ -111,11 +111,8 @@ fn main() {
         .arg("--verbose-link")
         .current_dir(&tigerbeetle_root)
         .env_remove("CI")
-        .output()
+        .status()
         .expect("running `zig build` subcommand");
-        io::stdout().write_all(&output.stdout).unwrap();
-        io::stderr().write_all(&output.stderr).unwrap();
-        let status = output.status;
         assert!(status.success(), "`zig build` failed with {status:?}");
 
         let c_dir = tigerbeetle_root.join("src/clients/c/");
