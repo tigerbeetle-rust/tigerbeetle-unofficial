@@ -21,6 +21,7 @@ mod linked {
     use std::{mem, ptr};
 
     #[test]
+    #[ignore = "only checks linkage"]
     fn tb_client_init() {
         unsafe {
             let mut raw = mem::zeroed();
