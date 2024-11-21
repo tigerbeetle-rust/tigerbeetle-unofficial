@@ -92,7 +92,7 @@ jobs:
         if: ${{ matrix.toolchain == 'nightly' }}
 
       - run: cargo ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }} test
-             -p tigerbeetle-unofficial-sys --all-features -vv
+             -p tigerbeetle-unofficial-sys --all-features -vv -- --nocapture
 
       - run: cargo ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }} test
              -p tigerbeetle-unofficial-core --all-features
