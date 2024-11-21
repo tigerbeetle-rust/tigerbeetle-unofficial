@@ -107,8 +107,6 @@ fn main() {
         .arg(format!("-Dconfig-log-level={log_level}"))
         .arg(format!("-Dconfig-release={TIGERBEETLE_RELEASE}"))
         .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
-        .arg("--verbose")
-        .arg("--verbose-link")
         .current_dir(&tigerbeetle_root)
         .env_remove("CI")
         .status()
@@ -125,6 +123,8 @@ fn main() {
                 .expect("link search directory path is not valid unicode"),
         );
         if target == "x86_64-pc-windows-gnu" {
+            // `-gnu` toolchain looks for `lib<hame>.a` file of a static library by default, but
+            // `zig build` produces `<name>.lib` despite using MinGW under-the-hood.
             println!("cargo:rustc-link-lib=static:+verbatim=tb_client.lib");
         } else {
             println!("cargo:rustc-link-lib=static=tb_client");
