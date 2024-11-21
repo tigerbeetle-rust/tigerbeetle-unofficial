@@ -90,6 +90,9 @@ jobs:
       - run: cargo install cargo-careful
         if: ${{ matrix.toolchain == 'nightly' }}
 
+      - run: which ar
+      - run: ar --help
+
       - run: cargo ${{ (matrix.toolchain == 'nightly' && '+nightly careful') || '' }} test
              -p tigerbeetle-unofficial-sys --all-features -vv
 
