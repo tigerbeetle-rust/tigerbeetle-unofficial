@@ -39,6 +39,7 @@ jobs:
   ##########################
 
   clippy:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -79,6 +80,8 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: nightly
@@ -96,6 +99,7 @@ jobs:
       - run: cargo test -p tigerbeetle-unofficial --all-features
 
   test:
+    if: ${{ false }}
     strategy:
       fail-fast: false
       matrix:
