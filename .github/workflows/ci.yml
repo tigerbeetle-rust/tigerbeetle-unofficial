@@ -23,8 +23,7 @@ jobs:
   pr:
     if: ${{ github.event_name == 'pull_request' }}
     needs:
-      # TODO: Re-enable once Clippy is satisfied on latest Rust.
-      #- clippy
+      - clippy
       - rustfmt
       - test
     runs-on: ubuntu-latest
@@ -39,8 +38,6 @@ jobs:
   ##########################
 
   clippy:
-    # TODO: Re-enable once Clippy is satisfied on latest Rust.
-    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -51,7 +48,7 @@ jobs:
           toolchain: stable
           components: clippy,rustfmt
 
-      - run: cargo clippy --all-features -- -D warnings
+      - run: cargo clippy --workspace --all-features -- -D warnings
 
   rustfmt:
     runs-on: ubuntu-latest
