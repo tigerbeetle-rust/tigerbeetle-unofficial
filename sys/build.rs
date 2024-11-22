@@ -16,13 +16,13 @@ const TIGERBEETLE_RELEASE: &str = "0.16.11";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
-        "aarch64-unknown-linux-gnu" => Some("aarch64-linux-gnu"),
+        "aarch64-unknown-linux-gnu" => Some("aarch64-linux-gnu.2.27"),
         "aarch64-unknown-linux-musl" => Some("aarch64-linux-musl"),
         "aarch64-apple-darwin" => Some("aarch64-macos"),
-        "x86_64-unknown-linux-gnu" => Some("x86_64-linux-gnu"),
+        "x86_64-unknown-linux-gnu" => Some("x86_64-linux-gnu.2.27"),
         "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         "x86_64-apple-darwin" => Some("x86_64-macos"),
-        "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
+        "x86_64-pc-windows-gnu" => Some("x86_64-windows"),
         _ => None,
     }
 }
@@ -35,7 +35,7 @@ fn target_to_tigerbeetle_target(target: &str) -> Option<&'static str> {
         "x86_64-unknown-linux-gnu" => Some("x86_64-linux"),
         "x86_64-unknown-linux-musl" => Some("x86_64-linux-musl"),
         "x86_64-apple-darwin" => Some("x86_64-macos"),
-        "x86_64-pc-windows-msvc" => Some("x86_64-windows"),
+        "x86_64-pc-windows-gnu" => Some("x86_64-windows"),
         _ => None,
     }
 }
@@ -60,10 +60,10 @@ fn main() {
         wrapper = "src/wrapper.h".into();
     } else {
         let target_lib_subdir = target_to_lib_dir(&target)
-            .unwrap_or_else(|| panic!("target {target:?} is not supported"));
+            .unwrap_or_else(|| panic!("target `{target:?}` is not supported"));
 
         let tigerbeetle_target = target_to_tigerbeetle_target(&target)
-            .unwrap_or_else(|| panic!("target {target:?} is not supported"));
+            .unwrap_or_else(|| panic!("target `{target:?}` is not supported"));
 
         let tigerbeetle_root = out_dir.join("tigerbeetle");
         fs::remove_dir_all(&tigerbeetle_root)
@@ -108,6 +108,7 @@ fn main() {
         .arg(format!("-Dconfig-release={TIGERBEETLE_RELEASE}"))
         .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
         .current_dir(&tigerbeetle_root)
+        .env_remove("CI")
         .status()
         .expect("running `zig build` subcommand");
         assert!(status.success(), "`zig build` failed with {status:?}");
@@ -119,26 +120,34 @@ fn main() {
             "cargo:rustc-link-search=native={}",
             link_search
                 .to_str()
-                .expect("link search directory path is not valid unicode")
+                .expect("link search directory path is not valid unicode"),
         );
-        println!("cargo:rustc-link-lib=static=tb_client");
+        if target == "x86_64-pc-windows-gnu" {
+            // `-gnu` toolchain looks for `lib<name>.a` file of a static library by default, but
+            // `zig build` produces `<name>.lib` despite using MinGW under-the-hood.
+            println!("cargo:rustc-link-lib=static:+verbatim=tb_client.lib");
+        } else {
+            println!("cargo:rustc-link-lib=static=tb_client");
+        }
 
         wrapper = c_dir.join("wrapper.h");
         let generated_header = c_dir.join("tb_client.h");
         assert_eq!(
             fs::read_to_string(&generated_header).expect("reading generated `tb_client.h`"),
-            fs::read_to_string("src/tb_client.h").expect("reading pregenerated `tb_client.h`"),
-            "generated and pregenerated `tb_client.h` headers must be equal, \
+            fs::read_to_string("src/tb_client.h")
+                .expect("reading pre-generated `tb_client.h`")
+                .replace("\r\n", "\n"),
+            "generated and pre-generated `tb_client.h` headers must be equal, \
              generated at: {generated_header:?}",
         );
-        fs::copy("src/wrapper.h", &wrapper).expect("copying wrapper.h");
+        fs::copy("src/wrapper.h", &wrapper).expect("copying `wrapper.h`");
     };
 
     let bindings = bindgen::Builder::default()
         .header(
             wrapper
                 .to_str()
-                .expect("wrapper.h out path is not valid unicode"),
+                .expect("`wrapper.h` out path is not valid unicode"),
         )
         .default_enum_style(bindgen::EnumVariation::ModuleConsts)
         .parse_callbacks(Box::new(TigerbeetleCallbacks {
@@ -146,11 +155,11 @@ fn main() {
             out_dir: out_dir.clone(),
         }))
         .generate()
-        .expect("generating tb_client bindings");
+        .expect("generating `tb_client` bindings");
 
     bindings
         .write_to_file(out_dir.join("bindings.rs"))
-        .expect("writing tb_client bindings");
+        .expect("writing `tb_client` bindings");
 
     if env::var("CARGO_FEATURE_GENERATED_SAFE").is_ok() {
         let bindings = syn::parse_file(&bindings.to_string()).unwrap();
