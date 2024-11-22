@@ -75,7 +75,7 @@ impl NewClientError {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
             // SAFETY: We checked if it's in range right above.
-            unsafe { mem::transmute(code) }
+            unsafe { mem::transmute::<u32, NewClientErrorKind>(code) }
         } else {
             NewClientErrorKind::UnstableUncategorized
         }
@@ -131,7 +131,7 @@ impl SendError {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
             // SAFETY: We checked if it's in range right above.
-            unsafe { mem::transmute(code) }
+            unsafe { mem::transmute::<u8, SendErrorKind>(code) }
         } else {
             SendErrorKind::UnstableUncategorized
         }
@@ -187,7 +187,7 @@ impl CreateAccountError {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
             // SAFETY: We checked if it's in range right above.
-            unsafe { mem::transmute(code) }
+            unsafe { mem::transmute::<u32, CreateAccountErrorKind>(code) }
         } else {
             CreateAccountErrorKind::UnstableUncategorized
         }
@@ -414,7 +414,7 @@ impl CreateTransferError {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
             // SAFETY: We checked if it's in range right above
-            unsafe { mem::transmute(code) }
+            unsafe { mem::transmute::<u32, CreateTransferErrorKind>(code) }
         } else {
             CreateTransferErrorKind::UnstableUncategorized
         }

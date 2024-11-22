@@ -164,9 +164,10 @@ impl Operation {
         sys::generated_safe::MIN_OPERATION_CODE..=sys::generated_safe::MAX_OPERATION_CODE;
 
     pub fn kind(self) -> OperationKind {
-        if Self::CODE_RANGE.contains(&self.0) {
+        let code = self.0;
+        if Self::CODE_RANGE.contains(&code) {
             // SAFETY: We checked if it's in range right above
-            unsafe { std::mem::transmute(self.0) }
+            unsafe { mem::transmute::<u8, OperationKind>(code) }
         } else {
             OperationKind::UnstableUncategorized
         }
