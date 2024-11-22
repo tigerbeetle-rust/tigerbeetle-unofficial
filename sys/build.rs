@@ -20,7 +20,7 @@ const TIGERBEETLE_RELEASE: &str = "0.16.11";
 /// Commit hash of [TigerBeetle] release matching the specified [`TIGERBEETLE_RELEASE`].
 ///
 /// [TigerBeetle]: https://github.com/tigerbeetle/tigerbeetle
-const TIGERBEETLE_COMMIT: &str = "73bbc1a32ba2513e369764680350c099fe302285";
+const TIGERBEETLE_COMMIT: &str = "ea8a3e445fd1801d8f5ad1dbd6a9320861053912";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
