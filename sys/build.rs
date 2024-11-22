@@ -12,7 +12,13 @@ use std::{
 use quote::quote;
 use syn::visit::Visit;
 
+/// Version of the used [TigerBeetle] release.
+///
+/// [TigerBeetle]: https://github.com/tigerbeetle/tigerbeetle
 const TIGERBEETLE_RELEASE: &str = "0.16.11";
+
+/// Commit hash of the [`TIGERBEETLE_RELEASE`].
+const TIGERBEETLE_COMMIT: &str = "ea8a3e445fd1801d8f5ad1dbd6a9320861053912";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
@@ -107,6 +113,7 @@ fn main() {
         .arg(format!("-Dconfig-log-level={log_level}"))
         .arg(format!("-Dconfig-release={TIGERBEETLE_RELEASE}"))
         .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
+        .arg(format!("-Dgit-commit={TIGERBEETLE_COMMIT}"))
         .current_dir(&tigerbeetle_root)
         .env_remove("CI")
         .status()
