@@ -96,6 +96,7 @@ where
 
             // SAFETY: Unwrapping is OK here, because the returned `TB_STATUS` is actually an enum
             //         with positive discriminant undoubtedly fitting into `u32`.
+            #[allow(clippy::useless_conversion)] // not true for Windows
             if let Some(c) = NonZeroU32::new(status.try_into().unwrap_unchecked()) {
                 Err(NewClientError(c))
             } else {

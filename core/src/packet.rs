@@ -165,8 +165,8 @@ impl Operation {
 
     pub fn kind(self) -> OperationKind {
         if Self::CODE_RANGE.contains(&self.0) {
-            // SAFETY: We checked if it's in range right above
-            unsafe { std::mem::transmute(self.0) }
+            // SAFETY: We checked if it's in range right above.
+            unsafe { mem::transmute::<u8, OperationKind>(self.0) }
         } else {
             OperationKind::UnstableUncategorized
         }

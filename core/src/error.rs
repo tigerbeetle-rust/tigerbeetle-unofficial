@@ -69,8 +69,8 @@ impl NewClientError {
     pub fn kind(self) -> NewClientErrorKind {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above
-            unsafe { std::mem::transmute(code) }
+            // SAFETY: We checked if it's in range right above.
+            unsafe { mem::transmute::<u32, NewClientErrorKind>(code) }
         } else {
             NewClientErrorKind::UnstableUncategorized
         }
@@ -120,8 +120,8 @@ impl SendError {
     pub fn kind(self) -> SendErrorKind {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above
-            unsafe { std::mem::transmute(code) }
+            // SAFETY: We checked if it's in range right above.
+            unsafe { mem::transmute::<u8, SendErrorKind>(code) }
         } else {
             SendErrorKind::UnstableUncategorized
         }
@@ -171,8 +171,8 @@ impl CreateAccountError {
     pub fn kind(self) -> CreateAccountErrorKind {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above
-            unsafe { std::mem::transmute(code) }
+            // SAFETY: We checked if it's in range right above.
+            unsafe { mem::transmute::<u32, CreateAccountErrorKind>(code) }
         } else {
             CreateAccountErrorKind::UnstableUncategorized
         }
@@ -395,8 +395,8 @@ impl CreateTransferError {
     pub fn kind(self) -> CreateTransferErrorKind {
         let code = self.0.get();
         if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above
-            unsafe { std::mem::transmute(code) }
+            // SAFETY: We checked if it's in range right above.
+            unsafe { mem::transmute::<u32, CreateTransferErrorKind>(code) }
         } else {
             CreateTransferErrorKind::UnstableUncategorized
         }
