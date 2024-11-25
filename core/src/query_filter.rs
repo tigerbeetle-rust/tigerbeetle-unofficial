@@ -12,6 +12,22 @@ pub use sys::tb_query_filter_t as Raw;
 #[repr(transparent)]
 pub struct QueryFilter(Raw);
 
+impl fmt::Debug for QueryFilter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("QueryFilter")
+            .field("user_data_128", &self.0.user_data_128)
+            .field("user_data_64", &self.0.user_data_64)
+            .field("user_data_32", &self.0.user_data_32)
+            .field("ledger", &self.0.ledger)
+            .field("code", &self.0.code)
+            .field("timestamp_min", &self.timestamp_min())
+            .field("timestamp_max", &self.timestamp_max())
+            .field("limit", &self.0.limit)
+            .field("flags", &self.flags())
+            .finish_non_exhaustive()
+    }
+}
+
 impl QueryFilter {
     #[track_caller]
     pub fn new(limit: u32) -> Self {
@@ -141,22 +157,6 @@ impl QueryFilter {
     pub const fn with_flags(mut self, flags: Flags) -> Self {
         self.0.flags = flags.bits();
         self
-    }
-}
-
-impl fmt::Debug for QueryFilter {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("AccountFilter")
-            .field("user_data_128", &self.0.user_data_128)
-            .field("user_data_64", &self.0.user_data_64)
-            .field("user_data_32", &self.0.user_data_32)
-            .field("ledger", &self.0.ledger)
-            .field("code", &self.0.code)
-            .field("timestamp_min", &self.timestamp_min())
-            .field("timestamp_max", &self.timestamp_max())
-            .field("limit", &self.0.limit)
-            .field("flags", &self.flags())
-            .finish_non_exhaustive()
     }
 }
 
