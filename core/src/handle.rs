@@ -29,7 +29,7 @@ impl<'a, U> ClientHandle<'a, U>
 where
     U: UserDataPtr,
 {
-    pub fn packet(self, user_data: U, operation: impl Into<packet::Operation>) -> Packet<'a, U> {
+    pub fn packet(self, user_data: U, operation: packet::Operation) -> Packet<'a, U> {
         Packet::new(self, user_data, operation)
     }
 }

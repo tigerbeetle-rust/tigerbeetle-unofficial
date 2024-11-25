@@ -45,7 +45,7 @@ impl Client {
         Ok(self
             .submit(
                 accounts.into_as_bytes(),
-                core::OperationKind::CreateAccounts,
+                core::OperationKind::CreateAccounts.into(),
             )
             .await?
             .into_create_accounts()?)
@@ -62,7 +62,7 @@ impl Client {
         Ok(self
             .submit(
                 transfers.into_as_bytes(),
-                core::OperationKind::CreateTransfers,
+                core::OperationKind::CreateTransfers.into(),
             )
             .await?
             .into_create_transfers()?)
@@ -78,7 +78,7 @@ impl Client {
         let filter: SendOwnedSlice<account::Filter> = SendOwnedSlice::from_single(filter);
         self.submit(
             filter.into_as_bytes(),
-            core::OperationKind::GetAccountBalances,
+            core::OperationKind::GetAccountBalances.into(),
         )
         .await
         .map(Reply::into_get_account_balances)
@@ -91,7 +91,7 @@ impl Client {
         let filter: SendOwnedSlice<account::Filter> = SendOwnedSlice::from_single(filter);
         self.submit(
             filter.into_as_bytes(),
-            core::OperationKind::GetAccountTransfers,
+            core::OperationKind::GetAccountTransfers.into(),
         )
         .await
         .map(Reply::into_get_account_transfers)
@@ -105,9 +105,12 @@ impl Client {
         if ids.is_empty() {
             return Ok(Vec::new());
         }
-        self.submit(ids.into_as_bytes(), core::OperationKind::LookupAccounts)
-            .await
-            .map(Reply::into_lookup_accounts)
+        self.submit(
+            ids.into_as_bytes(),
+            core::OperationKind::LookupAccounts.into(),
+        )
+        .await
+        .map(Reply::into_lookup_accounts)
     }
 
     pub async fn lookup_transfers<T>(&self, ids: T) -> Result<Vec<Transfer>, SendError>
@@ -118,9 +121,12 @@ impl Client {
         if ids.is_empty() {
             return Ok(Vec::new());
         }
-        self.submit(ids.into_as_bytes(), core::OperationKind::LookupTransfers)
-            .await
-            .map(Reply::into_lookup_transfers)
+        self.submit(
+            ids.into_as_bytes(),
+            core::OperationKind::LookupTransfers.into(),
+        )
+        .await
+        .map(Reply::into_lookup_transfers)
     }
 
     pub async fn query_accounts<T>(&self, filter: T) -> Result<Vec<Account>, SendError>
@@ -128,9 +134,12 @@ impl Client {
         T: RawConstPtr<Target = QueryFilter> + Send + 'static,
     {
         let filter: SendOwnedSlice<QueryFilter> = SendOwnedSlice::from_single(filter);
-        self.submit(filter.into_as_bytes(), core::OperationKind::QueryAccounts)
-            .await
-            .map(Reply::into_query_accounts)
+        self.submit(
+            filter.into_as_bytes(),
+            core::OperationKind::QueryAccounts.into(),
+        )
+        .await
+        .map(Reply::into_query_accounts)
     }
 
     pub async fn query_transfers<T>(&self, filter: T) -> Result<Vec<Transfer>, SendError>
@@ -138,15 +147,18 @@ impl Client {
         T: RawConstPtr<Target = QueryFilter> + Send + 'static,
     {
         let filter: SendOwnedSlice<QueryFilter> = SendOwnedSlice::from_single(filter);
-        self.submit(filter.into_as_bytes(), core::OperationKind::QueryTransfers)
-            .await
-            .map(Reply::into_query_transfers)
+        self.submit(
+            filter.into_as_bytes(),
+            core::OperationKind::QueryTransfers.into(),
+        )
+        .await
+        .map(Reply::into_query_transfers)
     }
 
     async fn submit(
         &self,
         data: SendAsBytesOwnedSlice,
-        operation: impl Into<core::Operation>,
+        operation: core::Operation,
     ) -> Result<Reply, SendError> {
         let (reply_sender, reply_receiver) = oneshot::channel();
         let user_data = Box::new(UserData { reply_sender, data });
