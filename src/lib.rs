@@ -128,12 +128,9 @@ impl Client {
         T: RawConstPtr<Target = QueryFilter> + Send + 'static,
     {
         let filter: SendOwnedSlice<QueryFilter> = SendOwnedSlice::from_single(filter);
-        self.submit(
-            filter.into_as_bytes(),
-            core::OperationKind::QueryAccounts.into(),
-        )
-        .await
-        .map(Reply::into_query_accounts)
+        self.submit(filter.into_as_bytes(), core::OperationKind::QueryAccounts)
+            .await
+            .map(Reply::into_query_accounts)
     }
 
     pub async fn query_transfers<T>(&self, filter: T) -> Result<Vec<Transfer>, SendError>
@@ -141,12 +138,9 @@ impl Client {
         T: RawConstPtr<Target = QueryFilter> + Send + 'static,
     {
         let filter: SendOwnedSlice<QueryFilter> = SendOwnedSlice::from_single(filter);
-        self.submit(
-            filter.into_as_bytes(),
-            core::OperationKind::QueryTransfers.into(),
-        )
-        .await
-        .map(Reply::into_query_transfers)
+        self.submit(filter.into_as_bytes(), core::OperationKind::QueryTransfers)
+            .await
+            .map(Reply::into_query_transfers)
     }
 
     async fn submit(
