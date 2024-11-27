@@ -134,7 +134,7 @@ where
     pub fn packet(
         &self,
         user_data: F::UserDataPtr,
-        operation: packet::Operation,
+        operation: impl Into<packet::Operation>,
     ) -> Packet<'_, F::UserDataPtr> {
         self.handle().packet(user_data, operation)
     }
