@@ -438,8 +438,9 @@ impl bindgen::callbacks::ParseCallbacks for TigerbeetleCallbacks {
                 | "tb_account_balance_t"
                 | "tb_account_filter_t"
                 | "tb_create_accounts_result_t"
-                | "tb_transfer_t"
-                | "tb_create_transfers_result_t",
+                | "tb_create_transfers_result_t"
+                | "tb_query_filter_t"
+                | "tb_transfer_t",
             ..
         } = info
         {

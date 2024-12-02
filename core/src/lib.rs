@@ -3,6 +3,7 @@ mod callback;
 pub mod error;
 mod handle;
 mod packet;
+pub mod query_filter;
 pub mod transfer;
 pub mod util;
 
@@ -14,6 +15,7 @@ pub use account::Account;
 pub use callback::*;
 pub use handle::ClientHandle;
 pub use packet::*;
+pub use query_filter::QueryFilter;
 pub use transfer::Transfer;
 
 type OnCompletionRawFn =
