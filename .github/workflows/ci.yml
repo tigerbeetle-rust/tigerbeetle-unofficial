@@ -161,7 +161,11 @@ jobs:
   release-github:
     name: release (GitHub)
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-    needs: ["clippy", "msrv", "rustfmt", "test"]
+    needs:
+      - clippy
+      - msrv
+      - rustfmt
+      - test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -175,11 +179,10 @@ jobs:
           test "${{ steps.release.outputs.version }}" \
             == "$(grep -m1 -e '^version = "' Cargo.toml | cut -d'"' -f2)"
 
-      # TODO: Uncomment once CHANGELOG is added.
-      #- name: Parse CHANGELOG link
-      #  id: changelog
-      #  run: echo "link=${{ github.server_url }}/${{ github.repository }}/blob/v${{ steps.release.outputs.version }}/CHANGELOG.md#$(sed -n '/^## \[${{ steps.release.outputs.version }}\]/{s/^## \[\(.*\)\][^0-9]*\([0-9].*\)/\1--\2/;s/[^0-9a-z-]*//g;p;}' CHANGELOG.md)"
-      #       >> $GITHUB_OUTPUT
+      - name: Parse CHANGELOG link
+        id: changelog
+        run: echo "link=${{ github.server_url }}/${{ github.repository }}/blob/v${{ steps.release.outputs.version }}/CHANGELOG.md#$(sed -n '/^## \[${{ steps.release.outputs.version }}\]/{s/^## \[\(.*\)\][^0-9]*\([0-9].*\)/\1--\2/;s/[^0-9a-z-]*//g;p;}' CHANGELOG.md)"
+             >> $GITHUB_OUTPUT
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
@@ -187,6 +190,5 @@ jobs:
           name: ${{ steps.release.outputs.version }}
           body: |
             [API docs](https://docs.rs/tigerbeetle-unofficial/${{ steps.release.outputs.version }})
-          # TODO: Uncomment once CHANGELOG is added.
-          # [Changelog](${{ steps.changelog.outputs.link }})
+            [Changelog](${{ steps.changelog.outputs.link }})
           prerelease: ${{ contains(steps.release.outputs.version, '-') }}
