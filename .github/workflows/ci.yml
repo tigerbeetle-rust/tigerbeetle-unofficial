@@ -146,7 +146,10 @@ jobs:
           toolchain: stable
           components: rustfmt
 
-      - run: cargo publish -p tigerbeetle-unofficial-sys
+      # TODO: Investigate how to fix this.
+      # `--no-verify` is required because the source directory is modified by `build.rs` (`zig/download.sh` running)
+      # during `cargo publish`, which isn't happy about (build scripts should not modify anything outside of `OUT_DIR`).
+      - run: cargo publish -p tigerbeetle-unofficial-sys --no-verify
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATESIO_TOKEN }}
 
