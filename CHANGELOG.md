@@ -6,6 +6,19 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## master
+
+[Diff](/../../compare/v0.5.0%2B0.16.11...master) | [Milestone](/../../milestone/2)
+
+### BC Breaks
+
+- Bumped up [MSRV] to 1.82 due to used dependencies. ([#36])
+
+[#36]: /../../pull/36
+
+
+
+
 ## [0.5.0+0.16.11] · 2024-12-02
 [0.5.0+0.16.11]: /../../tree/v0.5.0%2B0.16.11
 
@@ -75,4 +88,5 @@ See [Git log](/../../compare/a4994b2da3914352b8d64adae0535189b4bc7b27...v0.3.0%2
 [`tb_client` C library]: https://github.com/tigerbeetle/tigerbeetle/tree/main/src/clients/c
 [Docker]: https://www.docker.com
 [Git]: https://git-scm.com
+[MSRV]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-rust-version-field
 [Semantic Versioning 2.0.0]: https://semver.org
