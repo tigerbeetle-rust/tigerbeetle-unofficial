@@ -151,8 +151,8 @@ fn main() {
     };
 
     // TODO: Detect automatically, without bringing in heavy dependencies like `cargo-metadata`.
-    // MSRV: 1.82.0
-    let msrv = bindgen::RustTarget::stable(82, 0)
+    // MSRV: 1.78.0
+    let msrv = bindgen::RustTarget::stable(78, 0)
         .unwrap_or_else(|e| panic!("invalid MSRV specified for `bindgen`: {e}"));
 
     let bindings = bindgen::Builder::default()

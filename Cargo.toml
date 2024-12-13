@@ -27,6 +27,6 @@ members = ["sys", "core"]
 [workspace.package]
 version = "0.5.0+0.16.11"
 authors = ["Daria Sukhonina <dariasukhonina@gmail.com>"]
-rust-version = "1.82"
+rust-version = "1.78"
 repository = "https://github.com/tigerbeetle-rust/tigerbeetle-unofficial"
 license = "MIT OR Apache-2.0"

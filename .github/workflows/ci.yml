@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        msrv: ["1.82.0"]
+        msrv: ["1.78.0"]
         os: ["ubuntu", "macOS", "windows"]
     runs-on: ${{ matrix.os }}-latest
     steps:
