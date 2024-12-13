@@ -150,7 +150,13 @@ fn main() {
         fs::copy("src/wrapper.h", &wrapper).expect("copying `wrapper.h`");
     };
 
+    // TODO: Detect automatically, without bringing in heavy dependencies like `cargo-metadata`.
+    // MSRV: 1.82.0
+    let msrv = bindgen::RustTarget::stable(82, 0)
+        .unwrap_or_else(|e| panic!("invalid MSRV specified for `bindgen`: {e}"));
+
     let bindings = bindgen::Builder::default()
+        .rust_target(msrv)
         .header(
             wrapper
                 .to_str()
