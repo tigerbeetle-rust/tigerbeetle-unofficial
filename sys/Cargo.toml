@@ -18,6 +18,6 @@ bytemuck = { version = "1.19", features = ["derive", "min_const_generics"] }
 
 [build-dependencies]
 bindgen = "0.71"
-proc-macro2 = { version = "1.0", default-features = false }
+proc-macro2 = { version = "1.0.80", default-features = false }
 quote = { version = "1.0", default-features = false }
 syn = { version = "2.0", features = ["parsing", "full", "printing", "visit"], default-features = false }
