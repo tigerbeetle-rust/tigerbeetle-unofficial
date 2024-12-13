@@ -1,2 +1,5 @@
 /target/
 /Cargo.lock
+
+# Backup files produced by CLI tools.
+*.bk
