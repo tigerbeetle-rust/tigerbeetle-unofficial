@@ -17,16 +17,16 @@ fi
 
 echo "version=$newVersion"
 echo "commit=$newCommit"
-if [ ! -z "$GITHUB_OUTPUT" ]; then
+if [[ ! -z "$GITHUB_OUTPUT" ]]; then
   echo "version=$newVersion" >> $GITHUB_OUTPUT
   echo "commit=$newCommit" >> $GITHUB_OUTPUT
 fi
 
-if [ -z $(echo "$latestReleaseInfo" | jq -r 'select(.draft == false)') ]; then
+if [[ -z $(echo "$latestReleaseInfo" | jq -r 'select(.draft == false)') ]]; then
   echo "Latest TigerBeetle $newVersion release is in draft yet. Skipping..."
   exit 0
 fi
-if [ -z $(echo "$latestReleaseInfo" | jq -r 'select(.prerelease == false)') ]; then
+if [[ -z $(echo "$latestReleaseInfo" | jq -r 'select(.prerelease == false)') ]]; then
   echo "Latest TigerBeetle $newVersion version is pre-release. Skipping..."
   exit 0
 fi

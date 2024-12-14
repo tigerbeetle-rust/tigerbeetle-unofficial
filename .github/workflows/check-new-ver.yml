@@ -25,3 +25,4 @@ jobs:
             enhancement
             k::dependencies
             k::version
+            zig
