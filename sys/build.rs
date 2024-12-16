@@ -54,10 +54,14 @@ const SCRIPT_EXTENSION: &str = "bat";
 fn main() {
     assert!(env!("CARGO_PKG_VERSION").ends_with(TIGERBEETLE_RELEASE));
     let out_dir: PathBuf = env::var("OUT_DIR").unwrap().into();
-    let debug: bool = env::var("DEBUG").unwrap().parse().unwrap();
+    let debug: bool = env::var("TB_CLIENT_DEBUG").map_or_else(
+        |_| env::var("DEBUG").unwrap().parse().unwrap(),
+        |s| s.parse().unwrap(),
+    );
     let target = env::var("TARGET").unwrap();
 
     println!("cargo:rerun-if-env-changed=DOCS_RS");
+    println!("cargo:rerun-if-env-changed=TB_CLIENT_DEBUG");
     println!("cargo:rerun-if-changed=src/wrapper.h");
 
     let wrapper;
