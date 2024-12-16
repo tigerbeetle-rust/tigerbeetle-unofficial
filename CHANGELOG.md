@@ -6,6 +6,27 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.6.0+0.16.17] · unreleased
+[0.6.0+0.16.17]: /../../tree/v0.6.0%2B0.16.17
+
+[Diff](/../../compare/v0.5.0%2B0.16.11...v0.6.0%2B0.16.17) | [Milestone](/../../milestone/2)
+
+### BC Breaks
+
+- Upgraded [`tb_client` C library] to [0.16.17 version][tb-0.16.17]: ([#38])
+    - Made `cluster_id` as `&[u8; 16]` in `core::Client::with_callback()` and `core::Client::with_callback_unchecked()` constructors. ([tigerbeetle/tigerbeetle#2534])
+    - Replaced `payload` argument with `reply` in `core::Callbacks::on_competion()` to provide cluster `timestamp` of `Reply` generation. ([tigerbeetle/tigerbeetle#2481])
+    - Removed `TIGERBEETLE_LOG_LEVEL` env var, because log level can be set in runtime now. ([tigerbeetle/tigerbeetle#2539])
+
+[#38]: /../../pull/38
+[tb-0.16.17]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.17/CHANGELOG.md#tigerbeetle-01617
+[tigerbeetle/tigerbeetle#2534]: https://github.com/tigerbeetle/tigerbeetle/pull/2534
+[tigerbeetle/tigerbeetle#2539]: https://github.com/tigerbeetle/tigerbeetle/pull/2539
+[tigerbeetle/tigerbeetle#2481]: https://github.com/tigerbeetle/tigerbeetle/pull/2481
+
+
+
+
 ## [0.5.0+0.16.11] · 2024-12-02
 [0.5.0+0.16.11]: /../../tree/v0.5.0%2B0.16.11
 
@@ -13,7 +34,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 ### BC Breaks
 
-- Upgraded [`tb_client` C library] to [0.16.1 version][tb-0.16.1]. ([#24], [#19], [#18])
+- Upgraded [`tb_client` C library] to [0.16.11 version][tb-0.16.11]. ([#24], [#19], [#18])
 - Removed `concurrency_max` argument from `Client::new()`, `Client::with_callback()` and `Client::with_callback_unchecked()` methods. ([#24], [#19])
 - Replaced `Client::acquire()` and `ClientHandle::acquire()` methods with `Client::packet()` and `Packet::new()`. ([#24], [#19], [#34])
 - Removed `error::AcquirePacketError` type. ([#24], [#19])
@@ -35,7 +56,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 [#24]: /../../pull/24
 [#26]: /../../pull/26
 [#34]: /../../pull/34
-[tb-0.16.1]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.11/CHANGELOG.md#tigerbeetle-01611
+[tb-0.16.11]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.11/CHANGELOG.md#tigerbeetle-01611
 
 
 
