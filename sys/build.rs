@@ -56,7 +56,6 @@ fn main() {
     let out_dir: PathBuf = env::var("OUT_DIR").unwrap().into();
     let debug: bool = env::var("DEBUG").unwrap().parse().unwrap();
     let target = env::var("TARGET").unwrap();
-    let log_level = env::var("TIGERBEETLE_LOG_LEVEL").unwrap_or_else(|_| "info".to_owned());
 
     println!("cargo:rerun-if-env-changed=DOCS_RS");
     println!("cargo:rerun-if-changed=src/wrapper.h");
@@ -110,7 +109,6 @@ fn main() {
         .arg("clients:c")
         .args((!debug).then_some("-Drelease"))
         .arg(format!("-Dtarget={tigerbeetle_target}"))
-        .arg(format!("-Dconfig-log-level={log_level}"))
         .arg(format!("-Dconfig-release={TIGERBEETLE_RELEASE}"))
         .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
         .arg(format!("-Dgit-commit={TIGERBEETLE_COMMIT}"))
