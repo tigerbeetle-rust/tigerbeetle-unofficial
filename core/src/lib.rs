@@ -19,7 +19,7 @@ pub use query_filter::QueryFilter;
 pub use transfer::Transfer;
 
 type OnCompletionRawFn =
-    unsafe extern "C" fn(usize, sys::tb_client_t, *mut sys::tb_packet_t, *const u8, u32);
+    unsafe extern "C" fn(usize, sys::tb_client_t, *mut sys::tb_packet_t, u64, *const u8, u32);
 
 pub struct Client<F>
 where
