@@ -38,7 +38,7 @@ where
     F: CallbacksPtr,
 {
     pub fn with_callback<A>(
-        cluster_id: u128,
+        cluster_id: &[u8; 16],
         address: A,
         on_completion: F,
     ) -> Result<Self, NewClientError>
@@ -64,7 +64,7 @@ where
     /// for client's use. If client is dropped, you can safely invalidate these
     /// things.
     pub unsafe fn with_callback_unchecked<A>(
-        cluster_id: u128,
+        cluster_id: &[u8; 16],
         address: A,
         on_completion: F,
     ) -> Result<Self, NewClientError>
@@ -76,7 +76,7 @@ where
         let on_completion_ctx = sptr::Strict::expose_addr(on_completion);
 
         unsafe fn raw_with_callback(
-            cluster_id: u128,
+            cluster_id: &[u8; 16],
             address: &[u8],
             on_completion_ctx: usize,
             on_completion_fn: OnCompletionRawFn,
@@ -84,7 +84,7 @@ where
             let mut raw = mem::zeroed();
             let status = sys::tb_client_init(
                 &mut raw,
-                cluster_id,
+                cluster_id.as_ptr(),
                 address.as_ptr().cast(),
                 address
                     .len()

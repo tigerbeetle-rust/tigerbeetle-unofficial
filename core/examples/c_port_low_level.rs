@@ -35,7 +35,8 @@ fn main() {
     println!("Connecting...");
     let address = std::env::var("TB_ADDRESS");
     let address = address.as_deref().unwrap_or("3000");
-    let client = tb::Client::with_callback(0, address.as_bytes(), &Callbacks)
+    let cluster_id = 0_u128.to_ne_bytes();
+    let client = tb::Client::with_callback(&cluster_id, address.as_bytes(), &Callbacks)
         .expect("Failed to initialize tigerbeetle client");
 
     static CTX: CompletionContext = CompletionContext::new();
