@@ -1,8 +1,10 @@
 #![forbid(unsafe_code)]
 
+mod id;
 mod reply;
 
 use error::NewClientError;
+pub use id::id;
 use reply::Reply;
 use tokio::sync::oneshot;
 
