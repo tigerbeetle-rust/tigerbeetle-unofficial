@@ -6,6 +6,7 @@ on:
 
 jobs:
   check:
+    if: ${{ false }} # TODO: Re-enable once #38 is merged.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,12 +14,21 @@ jobs:
       - run: .github/upgrade-ver.sh
         id: new
 
+      - name: Check whether Pull Request branch exists already
+        uses: GuillaumeFalourd/branch-exists@v1.1
+        id: pr-branch
+        with:
+          branch: upgrade-to-tigerbeetle-${{ steps.new.outputs.version }}
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
           commit-message: Upgrade to ${{ steps.new.outputs.version }} TigerBeetle
-          branch: upgrade-to-${{ steps.new.outputs.version }}
+          branch: upgrade-to-tigerbeetle-${{ steps.new.outputs.version }}
           delete-branch: true
+          draft: true
+          sign-commits: true
+          signoff: true
           title: Upgrade to ${{ steps.new.outputs.version }} TigerBeetle
           body: Upgrade to new ${{ steps.new.outputs.version }} version of TigerBeetle.
           labels: |
@@ -26,3 +36,4 @@ jobs:
             k::dependencies
             k::version
             zig
+        if: ${{ steps.pr-branch.outputs.exists == 'false' }}
