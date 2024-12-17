@@ -6,7 +6,6 @@ on:
 
 jobs:
   check:
-    if: ${{ false }} # TODO: Re-enable once #38 is merged.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
