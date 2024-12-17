@@ -30,7 +30,7 @@ impl Client {
         A: AsRef<[u8]>,
     {
         Ok(Client {
-            inner: core::Client::with_callback(&cluster_id.to_ne_bytes(), address, &Callbacks)?,
+            inner: core::Client::with_callback(cluster_id, address, &Callbacks)?,
         })
     }
 

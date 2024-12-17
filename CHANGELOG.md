@@ -14,7 +14,6 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 ### BC Breaks
 
 - Upgraded [`tb_client` C library] to [0.16.17 version][tb-0.16.17]: ([#38])
-    - Made `cluster_id` as `&[u8; 16]` in `core::Client::with_callback()` and `core::Client::with_callback_unchecked()` constructors. ([tigerbeetle/tigerbeetle#2534])
     - Replaced `payload` argument with `reply` in `core::Callbacks::on_competion()` to provide cluster `timestamp` of `Reply` generation. ([tigerbeetle/tigerbeetle#2481])
     - Replaced `TIGERBEETLE_LOG_LEVEL` build time env var with `TB_CLIENT_DEBUG` one, since `config-log-level` build option was removed, but no FFI yet added for configuring runtime log filtering. ([tigerbeetle/tigerbeetle#2539])
 
@@ -24,7 +23,6 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 [#38]: /../../pull/38
 [tb-0.16.17]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.17/CHANGELOG.md#tigerbeetle-01617
-[tigerbeetle/tigerbeetle#2534]: https://github.com/tigerbeetle/tigerbeetle/pull/2534
 [tigerbeetle/tigerbeetle#2539]: https://github.com/tigerbeetle/tigerbeetle/pull/2539
 [tigerbeetle/tigerbeetle#2481]: https://github.com/tigerbeetle/tigerbeetle/pull/2481
 [tigerbeetle/tigerbeetle#2484]: https://github.com/tigerbeetle/tigerbeetle/pull/2484
