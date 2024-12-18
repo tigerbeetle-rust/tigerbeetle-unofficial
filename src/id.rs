@@ -1,3 +1,7 @@
+//! [TigerBeetle Time-Based Identifier][0] implementation.
+//!
+//! [0]: https://docs.tigerbeetle.com/coding/data-modeling#tigerbeetle-time-based-identifiers-recommended
+
 use std::{sync::Mutex, time::UNIX_EPOCH};
 
 /// Returns the current timestamp in milliseconds since [`UNIX_EPOCH`].

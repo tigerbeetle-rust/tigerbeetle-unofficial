@@ -6,6 +6,20 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [master] · unreleased
+[master]: /../../tree/v0.5.0%2B0.16.11
+
+[Diff](/../../compare/v0.5.0%2B0.16.11...master) | [Milestone](/../../milestone/2)
+
+### Added
+
+- `id()` function generating [TigerBeetle Time-Based Identifiers](https://docs.tigerbeetle.com/coding/data-modeling#tigerbeetle-time-based-identifiers-recommended). ([#39])
+
+[#39]: /../../pull/39
+
+
+
+
 ## [0.5.0+0.16.11] · 2024-12-02
 [0.5.0+0.16.11]: /../../tree/v0.5.0%2B0.16.11
 

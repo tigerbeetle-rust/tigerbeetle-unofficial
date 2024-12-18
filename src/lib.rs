@@ -4,7 +4,6 @@ mod id;
 mod reply;
 
 use error::NewClientError;
-pub use id::id;
 use reply::Reply;
 use tokio::sync::oneshot;
 
@@ -14,6 +13,8 @@ use core::{
 };
 
 pub use core::{self, account, error, transfer, Account, Packet, QueryFilter, Transfer};
+
+pub use self::id::id;
 
 pub struct Client {
     inner: core::Client<&'static Callbacks>,
