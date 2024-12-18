@@ -39,6 +39,7 @@ mod callbacks_ptr {
 }
 
 /// Reply returned by [`Callbacks`].
+#[non_exhaustive]
 pub struct Reply<'a> {
     /// Returned raw payload of this [`Reply`] as bytes.
     pub payload: &'a [u8],
