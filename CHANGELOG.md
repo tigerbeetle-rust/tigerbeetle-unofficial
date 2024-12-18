@@ -6,7 +6,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
-## [0.6.0+0.16.17] · unreleased
+## [0.6.0+0.16.17] · 2024-12-19
 [0.6.0+0.16.17]: /../../tree/v0.6.0%2B0.16.17
 
 [Diff](/../../compare/v0.5.0%2B0.16.11...v0.6.0%2B0.16.17) | [Milestone](/../../milestone/2)
@@ -20,7 +20,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 ### Added
 
 - `SendErrorKind::ClientEvicted` variant. ([#38], [tigerbeetle/tigerbeetle#2484])
-- `id()` function generating [TigerBeetle Time-Based Identifiers](https://docs.tigerbeetle.com/coding/data-modeling#tigerbeetle-time-based-identifiers-recommended). ([#39])
+- `id()` function generating [TigerBeetle Time-Based Identifiers](https://github.com/tigerbeetle/tigerbeetle/blob/0.16.17/docs/coding/data-modeling.md#tigerbeetle-time-based-identifiers-recommended). ([#39])
 
 [#38]: /../../pull/38
 [#39]: /../../pull/39
