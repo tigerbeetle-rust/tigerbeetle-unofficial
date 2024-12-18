@@ -20,8 +20,10 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 ### Added
 
 - `SendErrorKind::ClientEvicted` variant. ([#38], [tigerbeetle/tigerbeetle#2484])
+- `id()` function generating [TigerBeetle Time-Based Identifiers](https://docs.tigerbeetle.com/coding/data-modeling#tigerbeetle-time-based-identifiers-recommended). ([#39])
 
 [#38]: /../../pull/38
+[#39]: /../../pull/39
 [tb-0.16.17]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.17/CHANGELOG.md#tigerbeetle-01617
 [tigerbeetle/tigerbeetle#2539]: https://github.com/tigerbeetle/tigerbeetle/pull/2539
 [tigerbeetle/tigerbeetle#2481]: https://github.com/tigerbeetle/tigerbeetle/pull/2481
