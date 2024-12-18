@@ -75,4 +75,5 @@ See [Git log](/../../compare/a4994b2da3914352b8d64adae0535189b4bc7b27...v0.3.0%2
 [`tb_client` C library]: https://github.com/tigerbeetle/tigerbeetle/tree/main/src/clients/c
 [Docker]: https://www.docker.com
 [Git]: https://git-scm.com
+[MSRV]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-rust-version-field
 [Semantic Versioning 2.0.0]: https://semver.org
