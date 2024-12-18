@@ -260,16 +260,20 @@ impl UserData {
 impl tb::Callbacks for Callbacks {
     type UserDataPtr = Box<UserData>;
 
-    fn on_completion(&self, packet: tb::Packet<'_, Self::UserDataPtr>, payload: &[u8]) {
+    fn on_completion(
+        &self,
+        packet: tb::Packet<'_, Self::UserDataPtr>,
+        reply: Option<tb::Reply<'_>>,
+    ) {
         let status = packet.status();
         let user_data = packet.into_user_data();
         let ctx = user_data.ctx;
-        {
+        if let Some(reply) = reply {
             let mut state = ctx.state.lock().unwrap();
-            state.reply[..payload.len()].copy_from_slice(payload);
-            state.size = payload.len();
-            ctx.cv.notify_one();
+            state.reply[..reply.payload.len()].copy_from_slice(reply.payload);
+            state.size = reply.payload.len();
         }
+        ctx.cv.notify_one();
         user_data.free(status);
     }
 }

@@ -1,4 +1,9 @@
-use std::{marker::PhantomData, panic::catch_unwind, slice};
+use std::{
+    marker::PhantomData,
+    panic::catch_unwind,
+    slice,
+    time::{Duration, SystemTime},
+};
 
 use crate::util::RawConstPtr;
 
@@ -33,16 +38,30 @@ mod callbacks_ptr {
     }
 }
 
-// `Self: Sync` because `F` is called from some zig thread.
+/// Reply returned by [`Callbacks`].
+#[non_exhaustive]
+pub struct Reply<'a> {
+    /// Returned raw payload of this [`Reply`] as bytes.
+    pub payload: &'a [u8],
+
+    /// Cluster timestamp when the reply was generated.
+    pub timestamp: SystemTime,
+}
+
+// `Self: Sync` because `F` is called from some Zig thread.
 pub trait Callbacks: Sync {
     type UserDataPtr: UserDataPtr;
 
-    fn on_completion(&self, packet: Packet<'_, Self::UserDataPtr>, payload: &[u8]);
+    /// Calls back once a [`Packet`] is submitted and processed.
+    ///
+    /// [`None`] `reply` means that submitting the [`Packet`] failed (check the [`Packet::status`]
+    /// for the reason).
+    fn on_completion(&self, packet: Packet<'_, Self::UserDataPtr>, reply: Option<Reply<'_>>);
 }
 
 pub struct CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, &[u8]) + Sync,
+    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     inner: F,
@@ -51,7 +70,7 @@ where
 
 impl<F, U> CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, &[u8]) + Sync,
+    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     pub const fn new(inner: F) -> Self
@@ -68,19 +87,19 @@ where
 
 impl<F, U> Callbacks for CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, &[u8]) + Sync,
+    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     type UserDataPtr = U;
 
-    fn on_completion(&self, packet: Packet<'_, Self::UserDataPtr>, payload: &[u8]) {
-        (self.inner)(packet, payload)
+    fn on_completion(&self, packet: Packet<'_, Self::UserDataPtr>, reply: Option<Reply<'_>>) {
+        (self.inner)(packet, reply)
     }
 }
 
 pub const fn on_completion_fn<U, F>(f: F) -> CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, &[u8]) + Sync,
+    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     CallbacksFn::new(f)
@@ -90,6 +109,7 @@ pub(crate) unsafe extern "C" fn on_completion_raw_fn<F>(
     ctx: usize,
     raw_client: sys::tb_client_t,
     packet: *mut sys::tb_packet_t,
+    timestamp: u64,
     payload: *const u8,
     payload_size: u32,
 ) where
@@ -97,9 +117,10 @@ pub(crate) unsafe extern "C" fn on_completion_raw_fn<F>(
 {
     let _ = catch_unwind(|| {
         let cb = &*sptr::from_exposed_addr::<F>(ctx);
-        let payload_size = payload_size
-                    .try_into()
-                    .expect("At the start of calling on_completion callback: unable to convert payload_size from u32 into usize");
+        let payload_size = payload_size.try_into().expect(
+            "at the start of calling `on_completion` callback: \
+             unable to convert `payload_size` from `u32` into `usize`",
+        );
         let payload = if payload_size != 0 {
             slice::from_raw_parts(payload, payload_size)
         } else {
@@ -112,7 +133,8 @@ pub(crate) unsafe extern "C" fn on_completion_raw_fn<F>(
                 on_completion: cb,
             },
         };
-        cb.on_completion(packet, payload)
+        let timestamp = SystemTime::UNIX_EPOCH + Duration::from_nanos(timestamp);
+        cb.on_completion(packet, Some(Reply { payload, timestamp }))
     });
 }
 

@@ -161,13 +161,21 @@ impl Client {
 impl core::Callbacks for Callbacks {
     type UserDataPtr = Box<UserData>;
 
-    fn on_completion(&self, packet: core::Packet<'_, Self::UserDataPtr>, payload: &[u8]) {
+    fn on_completion(
+        &self,
+        packet: core::Packet<'_, Self::UserDataPtr>,
+        reply: Option<core::Reply<'_>>,
+    ) {
         let status = packet.status();
         let operation = packet.operation();
         let user_data = packet.into_user_data();
         user_data
             .reply_sender
-            .send(status.map(|()| Reply::copy_from_reply(operation.kind(), payload)))
+            .send(status.map(|()| {
+                // PANIC: Unwrapping is OK here, because the `reply` can only be `None` when the
+                //        `status` is `Err`.
+                Reply::copy_from_reply(operation.kind(), reply.unwrap().payload)
+            }))
             .unwrap_or_else(|_| panic!("Unexpected: reply receiver is already dropped"));
     }
 }

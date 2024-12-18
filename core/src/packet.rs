@@ -57,7 +57,7 @@ where
         let data = self.user_data().data();
         let Ok(data_size) = data.len().try_into() else {
             self.set_status(Err(SendErrorKind::TooMuchData.into()));
-            self.handle.on_completion.on_completion(self, &[]);
+            self.handle.on_completion.on_completion(self, None);
             return;
         };
         let data = data.as_ptr();
