@@ -6,6 +6,20 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [master] · unreleased
+[master]: /../../tree/master
+
+[Diff](/../../compare/v0.6.1%2B0.16.19...master) | [Milestone](/../../milestone/4)
+
+### BC Breaks
+
+- Removed MIT license. ([#41]) 
+
+[#41]: /../../pull/41
+
+
+
+
 ## [0.6.1+0.16.19] · 2024-12-25
 [0.6.1+0.16.19]: /../../tree/v0.6.1%2B0.16.19
 
