@@ -16,57 +16,6 @@ pub use sys::{
 #[derive(Clone, Copy)]
 pub struct NewClientError(pub(crate) NonZeroU32);
 
-#[derive(Clone, Copy)]
-pub struct SendError(pub(crate) NonZeroU8);
-
-#[derive(Clone, Copy)]
-pub struct CreateAccountError(pub(crate) NonZeroU32);
-
-/// Type indicating individual api error for account creation.
-///
-/// Safe to `transpose` from [`RawCreateAccountsIndividualApiResult`]
-/// if [`Self::from_raw_result_unchecked`] would also be safe.
-//
-// INVARIANT: self.0.result must not be zero
-#[derive(Clone, Copy)]
-#[repr(transparent)]
-pub struct CreateAccountsIndividualApiError(RawCreateAccountsIndividualApiResult);
-
-// INVARIANT: self.0 must not be empty
-#[derive(Debug)]
-pub struct CreateAccountsApiError(Vec<CreateAccountsIndividualApiError>);
-
-#[non_exhaustive]
-#[derive(Debug)]
-pub enum CreateAccountsError {
-    Send(SendError),
-    Api(CreateAccountsApiError),
-}
-
-#[derive(Clone, Copy)]
-pub struct CreateTransferError(pub(crate) NonZeroU32);
-
-/// Type indicating individual api error for account creation.
-///
-/// Safe to `transpose` from [`RawCreateTransfersIndividualApiResult`]
-/// if [`Self::from_raw_result_unchecked`] would also be safe.
-//
-// INVARIANT: self.0.result must not be zero
-#[derive(Clone, Copy)]
-#[repr(transparent)]
-pub struct CreateTransfersIndividualApiError(RawCreateTransfersIndividualApiResult);
-
-// INVARIANT: self.0 must not be empty
-#[derive(Debug)]
-pub struct CreateTransfersApiError(Vec<CreateTransfersIndividualApiError>);
-
-#[non_exhaustive]
-#[derive(Debug)]
-pub enum CreateTransfersError {
-    Send(SendError),
-    Api(CreateTransfersApiError),
-}
-
 impl NewClientError {
     const CODE_RANGE: std::ops::RangeInclusive<u32> =
         sys_safe::MIN_STATUS_ERROR_CODE..=sys_safe::MAX_STATUS_ERROR_CODE;
@@ -91,7 +40,7 @@ impl fmt::Debug for NewClientError {
         let mut d = f.debug_tuple("NewClientError");
         let kind = self.kind();
         if matches!(kind, NewClientErrorKind::UnstableUncategorized) {
-            let code = self.code().get();
+            let code = self.code();
             d.field(&code);
         } else {
             d.field(&kind);
@@ -102,7 +51,18 @@ impl fmt::Debug for NewClientError {
 
 impl fmt::Display for NewClientError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self.kind())
+        use NewClientErrorKind as K;
+
+        match self.kind() {
+            K::AddressInvalid => "Replica addresses format is invalid",
+            K::AddressLimitExceeded => "Replica addresses limit exceeded",
+            K::NetworkSubsystem => "Internal client had unexpected networking issues",
+            K::OutOfMemory => "Internal client ran out of memory",
+            K::SystemResources => "Internal client ran out of system resources",
+            K::Unexpected => "Unexpected internal error",
+            _ => return write!(f, "Unknown error status: {}", self.code()),
+        }
+        .fmt(f)
     }
 }
 
@@ -122,6 +82,9 @@ impl From<NewClientErrorKind> for NewClientError {
         this
     }
 }
+
+#[derive(Clone, Copy)]
+pub struct SendError(pub(crate) NonZeroU8);
 
 impl SendError {
     const CODE_RANGE: std::ops::RangeInclusive<u8> =
@@ -147,7 +110,7 @@ impl fmt::Debug for SendError {
         let mut d = f.debug_tuple("SendError");
         let kind = self.kind();
         if matches!(kind, SendErrorKind::UnstableUncategorized) {
-            let code = self.code().get();
+            let code = self.code();
             d.field(&code);
         } else {
             d.field(&kind);
@@ -158,7 +121,19 @@ impl fmt::Debug for SendError {
 
 impl fmt::Display for SendError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "error occurred while sending packets")
+        use SendErrorKind as K;
+
+        match self.kind() {
+            K::TooMuchData => "Too much data provided on this batch",
+            K::InvalidOperation => "Invalid operation",
+            K::InvalidDataSize => "Invalid data size",
+            K::ClientEvicted => "Client was evicted",
+            K::ClientReleaseTooLow => "Client was evicted: release too old",
+            K::ClientReleaseTooHigh => "Client was evicted: release too new",
+            K::ClientShutdown => "Client was closed",
+            _ => return write!(f, "Unknown error status: {}", self.code()),
+        }
+        .fmt(f)
     }
 }
 
@@ -178,6 +153,9 @@ impl From<SendErrorKind> for SendError {
         this
     }
 }
+
+#[derive(Clone, Copy)]
+pub struct CreateAccountError(pub(crate) NonZeroU32);
 
 impl CreateAccountError {
     const CODE_RANGE: std::ops::RangeInclusive<u32> =
@@ -203,8 +181,7 @@ impl fmt::Debug for CreateAccountError {
         let mut d = f.debug_tuple("CreateAccountError");
         let kind = self.kind();
         if matches!(kind, CreateAccountErrorKind::UnstableUncategorized) {
-            let code = self.0.get();
-            d.field(&code);
+            d.field(&self.0);
         } else {
             d.field(&kind);
         }
@@ -234,6 +211,15 @@ impl From<CreateAccountErrorKind> for CreateAccountError {
         this
     }
 }
+
+/// Type indicating individual API error for account creation.
+///
+/// Safe to `transpose` from [`RawCreateAccountsIndividualApiResult`]
+/// if [`Self::from_raw_result_unchecked`] would also be safe.
+// INVARIANT: `self.0.result` must not be zero.
+#[derive(Clone, Copy)]
+#[repr(transparent)]
+pub struct CreateAccountsIndividualApiError(RawCreateAccountsIndividualApiResult);
 
 impl CreateAccountsIndividualApiError {
     /// Create error from raw result.
@@ -324,6 +310,10 @@ impl fmt::Display for CreateAccountsIndividualApiError {
 
 impl Error for CreateAccountsIndividualApiError {}
 
+// INVARIANT: `self.0` must not be empty.
+#[derive(Debug)]
+pub struct CreateAccountsApiError(Vec<CreateAccountsIndividualApiError>);
+
 impl CreateAccountsApiError {
     /// Get a slice of individual errors. Never empty.
     pub fn as_slice(&self) -> &[CreateAccountsIndividualApiError] {
@@ -358,7 +348,7 @@ impl fmt::Display for CreateAccountsApiError {
         write!(
             f,
             "{} api errors occurred at accounts' creation",
-            self.0.len()
+            self.0.len(),
         )
     }
 }
@@ -375,6 +365,13 @@ impl From<CreateAccountsIndividualApiError> for CreateAccountsApiError {
     }
 }
 
+#[derive(Debug)]
+#[non_exhaustive]
+pub enum CreateAccountsError {
+    Send(SendError),
+    Api(CreateAccountsApiError),
+}
+
 impl Error for CreateAccountsError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         Some(match self {
@@ -386,7 +383,7 @@ impl Error for CreateAccountsError {
 
 impl fmt::Display for CreateAccountsError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "failed to create accounts: ")?;
+        write!(f, "Failed to create accounts: ")?;
         match self {
             Self::Send(e) => write!(f, "{e}"),
             Self::Api(e) => write!(f, "{e}"),
@@ -405,6 +402,9 @@ impl From<CreateAccountsApiError> for CreateAccountsError {
         Self::Api(value)
     }
 }
+
+#[derive(Clone, Copy)]
+pub struct CreateTransferError(pub(crate) NonZeroU32);
 
 impl CreateTransferError {
     const CODE_RANGE: std::ops::RangeInclusive<u32> =
@@ -461,6 +461,15 @@ impl From<CreateTransferErrorKind> for CreateTransferError {
         this
     }
 }
+
+/// Type indicating individual API error for transfer creation.
+///
+/// Safe to `transpose` from [`RawCreateTransfersIndividualApiResult`]
+/// if [`Self::from_raw_result_unchecked`] would also be safe.
+// INVARIANT: `self.0.result` must not be zero.
+#[derive(Clone, Copy)]
+#[repr(transparent)]
+pub struct CreateTransfersIndividualApiError(RawCreateTransfersIndividualApiResult);
 
 impl CreateTransfersIndividualApiError {
     /// Create error from raw struct.
@@ -544,12 +553,16 @@ impl fmt::Display for CreateTransfersIndividualApiError {
             f,
             "`{}` error occurred at account with index {}",
             self.inner(),
-            self.index()
+            self.index(),
         )
     }
 }
 
 impl Error for CreateTransfersIndividualApiError {}
+
+// INVARIANT: `self.0` must not be empty.
+#[derive(Debug)]
+pub struct CreateTransfersApiError(Vec<CreateTransfersIndividualApiError>);
 
 impl CreateTransfersApiError {
     /// Get a slice of individual errors. Never empty.
@@ -585,7 +598,7 @@ impl fmt::Display for CreateTransfersApiError {
         write!(
             f,
             "{} api errors occurred at transfers' creation",
-            self.0.len()
+            self.0.len(),
         )
     }
 }
@@ -602,6 +615,13 @@ impl From<CreateTransfersIndividualApiError> for CreateTransfersApiError {
     }
 }
 
+#[derive(Debug)]
+#[non_exhaustive]
+pub enum CreateTransfersError {
+    Send(SendError),
+    Api(CreateTransfersApiError),
+}
+
 impl Error for CreateTransfersError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         Some(match self {
@@ -613,7 +633,7 @@ impl Error for CreateTransfersError {
 
 impl fmt::Display for CreateTransfersError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "failed to create transfers: ")?;
+        write!(f, "Failed to create transfers: ")?;
         match self {
             Self::Send(e) => write!(f, "{e}"),
             Self::Api(e) => write!(f, "{e}"),
