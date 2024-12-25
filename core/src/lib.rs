@@ -1,3 +1,8 @@
+#![warn(
+    clippy::match_wildcard_for_single_variants,
+    clippy::wildcard_enum_match_arm
+)]
+
 pub mod account;
 mod callback;
 pub mod error;
