@@ -6,7 +6,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
-## [0.6.1+0.16.19] · unreleased
+## [0.6.1+0.16.19] · 2024-12-25
 [0.6.1+0.16.19]: /../../tree/v0.6.1%2B0.16.19
 
 [Diff](/../../compare/v0.6.0%2B0.16.17...v0.6.1%2B0.16.19) | [Milestone](/../../milestone/3)
