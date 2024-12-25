@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+mod id;
 mod reply;
 
 use error::NewClientError;
@@ -11,7 +12,9 @@ use core::{
     util::{RawConstPtr, SendAsBytesOwnedSlice, SendOwnedSlice},
 };
 
-pub use core::{self, account, error, transfer, Account, Packet, Transfer};
+pub use core::{self, account, error, transfer, Account, Packet, QueryFilter, Transfer};
+
+pub use self::id::id;
 
 pub struct Client {
     inner: core::Client<&'static Callbacks>,
@@ -45,7 +48,7 @@ impl Client {
         Ok(self
             .submit(
                 accounts.into_as_bytes(),
-                core::OperationKind::CreateAccounts.into(),
+                core::OperationKind::CreateAccounts,
             )
             .await?
             .into_create_accounts()?)
@@ -62,7 +65,7 @@ impl Client {
         Ok(self
             .submit(
                 transfers.into_as_bytes(),
-                core::OperationKind::CreateTransfers.into(),
+                core::OperationKind::CreateTransfers,
             )
             .await?
             .into_create_transfers()?)
@@ -78,7 +81,7 @@ impl Client {
         let filter: SendOwnedSlice<account::Filter> = SendOwnedSlice::from_single(filter);
         self.submit(
             filter.into_as_bytes(),
-            core::OperationKind::GetAccountBalances.into(),
+            core::OperationKind::GetAccountBalances,
         )
         .await
         .map(Reply::into_get_account_balances)
@@ -91,7 +94,7 @@ impl Client {
         let filter: SendOwnedSlice<account::Filter> = SendOwnedSlice::from_single(filter);
         self.submit(
             filter.into_as_bytes(),
-            core::OperationKind::GetAccountTransfers.into(),
+            core::OperationKind::GetAccountTransfers,
         )
         .await
         .map(Reply::into_get_account_transfers)
@@ -105,12 +108,9 @@ impl Client {
         if ids.is_empty() {
             return Ok(Vec::new());
         }
-        self.submit(
-            ids.into_as_bytes(),
-            core::OperationKind::LookupAccounts.into(),
-        )
-        .await
-        .map(Reply::into_lookup_accounts)
+        self.submit(ids.into_as_bytes(), core::OperationKind::LookupAccounts)
+            .await
+            .map(Reply::into_lookup_accounts)
     }
 
     pub async fn lookup_transfers<T>(&self, ids: T) -> Result<Vec<Transfer>, SendError>
@@ -121,18 +121,35 @@ impl Client {
         if ids.is_empty() {
             return Ok(Vec::new());
         }
-        self.submit(
-            ids.into_as_bytes(),
-            core::OperationKind::LookupTransfers.into(),
-        )
-        .await
-        .map(Reply::into_lookup_transfers)
+        self.submit(ids.into_as_bytes(), core::OperationKind::LookupTransfers)
+            .await
+            .map(Reply::into_lookup_transfers)
+    }
+
+    pub async fn query_accounts<T>(&self, filter: T) -> Result<Vec<Account>, SendError>
+    where
+        T: RawConstPtr<Target = QueryFilter> + Send + 'static,
+    {
+        let filter: SendOwnedSlice<QueryFilter> = SendOwnedSlice::from_single(filter);
+        self.submit(filter.into_as_bytes(), core::OperationKind::QueryAccounts)
+            .await
+            .map(Reply::into_query_accounts)
+    }
+
+    pub async fn query_transfers<T>(&self, filter: T) -> Result<Vec<Transfer>, SendError>
+    where
+        T: RawConstPtr<Target = QueryFilter> + Send + 'static,
+    {
+        let filter: SendOwnedSlice<QueryFilter> = SendOwnedSlice::from_single(filter);
+        self.submit(filter.into_as_bytes(), core::OperationKind::QueryTransfers)
+            .await
+            .map(Reply::into_query_transfers)
     }
 
     async fn submit(
         &self,
         data: SendAsBytesOwnedSlice,
-        operation: core::Operation,
+        operation: impl Into<core::Operation>,
     ) -> Result<Reply, SendError> {
         let (reply_sender, reply_receiver) = oneshot::channel();
         let user_data = Box::new(UserData { reply_sender, data });
@@ -144,13 +161,21 @@ impl Client {
 impl core::Callbacks for Callbacks {
     type UserDataPtr = Box<UserData>;
 
-    fn on_completion(&self, packet: core::Packet<'_, Self::UserDataPtr>, payload: &[u8]) {
+    fn on_completion(
+        &self,
+        packet: core::Packet<'_, Self::UserDataPtr>,
+        reply: Option<core::Reply<'_>>,
+    ) {
         let status = packet.status();
         let operation = packet.operation();
         let user_data = packet.into_user_data();
         user_data
             .reply_sender
-            .send(status.map(|()| Reply::copy_from_reply(operation.kind(), payload)))
+            .send(status.map(|()| {
+                // PANIC: Unwrapping is OK here, because the `reply` can only be `None` when the
+                //        `status` is `Err`.
+                Reply::copy_from_reply(operation.kind(), reply.unwrap().payload)
+            }))
             .unwrap_or_else(|_| panic!("Unexpected: reply receiver is already dropped"));
     }
 }

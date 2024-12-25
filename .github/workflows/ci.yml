@@ -23,8 +23,8 @@ jobs:
   pr:
     if: ${{ github.event_name == 'pull_request' }}
     needs:
-      # TODO: Re-enable once Clippy is satisfied on latest Rust.
-      #- clippy
+      - clippy
+      - msrv
       - rustfmt
       - test
     runs-on: ubuntu-latest
@@ -39,11 +39,9 @@ jobs:
   ##########################
 
   clippy:
-    # TODO: Re-enable once Clippy is satisfied on latest Rust.
-    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@v1
@@ -51,12 +49,12 @@ jobs:
           toolchain: stable
           components: clippy,rustfmt
 
-      - run: cargo clippy --all-features -- -D warnings
+      - run: cargo clippy --workspace --all-features -- -D warnings
 
   rustfmt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: nightly
@@ -71,6 +69,34 @@ jobs:
   # Testing #
   ###########
 
+  msrv:
+    name: MSRV
+    strategy:
+      fail-fast: false
+      matrix:
+        msrv: ["1.78.0"]
+        os: ["ubuntu", "macOS", "windows"]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: nightly
+      - uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.msrv }}${{ matrix.os == 'windows' && '-gnu' || '' }}
+          components: rustfmt
+
+      - run: cargo +nightly update -Z minimal-versions
+
+      - run: cargo test -p tigerbeetle-unofficial-sys --all-features
+
+      - run: cargo test -p tigerbeetle-unofficial-core --all-features
+
+      - run: cargo test -p tigerbeetle-unofficial --all-features
+
   test:
     strategy:
       fail-fast: false
@@ -79,7 +105,7 @@ jobs:
         os: ["ubuntu", "macOS", "windows"]
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@v1
@@ -112,7 +138,7 @@ jobs:
     needs: ["release-github"]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@v1
@@ -120,7 +146,10 @@ jobs:
           toolchain: stable
           components: rustfmt
 
-      - run: cargo publish -p tigerbeetle-unofficial-sys
+      # TODO: Investigate how to fix this.
+      # `--no-verify` is required because the source directory is modified by `build.rs` (`zig/download.sh` running)
+      # during `cargo publish`, which isn't happy about (build scripts should not modify anything outside of `OUT_DIR`).
+      - run: cargo publish -p tigerbeetle-unofficial-sys --no-verify
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATESIO_TOKEN }}
 
@@ -135,10 +164,14 @@ jobs:
   release-github:
     name: release (GitHub)
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-    needs: ["clippy", "rustfmt", "test"]
+    needs:
+      - clippy
+      - msrv
+      - rustfmt
+      - test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Parse release version
         id: release
@@ -149,18 +182,16 @@ jobs:
           test "${{ steps.release.outputs.version }}" \
             == "$(grep -m1 -e '^version = "' Cargo.toml | cut -d'"' -f2)"
 
-      # TODO: Uncomment once CHANGELOG is added.
-      #- name: Parse CHANGELOG link
-      #  id: changelog
-      #  run: echo "link=${{ github.server_url }}/${{ github.repository }}/blob/v${{ steps.release.outputs.version }}/CHANGELOG.md#$(sed -n '/^## \[${{ steps.release.outputs.version }}\]/{s/^## \[\(.*\)\][^0-9]*\([0-9].*\)/\1--\2/;s/[^0-9a-z-]*//g;p;}' CHANGELOG.md)"
-      #       >> $GITHUB_OUTPUT
+      - name: Parse CHANGELOG link
+        id: changelog
+        run: echo "link=${{ github.server_url }}/${{ github.repository }}/blob/v${{ steps.release.outputs.version }}/CHANGELOG.md#$(sed -n '/^## \[${{ steps.release.outputs.version }}\]/{s/^## \[\(.*\)\][^0-9]*\([0-9].*\)/\1--\2/;s/[^0-9a-z-]*//g;p;}' CHANGELOG.md)"
+             >> $GITHUB_OUTPUT
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.release.outputs.version }}
           body: |
             [API docs](https://docs.rs/tigerbeetle-unofficial/${{ steps.release.outputs.version }})
-          # TODO: Uncomment once CHANGELOG is added.
-          # [Changelog](${{ steps.changelog.outputs.link }})
+            [Changelog](${{ steps.changelog.outputs.link }})
           prerelease: ${{ contains(steps.release.outputs.version, '-') }}

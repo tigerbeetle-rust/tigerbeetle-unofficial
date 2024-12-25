@@ -12,7 +12,13 @@ use std::{
 use quote::quote;
 use syn::visit::Visit;
 
-const TIGERBEETLE_RELEASE: &str = "0.16.11";
+/// Version of the used [TigerBeetle] release.
+///
+/// [TigerBeetle]: https://github.com/tigerbeetle/tigerbeetle
+const TIGERBEETLE_RELEASE: &str = "0.16.19";
+
+/// Commit hash of the [`TIGERBEETLE_RELEASE`].
+const TIGERBEETLE_COMMIT: &str = "530105887eb4b4b9030f588ed543455db8f3fdb2";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
@@ -48,11 +54,14 @@ const SCRIPT_EXTENSION: &str = "bat";
 fn main() {
     assert!(env!("CARGO_PKG_VERSION").ends_with(TIGERBEETLE_RELEASE));
     let out_dir: PathBuf = env::var("OUT_DIR").unwrap().into();
-    let debug: bool = env::var("DEBUG").unwrap().parse().unwrap();
+    let debug: bool = env::var("TB_CLIENT_DEBUG").map_or_else(
+        |_| env::var("DEBUG").unwrap().parse().unwrap(),
+        |s| s.parse().unwrap(),
+    );
     let target = env::var("TARGET").unwrap();
-    let log_level = env::var("TIGERBEETLE_LOG_LEVEL").unwrap_or_else(|_| "info".to_owned());
 
     println!("cargo:rerun-if-env-changed=DOCS_RS");
+    println!("cargo:rerun-if-env-changed=TB_CLIENT_DEBUG");
     println!("cargo:rerun-if-changed=src/wrapper.h");
 
     let wrapper;
@@ -104,9 +113,9 @@ fn main() {
         .arg("clients:c")
         .args((!debug).then_some("-Drelease"))
         .arg(format!("-Dtarget={tigerbeetle_target}"))
-        .arg(format!("-Dconfig-log-level={log_level}"))
         .arg(format!("-Dconfig-release={TIGERBEETLE_RELEASE}"))
         .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
+        .arg(format!("-Dgit-commit={TIGERBEETLE_COMMIT}"))
         .current_dir(&tigerbeetle_root)
         .env_remove("CI")
         .status()
@@ -143,7 +152,13 @@ fn main() {
         fs::copy("src/wrapper.h", &wrapper).expect("copying `wrapper.h`");
     };
 
+    // TODO: Detect automatically, without bringing in heavy dependencies like `cargo-metadata`.
+    // MSRV: 1.78.0
+    let msrv = bindgen::RustTarget::stable(78, 0)
+        .unwrap_or_else(|e| panic!("invalid MSRV specified for `bindgen`: {e}"));
+
     let bindings = bindgen::Builder::default()
+        .rust_target(msrv)
         .header(
             wrapper
                 .to_str()
@@ -431,8 +446,9 @@ impl bindgen::callbacks::ParseCallbacks for TigerbeetleCallbacks {
                 | "tb_account_balance_t"
                 | "tb_account_filter_t"
                 | "tb_create_accounts_result_t"
-                | "tb_transfer_t"
-                | "tb_create_transfers_result_t",
+                | "tb_create_transfers_result_t"
+                | "tb_query_filter_t"
+                | "tb_transfer_t",
             ..
         } = info
         {

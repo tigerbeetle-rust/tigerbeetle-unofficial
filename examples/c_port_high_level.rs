@@ -17,7 +17,10 @@ async fn main() {
     // Submitting a batch of accounts:                        //
     ////////////////////////////////////////////////////////////
 
-    let accounts = [tb::Account::new(1, 777, 2), tb::Account::new(2, 777, 2)];
+    let accounts = [
+        tb::Account::new(1, 777, 2).with_user_data_32(1),
+        tb::Account::new(2, 777, 2),
+    ];
     client
         .create_accounts(accounts.to_vec())
         .await
@@ -47,6 +50,7 @@ async fn main() {
                     .with_code(2)
                     .with_ledger(777)
                     .with_amount(1)
+                    .with_user_data_32(1)
             })
             .collect();
 
@@ -98,6 +102,53 @@ async fn main() {
             account.id(),
             account.debits_posted(),
             account.credits_posted()
+        );
+    }
+
+    ////////////////////////////////////////////////////////////
+    // Querying accounts:                                     //
+    ////////////////////////////////////////////////////////////
+
+    println!("Querying accounts ...");
+    let accounts = client
+        .query_accounts(Box::new(
+            tb::QueryFilter::new(u32::MAX).with_user_data_32(1),
+        ))
+        .await
+        .expect("querying accounts");
+    assert!(!accounts.is_empty());
+    println!("{} Account(s) found", accounts.len());
+    println!("============================================");
+    for account in accounts {
+        println!(
+            "Account {{ id: {}, debits_posted: {}, credits_posted: {}, .. }}",
+            account.id(),
+            account.debits_posted(),
+            account.credits_posted()
+        );
+    }
+
+    ////////////////////////////////////////////////////////////
+    // Querying transfers:                                    //
+    ////////////////////////////////////////////////////////////
+
+    println!("Querying transfers ...");
+    let transfers = client
+        .query_transfers(Box::new(
+            tb::QueryFilter::new(u32::MAX).with_user_data_32(1),
+        ))
+        .await
+        .expect("querying transfers");
+    assert!(!transfers.is_empty());
+    println!("{} Transfer(s) found", transfers.len());
+    println!("============================================");
+    for transfer in transfers {
+        println!(
+            "Transfer {{ id: {}, debit_account_id: {}, credit_account_id: {}, amount: {}, .. }}",
+            transfer.id(),
+            transfer.debit_account_id(),
+            transfer.credit_account_id(),
+            transfer.amount(),
         );
     }
 }

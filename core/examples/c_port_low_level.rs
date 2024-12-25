@@ -44,14 +44,17 @@ fn main() {
     // Submitting a batch of accounts:                        //
     ////////////////////////////////////////////////////////////
 
-    let accounts = [tb::Account::new(1, 777, 2), tb::Account::new(2, 777, 2)];
+    let accounts = [
+        tb::Account::new(1, 777, 2).with_user_data_32(1),
+        tb::Account::new(2, 777, 2),
+    ];
     let mut user_data = Box::new(UserData {
         ctx: &CTX,
         data: [0; MAX_MESSAGE_SIZE],
         data_size: 0,
     });
     user_data.set_data(accounts);
-    let mut packet = client.packet(user_data, tb::OperationKind::CreateAccounts.into());
+    let mut packet = client.packet(user_data, tb::OperationKind::CreateAccounts);
     println!("Creating accounts...");
     let mut state = CTX.state.lock().unwrap();
     (user_data, state) = CTX.send_request(state, packet).unwrap();
@@ -81,9 +84,10 @@ fn main() {
                 .with_code(2)
                 .with_ledger(777)
                 .with_amount(1)
+                .with_user_data_32(1)
         });
         user_data.set_data(transfers);
-        packet = client.packet(user_data, tb::OperationKind::CreateTransfers.into());
+        packet = client.packet(user_data, tb::OperationKind::CreateTransfers);
 
         let now = Instant::now();
         (user_data, state) = CTX.send_request(state, packet).unwrap();
@@ -121,17 +125,53 @@ fn main() {
     println!("Looking up accounts ...");
     let ids = accounts.map(|a| a.id());
     user_data.set_data(ids);
-    packet = client.packet(user_data, tb::OperationKind::LookupAccounts.into());
-    (_, state) = CTX.send_request(state, packet).unwrap();
+    packet = client.packet(user_data, tb::OperationKind::LookupAccounts);
+    (user_data, state) = CTX.send_request(state, packet).unwrap();
     let accounts = state.get_data::<tb::Account>();
     if accounts.is_empty() {
         panic!("No accounts found");
     }
 
-    // Printing the account's balance:
+    // Printing the accounts:
     println!("{} Account(s) found", accounts.len());
     println!("============================================");
     println!("{accounts:#?}");
+
+    ////////////////////////////////////////////////////////////
+    // Querying accounts:                                     //
+    ////////////////////////////////////////////////////////////
+
+    println!("Querying accounts ...");
+    user_data.set_data([tb::QueryFilter::new(u32::MAX).with_user_data_32(1)]);
+    packet = client.packet(user_data, tb::OperationKind::QueryAccounts);
+    (user_data, state) = CTX.send_request(state, packet).unwrap();
+    let accounts = state.get_data::<tb::Account>();
+    if accounts.is_empty() {
+        panic!("No accounts found");
+    }
+
+    // Printing the accounts:
+    println!("{} Account(s) found", accounts.len());
+    println!("============================================");
+    println!("{accounts:#?}");
+
+    ////////////////////////////////////////////////////////////
+    // Querying transfers:                                    //
+    ////////////////////////////////////////////////////////////
+
+    println!("Querying transfers ...");
+    user_data.set_data([tb::QueryFilter::new(u32::MAX).with_user_data_32(1)]);
+    packet = client.packet(user_data, tb::OperationKind::QueryTransfers);
+    (_, state) = CTX.send_request(state, packet).unwrap();
+    let transfers = state.get_data::<tb::Transfer>();
+    if transfers.is_empty() {
+        panic!("No transfers found");
+    }
+
+    // Printing the transfers:
+    println!("{} Transfer(s) found", transfers.len());
+    println!("============================================");
+    println!("{transfers:#?}");
 }
 
 impl CompletionContext {
@@ -220,16 +260,20 @@ impl UserData {
 impl tb::Callbacks for Callbacks {
     type UserDataPtr = Box<UserData>;
 
-    fn on_completion(&self, packet: tb::Packet<'_, Self::UserDataPtr>, payload: &[u8]) {
+    fn on_completion(
+        &self,
+        packet: tb::Packet<'_, Self::UserDataPtr>,
+        reply: Option<tb::Reply<'_>>,
+    ) {
         let status = packet.status();
         let user_data = packet.into_user_data();
         let ctx = user_data.ctx;
-        {
+        if let Some(reply) = reply {
             let mut state = ctx.state.lock().unwrap();
-            state.reply[..payload.len()].copy_from_slice(payload);
-            state.size = payload.len();
-            ctx.cv.notify_one();
+            state.reply[..reply.payload.len()].copy_from_slice(reply.payload);
+            state.size = reply.payload.len();
         }
+        ctx.cv.notify_one();
         user_data.free(status);
     }
 }

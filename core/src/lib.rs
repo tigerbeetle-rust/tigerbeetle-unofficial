@@ -3,6 +3,7 @@ mod callback;
 pub mod error;
 mod handle;
 mod packet;
+pub mod query_filter;
 pub mod transfer;
 pub mod util;
 
@@ -14,10 +15,11 @@ pub use account::Account;
 pub use callback::*;
 pub use handle::ClientHandle;
 pub use packet::*;
+pub use query_filter::QueryFilter;
 pub use transfer::Transfer;
 
 type OnCompletionRawFn =
-    unsafe extern "C" fn(usize, sys::tb_client_t, *mut sys::tb_packet_t, *const u8, u32);
+    unsafe extern "C" fn(usize, sys::tb_client_t, *mut sys::tb_packet_t, u64, *const u8, u32);
 
 pub struct Client<F>
 where
@@ -82,7 +84,7 @@ where
             let mut raw = mem::zeroed();
             let status = sys::tb_client_init(
                 &mut raw,
-                cluster_id,
+                cluster_id.to_ne_bytes().as_ptr(),
                 address.as_ptr().cast(),
                 address
                     .len()
@@ -94,6 +96,7 @@ where
 
             // SAFETY: Unwrapping is OK here, because the returned `TB_STATUS` is actually an enum
             //         with positive discriminant undoubtedly fitting into `u32`.
+            #[allow(clippy::useless_conversion)] // not true for Windows
             if let Some(c) = NonZeroU32::new(status.try_into().unwrap_unchecked()) {
                 Err(NewClientError(c))
             } else {
@@ -131,7 +134,7 @@ where
     pub fn packet(
         &self,
         user_data: F::UserDataPtr,
-        operation: packet::Operation,
+        operation: impl Into<packet::Operation>,
     ) -> Packet<'_, F::UserDataPtr> {
         self.handle().packet(user_data, operation)
     }

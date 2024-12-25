@@ -1,0 +1,40 @@
+name: Check new version
+
+on:
+  schedule:
+    - cron: "42 7 * * *"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: .github/upgrade-ver.sh
+        id: new
+
+      - name: Check whether Pull Request branch exists already
+        id: pr-branch
+        run: echo "exists=$((git ls-remote --heads origin ${branch} | grep ${branch} > /dev/null)
+                            && echo 'true' || echo 'false')"
+             >> $GITHUB_OUTPUT
+        env:
+          branch: upgrade-to-tigerbeetle-${{ steps.new.outputs.version }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: Upgrade to ${{ steps.new.outputs.version }} TigerBeetle
+          branch: upgrade-to-tigerbeetle-${{ steps.new.outputs.version }}
+          delete-branch: true
+          draft: true
+          sign-commits: true
+          signoff: true
+          title: Upgrade to ${{ steps.new.outputs.version }} TigerBeetle
+          body: Upgrade to new ${{ steps.new.outputs.version }} version of TigerBeetle.
+          labels: |
+            enhancement
+            k::dependencies
+            k::version
+            zig
+        if: ${{ steps.pr-branch.outputs.exists == 'false' }}

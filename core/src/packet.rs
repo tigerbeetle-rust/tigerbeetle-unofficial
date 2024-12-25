@@ -57,7 +57,7 @@ where
         let data = self.user_data().data();
         let Ok(data_size) = data.len().try_into() else {
             self.set_status(Err(SendErrorKind::TooMuchData.into()));
-            self.handle.on_completion.on_completion(self, &[]);
+            self.handle.on_completion.on_completion(self, None);
             return;
         };
         let data = data.as_ptr();
@@ -164,10 +164,9 @@ impl Operation {
         sys::generated_safe::MIN_OPERATION_CODE..=sys::generated_safe::MAX_OPERATION_CODE;
 
     pub fn kind(self) -> OperationKind {
-        let code = self.0;
-        if Self::CODE_RANGE.contains(&code) {
-            // SAFETY: We checked if it's in range right above
-            unsafe { mem::transmute::<u8, OperationKind>(code) }
+        if Self::CODE_RANGE.contains(&self.0) {
+            // SAFETY: We checked if it's in range right above.
+            unsafe { mem::transmute::<u8, OperationKind>(self.0) }
         } else {
             OperationKind::UnstableUncategorized
         }
