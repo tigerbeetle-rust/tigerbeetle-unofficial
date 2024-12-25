@@ -1,8 +1,6 @@
 name: Check new version
 
 on:
-  push:
-    branches: ["master"]
   schedule:
     - cron: "42 7 * * *"
 
