@@ -13,11 +13,11 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 ### Added
 
+- `core` and main crates:
+    - `error::SendErrorKind::ClientReleaseTooLow` and `error::SendErrorKind::ClientReleaseTooHigh` variants. ([#40], [tigerbeetle/tigerbeetle#2552])
 - `sys` crate:
     - `TB_PACKET_STATUS::TB_PACKET_CLIENT_RELEASE_TOO_LOW` and `TB_PACKET_STATUS::TB_PACKET_CLIENT_RELEASE_TOO_HIGH` constants. ([#40], [tigerbeetle/tigerbeetle#2552])
     - `PacketStatusErrorKind::ClientReleaseTooLow` and `PacketStatusErrorKind::ClientReleaseTooHigh` variants. ([#40], [tigerbeetle/tigerbeetle#2552])
-- `core` amd main crates:
-    - `error::SendErrorKind::ClientReleaseTooLow` and `error::SendErrorKind::ClientReleaseTooHigh` variants. ([#40], [tigerbeetle/tigerbeetle#2552])
 
 ### Changed
 
