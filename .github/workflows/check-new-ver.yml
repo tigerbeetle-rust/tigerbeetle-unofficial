@@ -1,6 +1,8 @@
 name: Check new version
 
 on:
+  push:
+    branches: ["master"]
   schedule:
     - cron: "42 7 * * *"
 
@@ -14,9 +16,11 @@ jobs:
         id: new
 
       - name: Check whether Pull Request branch exists already
-        uses: GuillaumeFalourd/branch-exists@v1.1
         id: pr-branch
-        with:
+        run: echo "exists=$((git ls-remote --heads origin ${branch} | grep ${branch} > /dev/null)
+                            && echo 'true' || echo 'false')"
+             >> $GITHUB_OUTPUT
+        env:
           branch: upgrade-to-tigerbeetle-${{ steps.new.outputs.version }}
 
       - name: Create Pull Request
