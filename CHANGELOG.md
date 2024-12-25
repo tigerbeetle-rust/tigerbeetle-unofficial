@@ -6,6 +6,30 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.6.1+0.16.19] · unreleased
+[0.6.1+0.16.19]: /../../tree/v0.6.1%2B0.16.19
+
+[Diff](/../../compare/v0.6.0%2B0.16.17...v0.6.1%2B0.16.19) | [Milestone](/../../milestone/3)
+
+### Added
+
+- `sys` crate:
+    - `TB_PACKET_STATUS::TB_PACKET_CLIENT_RELEASE_TOO_LOW` and `TB_PACKET_STATUS::TB_PACKET_CLIENT_RELEASE_TOO_HIGH` constants. ([#40], [tigerbeetle/tigerbeetle#2552])
+    - `PacketStatusErrorKind::ClientReleaseTooLow` and `PacketStatusErrorKind::ClientReleaseTooHigh` variants. ([#40], [tigerbeetle/tigerbeetle#2552])
+- `core` amd main crates:
+    - `error::SendErrorKind::ClientReleaseTooLow` and `error::SendErrorKind::ClientReleaseTooHigh` variants. ([#40], [tigerbeetle/tigerbeetle#2552])
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.19 version][tb-0.16.19]. ([#40])
+
+[#40]: /../../pull/40
+[tb-0.16.19]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.19/CHANGELOG.md#tigerbeetle-01619
+[tigerbeetle/tigerbeetle#2552]: https://github.com/tigerbeetle/tigerbeetle/pull/2552
+
+
+
+
 ## [0.6.0+0.16.17] · 2024-12-19
 [0.6.0+0.16.17]: /../../tree/v0.6.0%2B0.16.17
 
