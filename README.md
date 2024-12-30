@@ -6,6 +6,8 @@
 [![CI](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/actions/workflows/ci.yml/badge.svg?branch=master "CI")](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/actions?query=workflow%3ACI+branch%3Amaster)
 [![Rust docs](https://docs.rs/tigerbeetle-unofficial/badge.svg "Rust docs")](https://docs.rs/tigerbeetle-unofficial)
 
+[Changelog](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/blob/v0.7.0%2B0.16.20/CHANGELOG.md)
+
 Unofficial [TigerBeetle] bindings for [Rust].
 
 
@@ -35,9 +37,9 @@ The repository hosts the following libraries:
 
 ## License
 
-[TigerBeetle] is licensed under [Apache License, Version 2.0](https://github.com/tigerbeetle/tigerbeetle/blob/0.16.19/LICENSE).
+[TigerBeetle] is licensed under [Apache License, Version 2.0](https://github.com/tigerbeetle/tigerbeetle/blob/0.16.20/LICENSE).
 
-`tigerbeetle-unofficial` crates are licensed under the [Apache License, Version 2.0](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/blob/master/LICENSE) (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at
+`tigerbeetle-unofficial` crates are licensed under the [Apache License, Version 2.0](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/blob/v0.7.0%2B0.16.20/LICENSE) (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at
 
 https://www.apache.org/licenses/LICENSE-2.0
 

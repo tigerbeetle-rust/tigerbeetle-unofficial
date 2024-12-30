@@ -15,10 +15,10 @@ use syn::visit::Visit;
 /// Version of the used [TigerBeetle] release.
 ///
 /// [TigerBeetle]: https://github.com/tigerbeetle/tigerbeetle
-const TIGERBEETLE_RELEASE: &str = "0.16.19";
+const TIGERBEETLE_RELEASE: &str = "0.16.20";
 
 /// Commit hash of the [`TIGERBEETLE_RELEASE`].
-const TIGERBEETLE_COMMIT: &str = "530105887eb4b4b9030f588ed543455db8f3fdb2";
+const TIGERBEETLE_COMMIT: &str = "40595893bfa6092b892d9073e691a5ef179b702d";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {

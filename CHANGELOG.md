@@ -6,16 +6,22 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
-## [master] · unreleased
-[master]: /../../tree/master
+## [0.7.0+0.16.20] · 2024-12-30
+[0.7.0+0.16.20]: /../../tree/v0.7.0%2B0.16.20
 
-[Diff](/../../compare/v0.6.1%2B0.16.19...master) | [Milestone](/../../milestone/4)
+[Diff](/../../compare/v0.6.1%2B0.16.19...v0.7.0%2B0.16.20) | [Milestone](/../../milestone/4)
 
 ### BC Breaks
 
-- Removed MIT license. ([#41]) 
+- Removed MIT license. ([#41])
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.20 version][tb-0.16.20]. ([#42])
 
 [#41]: /../../pull/41
+[#42]: /../../pull/42
+[tb-0.16.20]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.20/CHANGELOG.md#tigerbeetle-01620
 
 
 
