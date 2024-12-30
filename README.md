@@ -3,7 +3,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/tigerbeetle-unofficial.svg "crates.io")](https://crates.io/crates/tigerbeetle-unofficial)
 [![Rust 1.78+](https://img.shields.io/badge/rustc-1.78+-lightgray.svg "Rust 1.78+")](https://blog.rust-lang.org/2024/05/02/Rust-1.78.0.html)  
-[![CI](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/actions/workflows/ci.yml/badge.svg?branch=master "CI")](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/actions?query=workflow%3ACI+branch%3Amaster)
+[![CI](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/actions/workflows/ci.yml/badge.svg?branch=main "CI")](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/actions?query=workflow%3ACI+branch%3Amain)
 [![Rust docs](https://docs.rs/tigerbeetle-unofficial/badge.svg "Rust docs")](https://docs.rs/tigerbeetle-unofficial)
 
 [Changelog](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/blob/v0.7.0%2B0.16.20/CHANGELOG.md)
