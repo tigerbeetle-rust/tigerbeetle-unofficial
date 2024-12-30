@@ -6,10 +6,10 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
-## [master] · unreleased
-[master]: /../../tree/master
+## [0.7.0+0.16.20] · 2024-12-30
+[0.7.0+0.16.20]: /../../tree/v0.7.0%2B0.16.20
 
-[Diff](/../../compare/v0.6.1%2B0.16.19...master) | [Milestone](/../../milestone/4)
+[Diff](/../../compare/v0.6.1%2B0.16.19...v0.7.0%2B0.16.20) | [Milestone](/../../milestone/4)
 
 ### BC Breaks
 
