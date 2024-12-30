@@ -1,3 +1,7 @@
+#![doc(
+    html_logo_url = "https://avatars.githubusercontent.com/u/187310527",
+    html_favicon_url = "https://avatars.githubusercontent.com/u/187310527?s=256"
+)]
 #![warn(
     clippy::match_wildcard_for_single_variants,
     clippy::wildcard_enum_match_arm

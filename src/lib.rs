@@ -1,3 +1,7 @@
+#![doc(
+    html_logo_url = "https://avatars.githubusercontent.com/u/187310527",
+    html_favicon_url = "https://avatars.githubusercontent.com/u/187310527?s=256"
+)]
 #![forbid(unsafe_code)]
 
 mod id;
