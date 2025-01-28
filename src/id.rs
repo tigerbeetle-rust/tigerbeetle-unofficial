@@ -114,7 +114,7 @@ mod id_spec {
     }
 
     // Port of upstream test:
-    // https://github.com/tigerbeetle/tigerbeetle/blob/0.16.23/src/clients/go/pkg/types/main_test.go#L75-L115
+    // https://github.com/tigerbeetle/tigerbeetle/blob/0.16.25/src/clients/go/pkg/types/main_test.go#L75-L115
     #[test]
     fn monotonic_fuzz() {
         fn verifier() {
