@@ -7,7 +7,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 ## [0.7.5+0.16.27] · 2025-02-11
-[0.7.5+0.16.25]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.7.5%2B0.16.27
+[0.7.5+0.16.27]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.7.5%2B0.16.27
 
 [Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.7.4%2B0.16.26...v0.7.5%2B0.16.27) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/10)
 
