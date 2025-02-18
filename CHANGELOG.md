@@ -6,6 +6,29 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.8.0+0.16.28] · 2025-02-18
+[0.8.0+0.16.28]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.8.0%2B0.16.28
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.7.5%2B0.16.27...v0.8.0%2B0.16.28) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/11)
+
+### BC Breaks
+
+- `sys` crate:
+    - `tb_packet_t`: ([#48], [tigerbeetle/tigerbeetle#2728])
+        - `next`, `batch_next`, `batch_tail`, `batch_size` and `batch_allowed` fields are hidden into opaque `reserved` field.
+        - Added `tag` field.
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.28 version][tb-0.16.28]. ([#48])
+
+[#48]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/48
+[tb-0.16.28]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.28/CHANGELOG.md#tigerbeetle-01628
+[tigerbeetle/tigerbeetle#2728]: https://github.com/tigerbeetle/tigerbeetle/pull/2728
+
+
+
+
 ## [0.7.5+0.16.27] · 2025-02-11
 [0.7.5+0.16.27]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.7.5%2B0.16.27
 
