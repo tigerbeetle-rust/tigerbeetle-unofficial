@@ -15,7 +15,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 - `sys` crate:
     - `tb_packet_t`: ([#48], [tigerbeetle/tigerbeetle#2728])
-        - `next`, `batch_next`, `batch_tail`, `batch_size` and `batch_allowed` fields are hidden into opaque `reserved` field.
+        - `next`, `batch_next`, `batch_tail`, `batch_size` and `batch_allowed` fields were hidden into opaque `reserved` field.
         - Added `tag` field.
 
 ### Changed
