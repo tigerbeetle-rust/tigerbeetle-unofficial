@@ -37,17 +37,13 @@ where
     pub fn new(handle: ClientHandle<'a, U>, user_data: U, operation: impl Into<Operation>) -> Self {
         Self {
             raw: Box::into_raw(Box::new(sys::tb_packet_t {
-                next: ptr::null_mut(),
                 user_data: U::into_raw_const_ptr(user_data).cast::<c_void>().cast_mut(),
+                data: ptr::null_mut(),
+                data_size: 0,
+                tag: 0,
                 operation: operation.into().0,
                 status: 0,
-                data_size: 0,
-                data: ptr::null_mut(),
-                batch_next: ptr::null_mut(),
-                batch_tail: ptr::null_mut(),
-                batch_size: 0,
-                batch_allowed: 0,
-                reserved: [0; 7],
+                reserved: [0; 32],
             })),
             handle,
         }
