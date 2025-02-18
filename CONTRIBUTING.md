@@ -1,3 +1,9 @@
+Contribution Guide
+==================
+
+
+
+
 ## Upgrading to new [TigerBeetle] version
 
 First, checkout Git submodule to the desired version:
