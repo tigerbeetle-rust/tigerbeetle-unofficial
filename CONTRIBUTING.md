@@ -1,8 +1,15 @@
+Contribution Guide
+==================
+
+
+
+
 ## Upgrading to new [TigerBeetle] version
 
 First, checkout Git submodule to the desired version:
 ```bash
 cd sys/tigerbeetle
+git fetch origin 'refs/tags/*:refs/tags/*'
 git checkout 0.15.3
 ```
 
