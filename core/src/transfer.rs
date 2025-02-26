@@ -5,6 +5,19 @@ use bytemuck::{Pod, TransparentWrapper, Zeroable};
 pub use sys::generated_safe::TransferFlags as Flags;
 pub use sys::tb_transfer_t as Raw;
 
+// copied from https://github.com/tigerbeetle/tigerbeetle-go/blob/127c221992197076a3b1c84e3668c6c36c4a3389/pkg/types/bindings.go#L65
+pub mod flags {
+    pub static LINKED: u16 = 1 << 0;
+    pub static PENDING: u16 = 1 << 1;
+    pub static POST_PENDING_TRANSFER: u16 = 1 << 2;
+    pub static VOID_PENDING_TRANSFER: u16 = 1 << 3;
+    pub static BALANCING_DEBIT: u16 = 1 << 4;
+    pub static BALANCING_CREDIT: u16 = 1 << 5;
+    pub static CLOSING_DEBIT: u16 = 1 << 6;
+    pub static CLOSING_CREDIT: u16 = 1 << 7;
+    pub static IMPORTED: u16 = 1 << 8;
+}
+
 #[repr(transparent)]
 #[derive(Clone, Copy, TransparentWrapper, Pod, Zeroable)]
 pub struct Transfer(Raw);

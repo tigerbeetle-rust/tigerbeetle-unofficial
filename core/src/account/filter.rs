@@ -5,6 +5,13 @@ use bytemuck::{Pod, TransparentWrapper, Zeroable};
 pub use sys::generated_safe::AccountFilterFlags as Flags;
 pub use sys::tb_account_filter_t as Raw;
 
+/// copied from https://github.com/tigerbeetle/tigerbeetle-go/blob/127c221992197076a3b1c84e3668c6c36c4a3389/pkg/types/bindings.go#L113
+pub mod flags {
+    pub static DEBITS: u16 = 1 << 0;
+    pub static CREDITS: u16 = 1 << 1;
+    pub static REVERSED: u16 = 1 << 2;
+}
+
 #[repr(transparent)]
 #[derive(Clone, Copy, TransparentWrapper, Pod, Zeroable)]
 pub struct Filter(Raw);

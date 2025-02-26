@@ -8,6 +8,11 @@ use bytemuck::{Pod, TransparentWrapper, Zeroable};
 pub use sys::generated_safe::QueryFilterFlags as Flags;
 pub use sys::tb_query_filter_t as Raw;
 
+/// copied from https://github.com/tigerbeetle/tigerbeetle-go/blob/127c221992197076a3b1c84e3668c6c36c4a3389/pkg/types/bindings.go#L135
+pub mod flags {
+    pub static REVERSED: u16 = 1 << 0;
+}
+
 #[derive(Clone, Copy, Pod, TransparentWrapper, Zeroable)]
 #[repr(transparent)]
 pub struct QueryFilter(Raw);

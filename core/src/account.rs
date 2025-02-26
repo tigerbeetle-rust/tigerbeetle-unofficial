@@ -10,6 +10,16 @@ pub use filter::{Filter, Flags as FilterFlags, Raw as RawFilter};
 pub use sys::generated_safe::AccountFlags as Flags;
 pub use sys::tb_account_t as Raw;
 
+/// copied from https://github.com/tigerbeetle/tigerbeetle-go/blob/127c221992197076a3b1c84e3668c6c36c4a3389/pkg/types/bindings.go#L23
+pub mod flags {
+    pub static LINKED: u16 = 1 << 0;
+    pub static DEBITS_MUST_NOT_EXCEED_CREDITS: u16 = 1 << 1;
+    pub static CREDITS_MUST_NOT_EXCEED_DEBITS: u16 = 1 << 2;
+    pub static HISTORY: u16 = 1 << 3;
+    pub static IMPORTED: u16 = 1 << 4;
+    pub static CLOSED: u16 = 1 << 5;
+}
+
 #[repr(transparent)]
 #[derive(Clone, Copy, TransparentWrapper, Pod, Zeroable)]
 pub struct Account(Raw);
