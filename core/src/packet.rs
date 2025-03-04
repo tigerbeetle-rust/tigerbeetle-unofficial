@@ -40,10 +40,10 @@ where
                 user_data: U::into_raw_const_ptr(user_data).cast::<c_void>().cast_mut(),
                 data: ptr::null_mut(),
                 data_size: 0,
-                tag: 0,
+                user_tag: 0,
                 operation: operation.into().0,
                 status: 0,
-                reserved: [0; 32],
+                opaque: [0; 32],
             })),
             handle,
         }
@@ -53,7 +53,7 @@ where
         let data = self.user_data().data();
         let Ok(data_size) = data.len().try_into() else {
             self.set_status(Err(SendErrorKind::TooMuchData.into()));
-            self.handle.on_completion.on_completion(self, None);
+            self.handle.cb.completion(self, None);
             return;
         };
         let data = data.as_ptr();

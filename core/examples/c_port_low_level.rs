@@ -260,7 +260,7 @@ impl UserData {
 impl tb::Callbacks for Callbacks {
     type UserDataPtr = Box<UserData>;
 
-    fn on_completion(
+    fn completion(
         &self,
         packet: tb::Packet<'_, Self::UserDataPtr>,
         reply: Option<tb::Reply<'_>>,

@@ -291,26 +291,22 @@ impl Visit<'_> for TigerbeetleVisitor {
                     errorize = true;
                 }
                 match new_enum_name.as_str() {
-                    "Status" => {
-                        new_enum_name = "StatusErrorKind".to_string();
-                        new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
-                        errorize = true;
-                    }
-                    "PacketStatus" => {
-                        new_enum_name = "PacketStatusErrorKind".to_string();
-                        new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
-                        repr_type = "u8";
-                        errorize = true;
-                    }
-                    "PacketAcquireStatus" => {
-                        new_enum_name = "PacketAcquireStatusErrorKind".to_string();
+                    "ClientStatus"
+                    | "InitStatus"
+                    | "PacketStatus"
+                    | "PacketAcquireStatus"
+                    | "RegisterLogCallbackStatus" => {
+                        if new_enum_name == "PacketStatus" {
+                            repr_type = "u8";
+                        }
+                        new_enum_name = format!("{new_enum_name}ErrorKind");
                         new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
                         errorize = true;
                     }
                     "Operation" => {
-                        new_enum_name = "OperationKind".to_string();
+                        repr_type = "u8";
+                        new_enum_name = "OperationKind".into();
                         new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
-                        repr_type = "u8"
                     }
                     _ => (),
                 }

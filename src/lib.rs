@@ -165,9 +165,9 @@ impl Client {
 impl core::Callbacks for Callbacks {
     type UserDataPtr = Box<UserData>;
 
-    fn on_completion(
+    fn completion(
         &self,
-        packet: core::Packet<'_, Self::UserDataPtr>,
+        packet: Packet<'_, Self::UserDataPtr>,
         reply: Option<core::Reply<'_>>,
     ) {
         let status = packet.status();

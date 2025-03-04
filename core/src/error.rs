@@ -7,7 +7,7 @@ use std::{
 pub use sys::{
     generated_safe::{
         self as sys_safe, CreateAccountErrorKind, CreateTransferErrorKind,
-        PacketStatusErrorKind as SendErrorKind, StatusErrorKind as NewClientErrorKind,
+        PacketStatusErrorKind as SendErrorKind, InitStatusErrorKind as NewClientErrorKind,
     },
     tb_create_accounts_result_t as RawCreateAccountsIndividualApiResult,
     tb_create_transfers_result_t as RawCreateTransfersIndividualApiResult,
@@ -18,7 +18,7 @@ pub struct NewClientError(pub(crate) NonZeroU32);
 
 impl NewClientError {
     const CODE_RANGE: std::ops::RangeInclusive<u32> =
-        sys_safe::MIN_STATUS_ERROR_CODE..=sys_safe::MAX_STATUS_ERROR_CODE;
+        sys_safe::MIN_INIT_STATUS_ERROR_CODE..=sys_safe::MAX_INIT_STATUS_ERROR_CODE;
 
     pub fn kind(self) -> NewClientErrorKind {
         let code = self.0.get();

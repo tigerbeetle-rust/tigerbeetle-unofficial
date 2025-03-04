@@ -56,7 +56,7 @@ pub trait Callbacks: Sync {
     ///
     /// [`None`] `reply` means that submitting the [`Packet`] failed (check the [`Packet::status`]
     /// for the reason).
-    fn on_completion(&self, packet: Packet<'_, Self::UserDataPtr>, reply: Option<Reply<'_>>);
+    fn completion(&self, packet: Packet<'_, Self::UserDataPtr>, reply: Option<Reply<'_>>);
 }
 
 pub struct CallbacksFn<F, U>
@@ -92,7 +92,7 @@ where
 {
     type UserDataPtr = U;
 
-    fn on_completion(&self, packet: Packet<'_, Self::UserDataPtr>, reply: Option<Reply<'_>>) {
+    fn completion(&self, packet: Packet<'_, Self::UserDataPtr>, reply: Option<Reply<'_>>) {
         (self.inner)(packet, reply)
     }
 }
@@ -107,7 +107,6 @@ where
 
 pub(crate) unsafe extern "C" fn on_completion_raw_fn<F>(
     ctx: usize,
-    raw_client: sys::tb_client_t,
     packet: *mut sys::tb_packet_t,
     timestamp: u64,
     payload: *const u8,
@@ -130,11 +129,11 @@ pub(crate) unsafe extern "C" fn on_completion_raw_fn<F>(
             raw: packet,
             handle: super::ClientHandle {
                 raw: raw_client,
-                on_completion: cb,
+                cb,
             },
         };
         let timestamp = SystemTime::UNIX_EPOCH + Duration::from_nanos(timestamp);
-        cb.on_completion(packet, Some(Reply { payload, timestamp }))
+        cb.completion(packet, Some(Reply { payload, timestamp }))
     });
 }
 
