@@ -105,7 +105,7 @@ where
     CallbacksFn::new(f)
 }
 
-pub(crate) unsafe extern "C" fn on_completion_raw_fn<F>(
+pub(crate) unsafe extern "C" fn completion_callback_raw_fn<F>(
     ctx: usize,
     packet: *mut sys::tb_packet_t,
     timestamp: u64,
@@ -117,7 +117,7 @@ pub(crate) unsafe extern "C" fn on_completion_raw_fn<F>(
     let _ = catch_unwind(|| {
         let cb = &*sptr::from_exposed_addr::<F>(ctx);
         let payload_size = payload_size.try_into().expect(
-            "at the start of calling `on_completion` callback: \
+            "at the start of calling `completion_callback`: \
              unable to convert `payload_size` from `u32` into `usize`",
         );
         let payload = if payload_size != 0 {

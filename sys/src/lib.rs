@@ -63,8 +63,8 @@ mod linked {
     #[ignore = "only checks linkage"]
     fn tb_client_completion_context() {
         unsafe {
-            let client = mem::zeroed();
-            _ = crate::tb_client_completion_context(client);
+            let mut client = mem::zeroed();
+            _ = crate::tb_client_completion_context(&mut client, ptr::null_mut());
         }
     }
 
@@ -72,8 +72,8 @@ mod linked {
     #[ignore = "only checks linkage"]
     fn tb_client_submit() {
         unsafe {
-            let client = mem::zeroed();
-            _ = crate::tb_client_submit(client, ptr::null_mut());
+            let mut client = mem::zeroed();
+            _ = crate::tb_client_submit(&mut client, ptr::null_mut());
         }
     }
 
@@ -81,8 +81,8 @@ mod linked {
     #[ignore = "only checks linkage"]
     fn tb_client_deinit() {
         unsafe {
-            let client = mem::zeroed();
-            _ = crate::tb_client_deinit(client);
+            let mut client = mem::zeroed();
+            _ = crate::tb_client_deinit(&mut client);
         }
     }
 }

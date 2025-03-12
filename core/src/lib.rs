@@ -35,7 +35,7 @@ where
     F: CallbacksPtr,
 {
     raw: sys::tb_client_t,
-    on_completion: *const F::Target,
+    cb: *const F::Target,
     marker: PhantomData<F>,
 }
 
@@ -49,7 +49,7 @@ where
     pub fn with_callback<A>(
         cluster_id: u128,
         address: A,
-        on_completion: F,
+        completion_callback: F,
     ) -> Result<Self, NewClientError>
     where
         A: AsRef<[u8]>,
@@ -60,7 +60,7 @@ where
         F::UserDataPtr: 'static,
     {
         // SAFETY: `F` and `UserDataPtr` are `'static`.
-        unsafe { Client::with_callback_unchecked(cluster_id, address, on_completion) }
+        unsafe { Client::with_callback_unchecked(cluster_id, address, completion_callback) }
     }
 
     /// Highly unsafe method. Please use [`Self::with_callback`]
@@ -75,14 +75,14 @@ where
     pub unsafe fn with_callback_unchecked<A>(
         cluster_id: u128,
         address: A,
-        on_completion: F,
+        completion_callback: F,
     ) -> Result<Self, NewClientError>
     where
         A: AsRef<[u8]>,
     {
-        let on_completion_fn = callback::on_completion_raw_fn::<F::Target>;
-        let on_completion = F::into_raw_const_ptr(on_completion);
-        let on_completion_ctx = sptr::Strict::expose_addr(on_completion);
+        let completion_fn = completion_callback_raw_fn::<F::Target>;
+        let completion_cb = F::into_raw_const_ptr(completion_callback);
+        let completion_ctx = sptr::Strict::expose_addr(completion_cb);
 
         unsafe fn raw_with_callback(
             cluster_id: u128,
@@ -118,17 +118,17 @@ where
                 match raw_with_callback(
                     cluster_id,
                     address.as_ref(),
-                    on_completion_ctx,
-                    on_completion_fn,
+                    completion_ctx,
+                    completion_fn,
                 ) {
                     Ok(x) => x,
-                    Err(err) => {
-                        F::from_raw_const_ptr(on_completion);
-                        return Err(err);
+                    Err(e) => {
+                        F::from_raw_const_ptr(completion_cb);
+                        return Err(e);
                     }
                 }
             },
-            on_completion,
+            cb: completion_cb,
             marker: PhantomData,
         })
     }
@@ -136,7 +136,7 @@ where
     pub fn handle(&self) -> ClientHandle<'_, F::UserDataPtr> {
         ClientHandle {
             raw: self.raw,
-            cb: unsafe { &*self.on_completion },
+            cb: unsafe { &*self.cb },
         }
     }
 
@@ -163,13 +163,15 @@ where
                     tokio::runtime::RuntimeFlavor::MultiThread
                 )
             }) {
-                tokio::task::block_in_place(|| sys::tb_client_deinit(self.raw));
+                _ = tokio::task::block_in_place(|| sys::tb_client_deinit(&mut self.raw));
             } else {
-                sys::tb_client_deinit(self.raw)
+                _ = sys::tb_client_deinit(&mut self.raw);
             }
             #[cfg(not(feature = "tokio-rt-multi-thread"))]
-            sys::tb_client_deinit(self.raw);
-            F::from_raw_const_ptr(self.on_completion);
+            {
+                _ = sys::tb_client_deinit(&mut self.raw);
+            }
+            F::from_raw_const_ptr(self.cb);
         }
     }
 }

@@ -62,7 +62,10 @@ where
         raw.data_size = data_size;
         raw.data = data.cast_mut().cast();
 
-        unsafe { sys::tb_client_submit(self.handle.raw, self.raw) };
+        unsafe {
+            // TODO: error?
+            _ = sys::tb_client_submit(&mut self.handle.raw, self.raw);
+        }
         mem::forget(self); // avoid `Drop`ping `Packet`
     }
 

@@ -201,6 +201,7 @@ fn _test_thread_safe(
         client.lookup_accounts(ids.clone()).await.unwrap();
         client.create_transfers(transfers).await.unwrap();
         client.lookup_transfers(ids).await.unwrap();
+        // TODO: add other
     });
 
     fn check_thread_safe<T>(_: T)
