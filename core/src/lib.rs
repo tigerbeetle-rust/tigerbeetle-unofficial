@@ -146,7 +146,9 @@ where
         let mut raw_client = self.raw;
 
         unsafe {
-            // TODO: error?
+            // NOTE: We do omit checking the result to be `TB_CLIENT_INVALID` intentionally here,
+            //       because it can be returned only if the `raw_client` is not yet inited, or was
+            //       deinited already, which happens only in constructors and `Drop` respectively.
             _ = sys::tb_client_submit(&mut raw_client, packet.raw);
         }
         mem::forget(packet); // avoid `Drop`ping `Packet`

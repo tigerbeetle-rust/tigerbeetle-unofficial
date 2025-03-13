@@ -85,4 +85,12 @@ mod linked {
             _ = crate::tb_client_deinit(&mut client);
         }
     }
+
+    #[test]
+    #[ignore = "only checks linkage"]
+    fn register_log_callback() {
+        unsafe {
+            _ = crate::register_log_callback(None, false);
+        }
+    }
 }

@@ -190,14 +190,19 @@ fn _test_thread_safe(
     client: Client,
     accounts: Vec<Account>,
     transfers: Vec<Transfer>,
+    query_filter: &'static QueryFilter,
+    account_filter: &'static account::Filter,
     ids: Vec<u128>,
 ) {
     check_thread_safe(async move {
         client.create_accounts(accounts).await.unwrap();
-        client.lookup_accounts(ids.clone()).await.unwrap();
         client.create_transfers(transfers).await.unwrap();
+        client.get_account_balances(account_filter).await.unwrap();
+        client.get_account_transfers(account_filter).await.unwrap();
+        client.lookup_accounts(ids.clone()).await.unwrap();
         client.lookup_transfers(ids).await.unwrap();
-        // TODO: add other
+        client.query_accounts(query_filter).await.unwrap();
+        client.query_transfers(query_filter).await.unwrap();
     });
 
     fn check_thread_safe<T>(_: T)
