@@ -24,6 +24,7 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     needs:
       - clippy
+      - example
       - msrv
       - rustfmt
       - test
@@ -102,6 +103,10 @@ jobs:
               && exec /tigerbeetle start --addresses=0.0.0.0:3000 /db.tb'
 
       - run: cargo run -p ${{ matrix.crate }} --example ${{ matrix.example }}
+
+      - name: Stop TigerBeetle server
+        run: docker stop tigerbeetle || true
+        if: ${{ always() }}
 
   msrv:
     name: MSRV
@@ -200,6 +205,7 @@ jobs:
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
     needs:
       - clippy
+      - example
       - msrv
       - rustfmt
       - test
