@@ -1,9 +1,9 @@
-use std::{ffi::c_void, mem, num::NonZeroU8, ptr, marker::PhantomData};
+use std::{ffi::c_void, marker::PhantomData, mem, num::NonZeroU8, ptr};
 
 pub use sys::generated_safe::OperationKind;
 
-use crate::error::SendError;
 use super::callback::{UserData, UserDataPtr};
+use crate::error::SendError;
 
 pub struct Packet<U>
 where

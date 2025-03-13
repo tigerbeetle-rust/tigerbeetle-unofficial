@@ -7,7 +7,7 @@ use std::{
 pub use sys::{
     generated_safe::{
         self as sys_safe, CreateAccountErrorKind, CreateTransferErrorKind,
-        PacketStatusErrorKind as SendErrorKind, InitStatusErrorKind as NewClientErrorKind,
+        InitStatusErrorKind as NewClientErrorKind, PacketStatusErrorKind as SendErrorKind,
     },
     tb_create_accounts_result_t as RawCreateAccountsIndividualApiResult,
     tb_create_transfers_result_t as RawCreateTransfersIndividualApiResult,

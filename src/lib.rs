@@ -157,7 +157,7 @@ impl Client {
     ) -> Result<Reply, SendError> {
         let (reply_sender, reply_receiver) = oneshot::channel();
         let user_data = Box::new(UserData { reply_sender, data });
-        dbg!(self.inner.submit(Packet::new(user_data, operation)));
+        self.inner.submit(Packet::new(user_data, operation));
         reply_receiver.await.unwrap()
     }
 }
@@ -165,11 +165,7 @@ impl Client {
 impl core::Callbacks for Callbacks {
     type UserDataPtr = Box<UserData>;
 
-    fn completion(
-        &self,
-        packet: Packet<Self::UserDataPtr>,
-        reply: Option<core::Reply<'_>>,
-    ) {
+    fn completion(&self, packet: Packet<Self::UserDataPtr>, reply: Option<core::Reply<'_>>) {
         let status = packet.status();
         let operation = packet.operation();
         let user_data = packet.into_user_data();

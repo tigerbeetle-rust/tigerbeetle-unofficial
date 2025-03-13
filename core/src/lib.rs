@@ -113,12 +113,8 @@ where
 
         Ok(Client {
             raw: unsafe {
-                match raw_with_callback(
-                    cluster_id,
-                    address.as_ref(),
-                    completion_ctx,
-                    completion_fn,
-                ) {
+                match raw_with_callback(cluster_id, address.as_ref(), completion_ctx, completion_fn)
+                {
                     Ok(x) => x,
                     Err(e) => {
                         F::from_raw_const_ptr(completion_cb);
@@ -151,7 +147,7 @@ where
 
         unsafe {
             // TODO: error?
-            dbg!(sys::tb_client_submit(&mut raw_client, packet.raw));
+            _ = sys::tb_client_submit(&mut raw_client, packet.raw);
         }
         mem::forget(packet); // avoid `Drop`ping `Packet`
     }

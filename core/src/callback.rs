@@ -114,7 +114,6 @@ pub(crate) unsafe extern "C" fn completion_callback_raw_fn<F>(
 ) where
     F: Callbacks,
 {
-    dbg!("completion_callback_raw_fn");
     let _ = catch_unwind(|| {
         let cb = &*sptr::from_exposed_addr::<F>(ctx);
         let payload_size = payload_size.try_into().expect(

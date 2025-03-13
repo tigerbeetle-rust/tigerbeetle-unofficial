@@ -261,11 +261,7 @@ impl UserData {
 impl tb::Callbacks for Callbacks {
     type UserDataPtr = Box<UserData>;
 
-    fn completion(
-        &self,
-        packet: tb::Packet<Self::UserDataPtr>,
-        reply: Option<tb::Reply<'_>>,
-    ) {
+    fn completion(&self, packet: tb::Packet<Self::UserDataPtr>, reply: Option<tb::Reply<'_>>) {
         let status = packet.status();
         let user_data = packet.into_user_data();
         let ctx = user_data.ctx;
