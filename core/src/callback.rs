@@ -56,12 +56,12 @@ pub trait Callbacks: Sync {
     ///
     /// [`None`] `reply` means that submitting the [`Packet`] failed (check the [`Packet::status`]
     /// for the reason).
-    fn completion(&self, packet: Packet<'_, Self::UserDataPtr>, reply: Option<Reply<'_>>);
+    fn completion(&self, packet: Packet<Self::UserDataPtr>, reply: Option<Reply<'_>>);
 }
 
 pub struct CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
+    F: Fn(Packet<U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     inner: F,
@@ -70,7 +70,7 @@ where
 
 impl<F, U> CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
+    F: Fn(Packet<U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     pub const fn new(inner: F) -> Self
@@ -87,19 +87,19 @@ where
 
 impl<F, U> Callbacks for CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
+    F: Fn(Packet<U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     type UserDataPtr = U;
 
-    fn completion(&self, packet: Packet<'_, Self::UserDataPtr>, reply: Option<Reply<'_>>) {
+    fn completion(&self, packet: Packet<Self::UserDataPtr>, reply: Option<Reply<'_>>) {
         (self.inner)(packet, reply)
     }
 }
 
 pub const fn on_completion_fn<U, F>(f: F) -> CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
+    F: Fn(Packet<U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     CallbacksFn::new(f)
@@ -114,6 +114,7 @@ pub(crate) unsafe extern "C" fn completion_callback_raw_fn<F>(
 ) where
     F: Callbacks,
 {
+    dbg!("completion_callback_raw_fn");
     let _ = catch_unwind(|| {
         let cb = &*sptr::from_exposed_addr::<F>(ctx);
         let payload_size = payload_size.try_into().expect(
@@ -127,10 +128,7 @@ pub(crate) unsafe extern "C" fn completion_callback_raw_fn<F>(
         };
         let packet = Packet {
             raw: packet,
-            handle: super::ClientHandle {
-                raw: raw_client,
-                cb,
-            },
+            _ptr: PhantomData,
         };
         let timestamp = SystemTime::UNIX_EPOCH + Duration::from_nanos(timestamp);
         cb.completion(packet, Some(Reply { payload, timestamp }))

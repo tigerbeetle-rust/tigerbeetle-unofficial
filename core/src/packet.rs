@@ -1,40 +1,36 @@
-use std::{ffi::c_void, mem, num::NonZeroU8, ptr};
-
-use crate::error::{SendError, SendErrorKind};
+use std::{ffi::c_void, mem, num::NonZeroU8, ptr, marker::PhantomData};
 
 pub use sys::generated_safe::OperationKind;
 
-use super::{
-    callback::{UserData, UserDataPtr},
-    ClientHandle,
-};
+use crate::error::SendError;
+use super::callback::{UserData, UserDataPtr};
 
-pub struct Packet<'a, U>
+pub struct Packet<U>
 where
     U: UserDataPtr,
 {
     pub(super) raw: *mut sys::tb_packet_t,
-    pub(super) handle: ClientHandle<'a, U>,
+    pub(super) _ptr: PhantomData<U>,
 }
 
 #[derive(Clone, Copy)]
 pub struct Operation(pub(crate) u8);
 
-unsafe impl<U> Sync for Packet<'_, U>
+unsafe impl<U> Sync for Packet<U>
 where
     U: UserDataPtr,
     U::Pointee: Sync,
 {
 }
-unsafe impl<U> Send for Packet<'_, U> where U: UserDataPtr {}
+unsafe impl<U> Send for Packet<U> where U: UserDataPtr {}
 
-impl<'a, U> Packet<'a, U>
+impl<U> Packet<U>
 where
     U: UserDataPtr,
 {
     /// Creates a new [`Packet`].
     #[must_use]
-    pub fn new(handle: ClientHandle<'a, U>, user_data: U, operation: impl Into<Operation>) -> Self {
+    pub fn new(user_data: U, operation: impl Into<Operation>) -> Self {
         Self {
             raw: Box::into_raw(Box::new(sys::tb_packet_t {
                 user_data: U::into_raw_const_ptr(user_data).cast::<c_void>().cast_mut(),
@@ -45,35 +41,15 @@ where
                 status: 0,
                 opaque: [0; 32],
             })),
-            handle,
+            _ptr: PhantomData,
         }
     }
 
-    pub fn submit(mut self) {
-        let data = self.user_data().data();
-        let Ok(data_size) = data.len().try_into() else {
-            self.set_status(Err(SendErrorKind::TooMuchData.into()));
-            self.handle.cb.completion(self, None);
-            return;
-        };
-        let data = data.as_ptr();
-
-        let raw = self.raw_mut();
-        raw.data_size = data_size;
-        raw.data = data.cast_mut().cast();
-
-        unsafe {
-            // TODO: error?
-            _ = sys::tb_client_submit(&mut self.handle.raw, self.raw);
-        }
-        mem::forget(self); // avoid `Drop`ping `Packet`
-    }
-
-    fn raw(&self) -> &sys::tb_packet_t {
+    pub(crate) fn raw(&self) -> &sys::tb_packet_t {
         unsafe { &*self.raw }
     }
 
-    fn raw_mut(&mut self) -> &mut sys::tb_packet_t {
+    pub(crate) fn raw_mut(&mut self) -> &mut sys::tb_packet_t {
         unsafe { &mut *self.raw }
     }
 
@@ -116,10 +92,6 @@ where
         self.user_data().data()
     }
 
-    pub fn client_handle(&self) -> ClientHandle<'a, U> {
-        self.handle
-    }
-
     pub fn operation(&self) -> Operation {
         Operation(self.raw().operation)
     }
@@ -144,7 +116,7 @@ where
     }
 }
 
-impl<U> Drop for Packet<'_, U>
+impl<U> Drop for Packet<U>
 where
     U: UserDataPtr,
 {

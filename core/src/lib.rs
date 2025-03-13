@@ -10,7 +10,6 @@
 pub mod account;
 mod callback;
 pub mod error;
-mod handle;
 mod packet;
 pub mod query_filter;
 pub mod transfer;
@@ -22,7 +21,6 @@ use error::{NewClientError, NewClientErrorKind};
 
 pub use account::Account;
 pub use callback::*;
-pub use handle::ClientHandle;
 pub use packet::*;
 pub use query_filter::QueryFilter;
 pub use transfer::Transfer;
@@ -133,19 +131,29 @@ where
         })
     }
 
-    pub fn handle(&self) -> ClientHandle<'_, F::UserDataPtr> {
-        ClientHandle {
-            raw: self.raw,
-            cb: unsafe { &*self.cb },
-        }
-    }
+    pub fn submit(&self, mut packet: Packet<F::UserDataPtr>) {
+        use crate::error::SendErrorKind;
 
-    pub fn packet(
-        &self,
-        user_data: F::UserDataPtr,
-        operation: impl Into<packet::Operation>,
-    ) -> Packet<'_, F::UserDataPtr> {
-        self.handle().packet(user_data, operation)
+        let data = packet.user_data().data();
+        let Ok(data_size) = data.len().try_into() else {
+            packet.set_status(Err(SendErrorKind::TooMuchData.into()));
+            let cb = unsafe { &*self.cb };
+            cb.completion(packet, None);
+            return;
+        };
+        let data = data.as_ptr();
+
+        let raw_packet = packet.raw_mut();
+        raw_packet.data_size = data_size;
+        raw_packet.data = data.cast_mut().cast();
+
+        let mut raw_client = self.raw;
+
+        unsafe {
+            // TODO: error?
+            dbg!(sys::tb_client_submit(&mut raw_client, packet.raw));
+        }
+        mem::forget(packet); // avoid `Drop`ping `Packet`
     }
 }
 

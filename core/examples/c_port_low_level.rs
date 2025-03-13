@@ -54,10 +54,10 @@ fn main() {
         data_size: 0,
     });
     user_data.set_data(accounts);
-    let mut packet = client.packet(user_data, tb::OperationKind::CreateAccounts);
+    let mut packet = tb::Packet::new(user_data, tb::OperationKind::CreateAccounts);
     println!("Creating accounts...");
     let mut state = CTX.state.lock().unwrap();
-    (user_data, state) = CTX.send_request(state, packet).unwrap();
+    (user_data, state) = CTX.send_request(state, &client, packet).unwrap();
     state.create_accounts_status().unwrap();
 
     println!("Accounts created successfully");
@@ -87,10 +87,10 @@ fn main() {
                 .with_user_data_32(1)
         });
         user_data.set_data(transfers);
-        packet = client.packet(user_data, tb::OperationKind::CreateTransfers);
+        packet = tb::Packet::new(user_data, tb::OperationKind::CreateTransfers);
 
         let now = Instant::now();
-        (user_data, state) = CTX.send_request(state, packet).unwrap();
+        (user_data, state) = CTX.send_request(state, &client, packet).unwrap();
         let elapsed = now.elapsed();
         max_latency = max_latency.max(elapsed);
         total_time += elapsed;
@@ -125,8 +125,8 @@ fn main() {
     println!("Looking up accounts ...");
     let ids = accounts.map(|a| a.id());
     user_data.set_data(ids);
-    packet = client.packet(user_data, tb::OperationKind::LookupAccounts);
-    (user_data, state) = CTX.send_request(state, packet).unwrap();
+    packet = tb::Packet::new(user_data, tb::OperationKind::LookupAccounts);
+    (user_data, state) = CTX.send_request(state, &client, packet).unwrap();
     let accounts = state.get_data::<tb::Account>();
     if accounts.is_empty() {
         panic!("No accounts found");
@@ -143,8 +143,8 @@ fn main() {
 
     println!("Querying accounts ...");
     user_data.set_data([tb::QueryFilter::new(u32::MAX).with_user_data_32(1)]);
-    packet = client.packet(user_data, tb::OperationKind::QueryAccounts);
-    (user_data, state) = CTX.send_request(state, packet).unwrap();
+    packet = tb::Packet::new(user_data, tb::OperationKind::QueryAccounts);
+    (user_data, state) = CTX.send_request(state, &client, packet).unwrap();
     let accounts = state.get_data::<tb::Account>();
     if accounts.is_empty() {
         panic!("No accounts found");
@@ -161,8 +161,8 @@ fn main() {
 
     println!("Querying transfers ...");
     user_data.set_data([tb::QueryFilter::new(u32::MAX).with_user_data_32(1)]);
-    packet = client.packet(user_data, tb::OperationKind::QueryTransfers);
-    (_, state) = CTX.send_request(state, packet).unwrap();
+    packet = tb::Packet::new(user_data, tb::OperationKind::QueryTransfers);
+    (_, state) = CTX.send_request(state, &client, packet).unwrap();
     let transfers = state.get_data::<tb::Transfer>();
     if transfers.is_empty() {
         panic!("No transfers found");
@@ -189,10 +189,11 @@ impl CompletionContext {
     fn send_request<'a>(
         &self,
         mut guard: MutexGuard<'a, CompletionState>,
+        client: &tb::Client<&Callbacks>,
         packet: tb::Packet<Box<UserData>>,
     ) -> Result<(Box<UserData>, MutexGuard<'a, CompletionState>), tb::error::SendError> {
         guard.completed = None;
-        packet.submit();
+        client.submit(packet);
         loop {
             guard = self.cv.wait(guard).unwrap();
 
@@ -262,7 +263,7 @@ impl tb::Callbacks for Callbacks {
 
     fn completion(
         &self,
-        packet: tb::Packet<'_, Self::UserDataPtr>,
+        packet: tb::Packet<Self::UserDataPtr>,
         reply: Option<tb::Reply<'_>>,
     ) {
         let status = packet.status();
