@@ -88,9 +88,9 @@ mod linked {
 
     #[test]
     #[ignore = "only checks linkage"]
-    fn register_log_callback() {
+    fn tb_client_register_log_callback() {
         unsafe {
-            _ = crate::register_log_callback(None, false);
+            _ = crate::tb_client_register_log_callback(None, false);
         }
     }
 }

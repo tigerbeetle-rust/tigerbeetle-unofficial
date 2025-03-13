@@ -47,7 +47,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
     - `TB_CLIENT_STATUS` enumeration. ([#49], [tigerbeetle/tigerbeetle#2742])
     - `TB_REGISTER_LOG_CALLBACK_STATUS` enumeration. ([#49], [tigerbeetle/tigerbeetle#2742])
     - `TB_LOG_LEVEL` enumeration. ([#49], [tigerbeetle/tigerbeetle#2742])
-    - `register_log_callback()` function. ([#49], [tigerbeetle/tigerbeetle#2742])
+    - `tb_client_register_log_callback()` function. ([#49], [tigerbeetle/tigerbeetle#2742])
 - `core` crate:
     - `OperationKind::GetEvents` variant. ([#49])
 

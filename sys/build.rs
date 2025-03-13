@@ -9,8 +9,8 @@ use std::{
     process::Command,
 };
 
-use quote::quote;
-use syn::visit::Visit;
+use quote::{quote, ToTokens as _};
+use syn::{visit::Visit, visit_mut::VisitMut};
 
 /// Version of the used [TigerBeetle] release.
 ///
@@ -172,12 +172,20 @@ fn main() {
         .generate()
         .expect("generating `tb_client` bindings");
 
-    bindings
-        .write_to_file(out_dir.join("bindings.rs"))
+    let mut bindings = syn::parse_file(&bindings.to_string()).unwrap();
+    FixVisitor.visit_file_mut(&mut bindings);
+
+    fs::write(out_dir.join("bindings.rs"), bindings.to_token_stream().to_string())
+    //bindings
+    //    .write_to_file(out_dir.join("bindings.rs"))
         .expect("writing `tb_client` bindings");
+    Command::new(env::var("RUSTFMT").unwrap_or_else(|_| "rustfmt".into()))
+        .arg(&out_dir.join("bindings.rs"))
+        .status()
+        .unwrap();
 
     if env::var("CARGO_FEATURE_GENERATED_SAFE").is_ok() {
-        let bindings = syn::parse_file(&bindings.to_string()).unwrap();
+        //let bindings = syn::parse_file(&bindings.to_string()).unwrap();
 
         let mut visitor = TigerbeetleVisitor::default();
         visitor.visit_file(&bindings);
@@ -191,6 +199,19 @@ fn main() {
             .arg(&generated_path)
             .status()
             .unwrap();
+    }
+}
+
+struct FixVisitor;
+
+impl VisitMut for FixVisitor {
+    fn visit_foreign_item_fn_mut(&mut self, i: &mut syn::ForeignItemFn) {
+        if i.sig.ident == "register_log_callback" {
+            i.sig.ident = syn::Ident::new("tb_client_register_log_callback", i.sig.ident.span());
+
+        }
+
+        syn::visit_mut::visit_foreign_item_fn_mut(self, i)
     }
 }
 
