@@ -33,6 +33,12 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
         - Removed second `tb_client_t` argument from `completion_callback` (was `on_completion`) argument.
 - `core` crate:
     - Renamed `Callbacks::on_completion()` as `Callbacks::completion()` to match [`tb_client` C library] naming. ([#49])
+    - Removed lifetime parameter from `Packet`. ([#49])
+    - Removed `ClientHandle`, `Client::handle()`, `Packet::client_handle()` and `handle` argument of `Packet::new()`. ([#49])
+    - Remade `Packet::submit()` into `Client::submit()`. ([#49])
+    - Removed `Client::packet()` (use `Packet::new()` instead). ([#49])
+- Main crate:
+    - Removed lifetime parameter from `Packet`. ([#49]) 
 
 ### Added
 
