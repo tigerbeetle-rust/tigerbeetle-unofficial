@@ -69,6 +69,40 @@ jobs:
   # Testing #
   ###########
 
+  example:
+    name: example (${{ matrix.example }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - example: c_port_low_level
+            crate: tigerbeetle-unofficial-core
+          - example: c_port_high_level
+            crate: tigerbeetle-unofficial
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt
+
+      - name: Parse TigerBeetle version from Cargo manifest
+        id: tigerbeetle
+        run: echo "version=$(grep -m1 -e '^version = "' Cargo.toml | cut -d'"' -f2 | cut -d'+' -f2)"
+             >> $GITHUB_OUTPUT
+
+      - name: Start TigerBeetle server
+        run: docker run --rm -d --name tigerbeetle -p 3000:3000
+                        --security-opt seccomp=unconfined --cap-add IPC_LOCK
+                        --entrypoint sh ghcr.io/tigerbeetle/tigerbeetle:${{ steps.tigerbeetle.outputs.version }} -c
+             '/tigerbeetle format --cluster=0 --replica=0 --replica-count=1 /db.tb
+              && exec /tigerbeetle start --addresses=0.0.0.0:3000 /db.tb'
+
+      - run: cargo run -p ${{ matrix.crate }} --example ${{ matrix.example }}
+
   msrv:
     name: MSRV
     strategy:
