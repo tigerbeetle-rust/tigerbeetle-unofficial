@@ -103,6 +103,9 @@ jobs:
       matrix:
         toolchain: ["stable", "beta", "nightly"]
         os: ["ubuntu", "macOS", "windows"]
+        exclude: # TODO: Try remove on newer nightly versions.
+          - toolchain: nightly
+            os: windows
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v4
