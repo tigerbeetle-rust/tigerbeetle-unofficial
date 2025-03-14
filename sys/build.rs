@@ -172,21 +172,19 @@ fn main() {
         .generate()
         .expect("generating `tb_client` bindings");
 
+    // NOTE: `tb_client.h` has the `register_log_callback()` function name exported incorrectly, and
+    //       it doesn't link, so it should be to adjust it to link and work.
+    // TODO: Remove once `register_log_callback()` is renamed as `tb_client_register_log_callback()`
+    //       in `tb_client.h`.
     let mut bindings = syn::parse_file(&bindings.to_string()).unwrap();
-    FixVisitor.visit_file_mut(&mut bindings);
+    FixFnNamesVisitor.visit_file_mut(&mut bindings);
 
-    fs::write(out_dir.join("bindings.rs"), bindings.to_token_stream().to_string())
-    //bindings
-    //    .write_to_file(out_dir.join("bindings.rs"))
+    let bindings_path = out_dir.join("bindings.rs");
+    fs::write(&bindings_path, bindings.to_token_stream().to_string())
         .expect("writing `tb_client` bindings");
-    Command::new(env::var("RUSTFMT").unwrap_or_else(|_| "rustfmt".into()))
-        .arg(&out_dir.join("bindings.rs"))
-        .status()
-        .unwrap();
+    rustfmt(bindings_path);
 
     if env::var("CARGO_FEATURE_GENERATED_SAFE").is_ok() {
-        //let bindings = syn::parse_file(&bindings.to_string()).unwrap();
-
         let mut visitor = TigerbeetleVisitor::default();
         visitor.visit_file(&bindings);
 
@@ -195,20 +193,18 @@ fn main() {
         write!(f, "{}", visitor.output).unwrap();
         drop(f);
 
-        Command::new(env::var("RUSTFMT").unwrap_or_else(|_| "rustfmt".into()))
-            .arg(&generated_path)
-            .status()
-            .unwrap();
+        rustfmt(generated_path);
     }
 }
 
-struct FixVisitor;
+// TODO: Remove once `register_log_callback()` is renamed as `tb_client_register_log_callback()`
+//       in `tb_client.h`.
+struct FixFnNamesVisitor;
 
-impl VisitMut for FixVisitor {
+impl VisitMut for FixFnNamesVisitor {
     fn visit_foreign_item_fn_mut(&mut self, i: &mut syn::ForeignItemFn) {
         if i.sig.ident == "register_log_callback" {
             i.sig.ident = syn::Ident::new("tb_client_register_log_callback", i.sig.ident.span());
-
         }
 
         syn::visit_mut::visit_foreign_item_fn_mut(self, i)
@@ -729,4 +725,18 @@ where
     };
     #[cfg(not(any(unix, windows)))]
     unimplemented!("symlink on current platform is not supported")
+}
+
+/// Runs `rustfmt` over the provided `file`.
+///
+/// # Panics
+///
+/// If `rustfmt` fails to run.
+fn rustfmt(file: impl AsRef<Path>) {
+    let file = file.as_ref();
+
+    Command::new(env::var("RUSTFMT").unwrap_or_else(|_| "rustfmt".into()))
+        .arg(file)
+        .status()
+        .unwrap_or_else(|e| panic!("failed to run `rustfmt` on {}: {e}", file.display()));
 }
