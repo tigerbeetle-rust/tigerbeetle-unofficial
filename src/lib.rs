@@ -157,7 +157,7 @@ impl Client {
     ) -> Result<Reply, SendError> {
         let (reply_sender, reply_receiver) = oneshot::channel();
         let user_data = Box::new(UserData { reply_sender, data });
-        self.inner.packet(user_data, operation).submit();
+        self.inner.submit(Packet::new(user_data, operation));
         reply_receiver.await.unwrap()
     }
 }
@@ -165,11 +165,7 @@ impl Client {
 impl core::Callbacks for Callbacks {
     type UserDataPtr = Box<UserData>;
 
-    fn on_completion(
-        &self,
-        packet: core::Packet<'_, Self::UserDataPtr>,
-        reply: Option<core::Reply<'_>>,
-    ) {
+    fn completion(&self, packet: Packet<Self::UserDataPtr>, reply: Option<core::Reply<'_>>) {
         let status = packet.status();
         let operation = packet.operation();
         let user_data = packet.into_user_data();
@@ -194,13 +190,19 @@ fn _test_thread_safe(
     client: Client,
     accounts: Vec<Account>,
     transfers: Vec<Transfer>,
+    query_filter: &'static QueryFilter,
+    account_filter: &'static account::Filter,
     ids: Vec<u128>,
 ) {
     check_thread_safe(async move {
         client.create_accounts(accounts).await.unwrap();
-        client.lookup_accounts(ids.clone()).await.unwrap();
         client.create_transfers(transfers).await.unwrap();
+        client.get_account_balances(account_filter).await.unwrap();
+        client.get_account_transfers(account_filter).await.unwrap();
+        client.lookup_accounts(ids.clone()).await.unwrap();
         client.lookup_transfers(ids).await.unwrap();
+        client.query_accounts(query_filter).await.unwrap();
+        client.query_transfers(query_filter).await.unwrap();
     });
 
     fn check_thread_safe<T>(_: T)

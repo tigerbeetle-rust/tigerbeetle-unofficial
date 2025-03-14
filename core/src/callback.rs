@@ -56,12 +56,12 @@ pub trait Callbacks: Sync {
     ///
     /// [`None`] `reply` means that submitting the [`Packet`] failed (check the [`Packet::status`]
     /// for the reason).
-    fn on_completion(&self, packet: Packet<'_, Self::UserDataPtr>, reply: Option<Reply<'_>>);
+    fn completion(&self, packet: Packet<Self::UserDataPtr>, reply: Option<Reply<'_>>);
 }
 
 pub struct CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
+    F: Fn(Packet<U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     inner: F,
@@ -70,7 +70,7 @@ where
 
 impl<F, U> CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
+    F: Fn(Packet<U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     pub const fn new(inner: F) -> Self
@@ -87,27 +87,26 @@ where
 
 impl<F, U> Callbacks for CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
+    F: Fn(Packet<U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     type UserDataPtr = U;
 
-    fn on_completion(&self, packet: Packet<'_, Self::UserDataPtr>, reply: Option<Reply<'_>>) {
+    fn completion(&self, packet: Packet<Self::UserDataPtr>, reply: Option<Reply<'_>>) {
         (self.inner)(packet, reply)
     }
 }
 
 pub const fn on_completion_fn<U, F>(f: F) -> CallbacksFn<F, U>
 where
-    F: Fn(Packet<'_, U>, Option<Reply<'_>>) + Sync,
+    F: Fn(Packet<U>, Option<Reply<'_>>) + Sync,
     U: UserDataPtr,
 {
     CallbacksFn::new(f)
 }
 
-pub(crate) unsafe extern "C" fn on_completion_raw_fn<F>(
+pub(crate) unsafe extern "C" fn completion_callback_raw_fn<F>(
     ctx: usize,
-    raw_client: sys::tb_client_t,
     packet: *mut sys::tb_packet_t,
     timestamp: u64,
     payload: *const u8,
@@ -118,7 +117,7 @@ pub(crate) unsafe extern "C" fn on_completion_raw_fn<F>(
     let _ = catch_unwind(|| {
         let cb = &*sptr::from_exposed_addr::<F>(ctx);
         let payload_size = payload_size.try_into().expect(
-            "at the start of calling `on_completion` callback: \
+            "at the start of calling `completion_callback`: \
              unable to convert `payload_size` from `u32` into `usize`",
         );
         let payload = if payload_size != 0 {
@@ -128,13 +127,10 @@ pub(crate) unsafe extern "C" fn on_completion_raw_fn<F>(
         };
         let packet = Packet {
             raw: packet,
-            handle: super::ClientHandle {
-                raw: raw_client,
-                on_completion: cb,
-            },
+            _ptr: PhantomData,
         };
         let timestamp = SystemTime::UNIX_EPOCH + Duration::from_nanos(timestamp);
-        cb.on_completion(packet, Some(Reply { payload, timestamp }))
+        cb.completion(packet, Some(Reply { payload, timestamp }))
     });
 }
 

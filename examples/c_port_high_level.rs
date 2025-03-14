@@ -17,6 +17,7 @@ async fn main() {
     // Submitting a batch of accounts:                        //
     ////////////////////////////////////////////////////////////
 
+    println!("Creating accounts...");
     let accounts = [
         tb::Account::new(1, 777, 2).with_user_data_32(1),
         tb::Account::new(2, 777, 2),
