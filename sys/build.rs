@@ -9,16 +9,16 @@ use std::{
     process::Command,
 };
 
-use quote::quote;
-use syn::visit::Visit;
+use quote::{quote, ToTokens as _};
+use syn::{visit::Visit, visit_mut::VisitMut};
 
 /// Version of the used [TigerBeetle] release.
 ///
 /// [TigerBeetle]: https://github.com/tigerbeetle/tigerbeetle
-const TIGERBEETLE_RELEASE: &str = "0.16.28";
+const TIGERBEETLE_RELEASE: &str = "0.16.29";
 
 /// Commit hash of the [`TIGERBEETLE_RELEASE`].
-const TIGERBEETLE_COMMIT: &str = "e97e3377746aba6668a57bd4c919b2e2277d7ce6";
+const TIGERBEETLE_COMMIT: &str = "e55e3263d9606d50e6912341ce6c6a28718f9a5a";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
@@ -172,13 +172,19 @@ fn main() {
         .generate()
         .expect("generating `tb_client` bindings");
 
-    bindings
-        .write_to_file(out_dir.join("bindings.rs"))
+    // NOTE: `tb_client.h` has the `register_log_callback()` function name exported incorrectly, and
+    //       it doesn't link, so it should be to adjust it to link and work.
+    // TODO: Remove once `register_log_callback()` is renamed as `tb_client_register_log_callback()`
+    //       in `tb_client.h`.
+    let mut bindings = syn::parse_file(&bindings.to_string()).unwrap();
+    FixFnNamesVisitor.visit_file_mut(&mut bindings);
+
+    let bindings_path = out_dir.join("bindings.rs");
+    fs::write(&bindings_path, bindings.to_token_stream().to_string())
         .expect("writing `tb_client` bindings");
+    rustfmt(bindings_path);
 
     if env::var("CARGO_FEATURE_GENERATED_SAFE").is_ok() {
-        let bindings = syn::parse_file(&bindings.to_string()).unwrap();
-
         let mut visitor = TigerbeetleVisitor::default();
         visitor.visit_file(&bindings);
 
@@ -187,10 +193,21 @@ fn main() {
         write!(f, "{}", visitor.output).unwrap();
         drop(f);
 
-        Command::new(env::var("RUSTFMT").unwrap_or_else(|_| "rustfmt".into()))
-            .arg(&generated_path)
-            .status()
-            .unwrap();
+        rustfmt(generated_path);
+    }
+}
+
+// TODO: Remove once `register_log_callback()` is renamed as `tb_client_register_log_callback()`
+//       in `tb_client.h`.
+struct FixFnNamesVisitor;
+
+impl VisitMut for FixFnNamesVisitor {
+    fn visit_foreign_item_fn_mut(&mut self, i: &mut syn::ForeignItemFn) {
+        if i.sig.ident == "register_log_callback" {
+            i.sig.ident = syn::Ident::new("tb_client_register_log_callback", i.sig.ident.span());
+        }
+
+        syn::visit_mut::visit_foreign_item_fn_mut(self, i)
     }
 }
 
@@ -291,26 +308,22 @@ impl Visit<'_> for TigerbeetleVisitor {
                     errorize = true;
                 }
                 match new_enum_name.as_str() {
-                    "Status" => {
-                        new_enum_name = "StatusErrorKind".to_string();
-                        new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
-                        errorize = true;
-                    }
-                    "PacketStatus" => {
-                        new_enum_name = "PacketStatusErrorKind".to_string();
-                        new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
-                        repr_type = "u8";
-                        errorize = true;
-                    }
-                    "PacketAcquireStatus" => {
-                        new_enum_name = "PacketAcquireStatusErrorKind".to_string();
+                    "ClientStatus"
+                    | "InitStatus"
+                    | "PacketStatus"
+                    | "PacketAcquireStatus"
+                    | "RegisterLogCallbackStatus" => {
+                        if new_enum_name == "PacketStatus" {
+                            repr_type = "u8";
+                        }
+                        new_enum_name = format!("{new_enum_name}ErrorKind");
                         new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
                         errorize = true;
                     }
                     "Operation" => {
-                        new_enum_name = "OperationKind".to_string();
+                        repr_type = "u8";
+                        new_enum_name = "OperationKind".into();
                         new_enum_ident = syn::Ident::new(&new_enum_name, new_enum_ident.span());
-                        repr_type = "u8"
                     }
                     _ => (),
                 }
@@ -712,4 +725,18 @@ where
     };
     #[cfg(not(any(unix, windows)))]
     unimplemented!("symlink on current platform is not supported")
+}
+
+/// Runs `rustfmt` over the provided `file`.
+///
+/// # Panics
+///
+/// If `rustfmt` fails to run.
+fn rustfmt(file: impl AsRef<Path>) {
+    let file = file.as_ref();
+
+    Command::new(env::var("RUSTFMT").unwrap_or_else(|_| "rustfmt".into()))
+        .arg(file)
+        .status()
+        .unwrap_or_else(|e| panic!("failed to run `rustfmt` on {}: {e}", file.display()));
 }
