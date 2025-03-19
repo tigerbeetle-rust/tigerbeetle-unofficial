@@ -6,7 +6,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
-## [0.9.0+0.16.29] · unreleased
+## [0.9.0+0.16.29] · 2025-03-20
 [0.9.0+0.16.29]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.9.0%2B0.16.29
 
 [Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.8.0%2B0.16.28...v0.9.0%2B0.16.29) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/12)
@@ -15,7 +15,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 - `sys` crate:
     - Renamed `TB_STATUS` enumeration as `TB_INIT_STATUS`. ([#49], [tigerbeetle/tigerbeetle#2742])
-    - Transformed `tb_client_t` into struct with `opaque` field: ([#49], [tigerbeetle/tigerbeetle#2742])
+    - Transformed `tb_client_t` into struct with `opaque` field. ([#49], [tigerbeetle/tigerbeetle#2742])
     - `tb_packet_t`: ([#49], [tigerbeetle/tigerbeetle#2742])
         - Renamed `tag` field as `user_tag`.
         - Renamed `reserved` field as `opaque`.

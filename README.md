@@ -10,6 +10,13 @@
 
 Unofficial [TigerBeetle] bindings for [Rust].
 
+> **WARNING**: In [TigerBeetle] a client is **not [backward compatible][2]** with a cluster. You cannot run a newer client against an older cluster: clients are only [forward compatible][3] with replicas from their own version or newer (see the ["Oldest supported client version"](https://github.com/tigerbeetle/tigerbeetle/releases/tag/0.16.29) for the supported versions range).  
+> To avoid accidental use of a newer [TigerBeetle] client with an older cluster, it's highly recommended to pin the exact version if this crate in your `[dependencies]` and only change it with the cluster upgrade along:
+> ```toml
+> [dependencies]
+> tigerbeetle-unofficial = "=0.9.0+0.16.29"
+> ```
+
 
 
 
@@ -51,3 +58,5 @@ Unless required by applicable law or agreed to in writing, software distributed 
 [Rust]: https://www.rust-lang.org
 [TigerBeetle]: https://tigerbeetle.com
 [1]: https://github.com/tigerbeetle
+[2]: https://en.wikipedia.org/wiki/Backward_compatibility
+[3]: https://en.wikipedia.org/wiki/Forward_compatibility
