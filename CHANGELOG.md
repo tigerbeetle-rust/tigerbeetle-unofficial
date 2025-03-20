@@ -6,6 +6,93 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.9.2+0.16.31] · 2025-03-20
+[0.9.2+0.16.31]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.9.2%2B0.16.31
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.9.1%2B0.16.30...v0.9.2%2B0.16.31) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/14)
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.30 version][tb-0.16.30]. ([#54])
+
+[#54]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/54
+[tb-0.16.31]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.31/CHANGELOG.md#tigerbeetle-01631
+
+
+
+
+## [0.9.1+0.16.30] · 2025-03-20
+[0.9.1+0.16.30]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.9.1%2B0.16.30
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.9.0%2B0.16.29...v0.9.1%2B0.16.30) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/13)
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.30 version][tb-0.16.30]. ([#52])
+
+[#52]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/52
+[tb-0.16.30]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.30/CHANGELOG.md#tigerbeetle-01630
+
+
+
+
+## [0.9.0+0.16.29] · 2025-03-20
+[0.9.0+0.16.29]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.9.0%2B0.16.29
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.8.0%2B0.16.28...v0.9.0%2B0.16.29) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/12)
+
+### BC Breaks
+
+- `sys` crate:
+    - Renamed `TB_STATUS` enumeration as `TB_INIT_STATUS`. ([#49], [tigerbeetle/tigerbeetle#2742])
+    - Transformed `tb_client_t` into struct with `opaque` field. ([#49], [tigerbeetle/tigerbeetle#2742])
+    - `tb_packet_t`: ([#49], [tigerbeetle/tigerbeetle#2742])
+        - Renamed `tag` field as `user_tag`.
+        - Renamed `reserved` field as `opaque`.
+    - `tb_client_deinit()`: ([#49], [tigerbeetle/tigerbeetle#2742])
+        - Changed return type to `TB_CLIENT_STATUS`.
+        - Changed `client` argument to `*mut tb_client_t`.
+    - `tb_client_submit()`: ([#49], [tigerbeetle/tigerbeetle#2742])
+        - Changed return type to `TB_CLIENT_STATUS`.
+        - Changed `client` argument to `*mut tb_client_t`.
+    - `tb_client_completion_context()`: ([#49], [tigerbeetle/tigerbeetle#2742])
+        - Changed return type to `TB_CLIENT_STATUS`.
+        - Changed `client` argument to `*mut tb_client_t`.
+        - Added `completion_ctx_out: *mut usize` argument.
+    - `tb_client_init()` and `tb_client_init_echo()`: ([#49], [tigerbeetle/tigerbeetle#2742])
+        - Removed second `tb_client_t` argument from `completion_callback` (was `on_completion`) argument.
+- `core` crate:
+    - Renamed `Callbacks::on_completion()` as `Callbacks::completion()` to match [`tb_client` C library] naming. ([#49])
+    - Removed lifetime parameter from `Packet`. ([#49])
+    - Removed `ClientHandle`, `Client::handle()`, `Packet::client_handle()` and `handle` argument of `Packet::new()`. ([#49])
+    - Remade `Packet::submit()` into `Client::submit()`. ([#49])
+    - Removed `Client::packet()` (use `Packet::new()` instead). ([#49])
+- Main crate:
+    - Removed lifetime parameter from `Packet`. ([#49]) 
+
+### Added
+
+- `sys` crate:
+    - `TB_OPERATION_GET_EVENTS` value to `TB_OPERATION` enumeration. ([#49], [tigerbeetle/tigerbeetle#2507])
+    - `TB_CLIENT_STATUS` enumeration. ([#49], [tigerbeetle/tigerbeetle#2742])
+    - `TB_REGISTER_LOG_CALLBACK_STATUS` enumeration. ([#49], [tigerbeetle/tigerbeetle#2742])
+    - `TB_LOG_LEVEL` enumeration. ([#49], [tigerbeetle/tigerbeetle#2742])
+    - `tb_client_register_log_callback()` function. ([#49], [tigerbeetle/tigerbeetle#2742])
+- `core` crate:
+    - `OperationKind::GetEvents` variant. ([#49])
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.29 version][tb-0.16.29]. ([#49])
+
+[#49]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/49
+[tb-0.16.29]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.29/CHANGELOG.md#tigerbeetle-01629
+[tigerbeetle/tigerbeetle#2507]: https://github.com/tigerbeetle/tigerbeetle/pull/2507
+[tigerbeetle/tigerbeetle#2742]: https://github.com/tigerbeetle/tigerbeetle/pull/2742
+
+
+
+
 ## [0.8.0+0.16.28] · 2025-02-18
 [0.8.0+0.16.28]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.8.0%2B0.16.28
 
