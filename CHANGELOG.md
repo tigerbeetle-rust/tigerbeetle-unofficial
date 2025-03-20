@@ -13,9 +13,9 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 ### Changed
 
-- Upgraded [`tb_client` C library] to [0.16.30 version][tb-0.16.30]. ([#50])
+- Upgraded [`tb_client` C library] to [0.16.30 version][tb-0.16.30]. ([#52])
 
-[#50]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/50
+[#52]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/52
 [tb-0.16.30]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.30/CHANGELOG.md#tigerbeetle-01630
 
 
