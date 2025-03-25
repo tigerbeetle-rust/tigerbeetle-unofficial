@@ -15,10 +15,10 @@ use syn::{visit::Visit, visit_mut::VisitMut};
 /// Version of the used [TigerBeetle] release.
 ///
 /// [TigerBeetle]: https://github.com/tigerbeetle/tigerbeetle
-const TIGERBEETLE_RELEASE: &str = "0.16.32";
+const TIGERBEETLE_RELEASE: &str = "0.16.33";
 
 /// Commit hash of the [`TIGERBEETLE_RELEASE`].
-const TIGERBEETLE_COMMIT: &str = "801957ecc72027feb9a5a5b3e1af52c5014d2cce";
+const TIGERBEETLE_COMMIT: &str = "972367f51e187d5bce7e04d868b787332c2701a5";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
@@ -341,11 +341,15 @@ impl Visit<'_> for TigerbeetleVisitor {
                     variants.remove(0);
                 }
 
+                let mut excluded_codes = vec![];
                 let mut variants_iter = variants.iter();
                 let mut j = variants_iter.next().unwrap().2;
                 for (_, _, i) in variants_iter {
                     j += 1;
-                    assert_eq!(*i, j);
+                    if *i != j {
+                        excluded_codes.push(j);
+                        j += 1;
+                    }
                 }
 
                 let minmax_prefix = enum_name
@@ -354,6 +358,7 @@ impl Visit<'_> for TigerbeetleVisitor {
                     .strip_prefix("TB_")
                     .unwrap();
                 let error = if errorize { "_ERROR" } else { "" };
+
                 let min_name = syn::Ident::new(
                     &format!("MIN_{minmax_prefix}{error}_CODE"),
                     proc_macro2::Span::call_site(),
@@ -363,9 +368,22 @@ impl Visit<'_> for TigerbeetleVisitor {
                     proc_macro2::Span::call_site(),
                 );
                 let j = syn::LitInt::new(&j.to_string(), proc_macro2::Span::call_site());
+                let excluded_const = (!excluded_codes.is_empty()).then(|| {
+                    let excl_name = syn::Ident::new(
+                        &format!("EXCLUDED_{minmax_prefix}{error}_CODES"),
+                        proc_macro2::Span::call_site(),
+                    );
+                    let excl_codes = excluded_codes
+                        .iter()
+                        .map(|c| syn::LitInt::new(&c.to_string(), proc_macro2::Span::call_site()));
+                    quote! {
+                        pub const #excl_name: &[#repr_type] = &[#(#excl_codes),*];
+                    }
+                });
                 let extra = quote! {
                     pub const #min_name: #repr_type = 1;
                     pub const #max_name: #repr_type = #j;
+                    #excluded_const
                 };
 
                 let from_snake_case_str_branches = variants

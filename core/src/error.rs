@@ -412,7 +412,9 @@ impl CreateTransferError {
 
     pub fn kind(self) -> CreateTransferErrorKind {
         let code = self.0.get();
-        if Self::CODE_RANGE.contains(&code) {
+        if Self::CODE_RANGE.contains(&code)
+            && !sys_safe::EXCLUDED_CREATE_TRANSFER_ERROR_CODES.contains(&code)
+        {
             // SAFETY: We checked if it's in range right above.
             unsafe { mem::transmute::<u32, CreateTransferErrorKind>(code) }
         } else {
