@@ -6,6 +6,38 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.10.0+0.16.33] · 2025-03-25
+[0.10.0+0.16.33]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.10.0%2B0.16.33
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.9.3%2B0.16.32...v0.10.0%2B0.16.33) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/16)
+
+### BC Breaks
+
+- `sys` crate:
+    - Removed `TB_CREATE_TRANSFER_AMOUNT_MUST_NOT_BE_ZERO` value from `TB_CREATE_TRANSFER_RESULT` enumeration. ([#57], [tigerbeetle/tigerbeetle#2824])
+    - `generated_safe`:
+        - Removed `AmountMustNotBeZero` variant from `CreateTransferErrorKind` enum. ([#57], [tigerbeetle/tigerbeetle#2824])
+- `core` crate:
+    - Removed `AmountMustNotBeZero` variant from `error::CreateTransferErrorKind` enum. ([#57], [tigerbeetle/tigerbeetle#2824])
+- Main crate:
+    - Removed `AmountMustNotBeZero` variant from `error::CreateTransferErrorKind` enum. ([#57], [tigerbeetle/tigerbeetle#2824])
+
+### Added
+
+- `sys` crate:
+    - `generated_safe`:
+        - `EXCLUDED_CREATE_TRANSFER_ERROR_CODES` constant holding the code of the removed `CreateTransferErrorKind::AmountMustNotBeZero` variant. ([#57])
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.33 version][tb-0.16.33]. ([#57])
+
+[#57]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/57
+[tb-0.16.33]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.33/CHANGELOG.md#tigerbeetle-01633
+[tigerbeetle/tigerbeetle#2824]: https://github.com/tigerbeetle/tigerbeetle/pull/2824
+
+
+
+
 ## [0.9.3+0.16.32] · 2025-03-20
 [0.9.3+0.16.32]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.9.3%2B0.16.32
 
