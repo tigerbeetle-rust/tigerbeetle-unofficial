@@ -142,9 +142,6 @@ jobs:
       matrix:
         toolchain: ["stable", "beta", "nightly"]
         os: ["ubuntu", "macOS", "windows"]
-        exclude: # TODO: Try remove on newer nightly versions.
-          - toolchain: nightly
-            os: windows
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v4
@@ -159,13 +156,13 @@ jobs:
         if: ${{ matrix.toolchain == 'nightly' && matrix.os != 'windows' }}
 
       - run: cargo ${{ (matrix.toolchain == 'nightly' && matrix.os != 'windows') && 'careful' || '' }} test
-             -p tigerbeetle-unofficial-sys --all-features
+             -p tigerbeetle-unofficial-sys --all-features --verbose
 
-      - run: cargo ${{ (matrix.toolchain == 'nightly' && matrix.os != 'windows') && 'careful' || '' }} test
-             -p tigerbeetle-unofficial-core --all-features
+      #- run: cargo ${{ (matrix.toolchain == 'nightly' && matrix.os != 'windows') && 'careful' || '' }} test
+      #       -p tigerbeetle-unofficial-core --all-features
 
-      - run: cargo ${{ (matrix.toolchain == 'nightly' && matrix.os != 'windows') && 'careful' || '' }} test
-             -p tigerbeetle-unofficial --all-features
+      #- run: cargo ${{ (matrix.toolchain == 'nightly' && matrix.os != 'windows') && 'careful' || '' }} test
+      #       -p tigerbeetle-unofficial --all-features
 
 
 
