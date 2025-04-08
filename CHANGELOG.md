@@ -11,8 +11,14 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 [Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.10.1%2B0.16.34...v0.11.0%2B0.16.35) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/18)
 
+### BC Breaks
+
 - `sys` crate:
     - Shifted numeric representation of values in `TB_OPERATION` enumeration. ([#60], [tigerbeetle/tigerbeetle#2787])
+
+### Added
+
+- `sys` crate:
     - `generated_safe`:
         - `EXCLUDED_OPERATION_CODES` constant holding the excluded codes between `MIN_OPERATION_CODE` AND `MIN_OPERATION_CODE`. ([#60])
 
