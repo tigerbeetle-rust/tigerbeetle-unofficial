@@ -6,6 +6,27 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.11.0+0.16.35] · 2025-04-08
+[0.11.0+0.16.35]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.11.0%2B0.16.35
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.10.1%2B0.16.34...v0.11.0%2B0.16.35) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/18)
+
+- `sys` crate:
+    - Shifted numeric representation of values in `TB_OPERATION` enumeration. ([#60], [tigerbeetle/tigerbeetle#2787])
+    - `generated_safe`:
+        - `EXCLUDED_OPERATION_CODES` constant holding the excluded codes between `MIN_OPERATION_CODE` AND `MIN_OPERATION_CODE`. ([#60])
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.35 version][tb-0.16.35]. ([#60])
+
+[#60]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/60
+[tb-0.16.35]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.35/CHANGELOG.md#tigerbeetle-01635
+[tigerbeetle/tigerbeetle#2787]: https://github.com/tigerbeetle/tigerbeetle/pull/2787
+
+
+
+
 ## [0.10.1+0.16.34] · 2025-04-01
 [0.10.1+0.16.34]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.10.1%2B0.16.34
 
