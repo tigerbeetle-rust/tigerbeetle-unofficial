@@ -7,7 +7,7 @@ use std::{
 
 use tigerbeetle_unofficial_core as tb;
 
-const MAX_MESSAGE_SIZE: usize = (1024 * 1024) - 256;
+const MAX_MESSAGE_SIZE: usize = (1024 * 1024) - 512;
 
 struct Callbacks;
 
