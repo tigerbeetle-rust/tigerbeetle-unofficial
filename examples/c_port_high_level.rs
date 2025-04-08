@@ -2,7 +2,7 @@ use std::time::{Duration, Instant};
 
 use tigerbeetle_unofficial as tb;
 
-const MAX_MESSAGE_BYTE_SIZE: usize = (1024 * 1024) - 256;
+const MAX_MESSAGE_BYTE_SIZE: usize = (1024 * 1024) - 512;
 
 // Crate is runtime agnostic, so you can use tokio or any other async runtime
 #[pollster::main]
