@@ -125,6 +125,7 @@ pub(crate) unsafe extern "C" fn completion_callback_raw_fn<F>(
         } else {
             &[]
         };
+        dbg!((*packet).operation);
         let packet = Packet {
             raw: packet,
             _ptr: PhantomData,

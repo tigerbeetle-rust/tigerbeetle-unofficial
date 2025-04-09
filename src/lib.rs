@@ -167,7 +167,7 @@ impl core::Callbacks for Callbacks {
 
     fn completion(&self, packet: Packet<Self::UserDataPtr>, reply: Option<core::Reply<'_>>) {
         let status = packet.status();
-        let operation = packet.operation();
+        let operation = dbg!(packet.operation());
         let user_data = packet.into_user_data();
         user_data
             .reply_sender
