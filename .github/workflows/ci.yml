@@ -102,10 +102,6 @@ jobs:
              '/tigerbeetle format --cluster=0 --replica=0 --replica-count=1 /db.tb
               && exec /tigerbeetle start --addresses=0.0.0.0:3000 /db.tb'
 
-      - run: cat notify_completion_log.patch
-      - run: git apply ../../notify_completion_log.patch
-        working-directory: ./sys/tigerbeetle/
-
       - run: cargo run -p ${{ matrix.crate }} --example ${{ matrix.example }}
 
       - name: Stop TigerBeetle server
