@@ -1,0 +1,13 @@
+diff --git a/src/clients/c/tb_client/context.zig b/src/clients/c/tb_client/context.zig
+index 9613a2c4d..230d40d53 100644
+--- a/src/clients/c/tb_client/context.zig
++++ b/src/clients/c/tb_client/context.zig
+@@ -752,6 +752,8 @@ pub fn ContextType(
+                 reply: []const u8,
+             },
+         ) void {
++            log.warn("notify_completion: packet.operation == {}", .{ packet.operation });
++
+             const result = completion catch |err| {
+                 packet.status = switch (err) {
+                     error.TooMuchData => .too_much_data,
