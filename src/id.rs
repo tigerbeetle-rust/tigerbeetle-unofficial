@@ -49,8 +49,7 @@ pub fn id() -> u128 {
         }
 
         // Read out a `u80` from the `last_random` as a `u64` and `u16`.
-        // PANIC: Unwrapping is OK here, since `mem::size_of<u64>() == 8` and
-        //        `mem::size_of<u16>() == 2`.
+        // PANIC: Unwrapping is OK here, since `size_of<u64>() == 8` and `size_of<u16>() == 2`.
         let mut random_lo = u64::from_le_bytes(last_random[..8].try_into().unwrap());
         let mut random_hi = u16::from_le_bytes(last_random[8..].try_into().unwrap());
 

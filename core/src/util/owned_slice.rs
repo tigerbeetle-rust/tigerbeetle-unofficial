@@ -122,7 +122,7 @@ where
     {
         AsBytesOwnedSlice {
             owner: self.erase_type(),
-            size_of_element: mem::size_of::<T>(),
+            size_of_element: size_of::<T>(),
         }
     }
 }

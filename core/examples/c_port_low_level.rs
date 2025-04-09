@@ -1,6 +1,5 @@
 use std::{
     io::Write,
-    mem,
     sync::{Condvar, Mutex, MutexGuard},
     time::{Duration, Instant},
 };
@@ -69,7 +68,7 @@ fn main() {
 
     println!("Creating transfers...");
     const MAX_BATCHES: usize = 100;
-    const TRANSFERS_PER_BATCH: usize = MAX_MESSAGE_SIZE / mem::size_of::<tb::Transfer>() - 1;
+    const TRANSFERS_PER_BATCH: usize = MAX_MESSAGE_SIZE / size_of::<tb::Transfer>() - 1;
     let max_batches = std::env::var("TIGERBEETLE_RS_MAX_BATCHES")
         .ok()
         .and_then(|s| s.parse().ok())
@@ -227,8 +226,8 @@ impl CompletionState {
         if self.size == 0 {
             return Vec::new();
         }
-        assert_eq!(self.size % mem::size_of::<T>(), 0);
-        let mut res = vec![T::zeroed(); self.size / mem::size_of::<T>()];
+        assert_eq!(self.size % size_of::<T>(), 0);
+        let mut res = vec![T::zeroed(); self.size / size_of::<T>()];
         bytemuck::cast_slice_mut::<_, u8>(&mut res).copy_from_slice(&self.reply[..self.size]);
         res
     }
