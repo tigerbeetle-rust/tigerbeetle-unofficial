@@ -135,6 +135,7 @@ fn main() {
             // `-gnu` toolchain looks for `lib<name>.a` file of a static library by default, but
             // `zig build` produces `<name>.lib` despite using MinGW under-the-hood.
             println!("cargo:rustc-link-lib=static:+verbatim=tb_client.lib");
+            println!("cargo:rustc-link-lib=static:advapi32");
         } else {
             println!("cargo:rustc-link-lib=static=tb_client");
         }
