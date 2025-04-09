@@ -48,7 +48,7 @@ impl Reply {
             OperationKind::QueryTransfers => {
                 Reply::QueryTransfers(bytemuck::pod_collect_to_vec(payload))
             }
-            _ => unimplemented!("unknown operation kind"),
+            _ => unimplemented!("unknown `OperationKind`: {}", operation as u8),
         }
     }
 
