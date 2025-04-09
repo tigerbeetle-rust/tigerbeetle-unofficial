@@ -135,7 +135,11 @@ fn main() {
             // `-gnu` toolchain looks for `lib<name>.a` file of a static library by default, but
             // `zig build` produces `<name>.lib` despite using MinGW under-the-hood.
             println!("cargo:rustc-link-lib=static:+verbatim=tb_client.lib");
-            println!("cargo:rustc-link-lib=static=advapi32");
+            // As of Rust 1.87, its `std` doesn't link `advapi32` automatically anymore, however
+            // the `tb_client` requires it.
+            // See: https://github.com/rust-lang/rust/pull/138233
+            //      https://github.com/rust-lang/rust/issues/139352
+            println!("cargo:rustc-link-lib=advapi32");
         } else {
             println!("cargo:rustc-link-lib=static=tb_client");
         }

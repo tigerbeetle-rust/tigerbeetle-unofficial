@@ -156,13 +156,13 @@ jobs:
         if: ${{ matrix.toolchain == 'nightly' && matrix.os != 'windows' }}
 
       - run: cargo ${{ (matrix.toolchain == 'nightly' && matrix.os != 'windows') && 'careful' || '' }} test
-             -p tigerbeetle-unofficial-sys --all-features --verbose
+             -p tigerbeetle-unofficial-sys --all-features
 
-      #- run: cargo ${{ (matrix.toolchain == 'nightly' && matrix.os != 'windows') && 'careful' || '' }} test
-      #       -p tigerbeetle-unofficial-core --all-features
+      - run: cargo ${{ (matrix.toolchain == 'nightly' && matrix.os != 'windows') && 'careful' || '' }} test
+             -p tigerbeetle-unofficial-core --all-features
 
-      #- run: cargo ${{ (matrix.toolchain == 'nightly' && matrix.os != 'windows') && 'careful' || '' }} test
-      #       -p tigerbeetle-unofficial --all-features
+      - run: cargo ${{ (matrix.toolchain == 'nightly' && matrix.os != 'windows') && 'careful' || '' }} test
+             -p tigerbeetle-unofficial --all-features
 
 
 
