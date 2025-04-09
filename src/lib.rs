@@ -176,7 +176,7 @@ impl core::Callbacks for Callbacks {
                 //        `status` is `Err`.
                 Reply::copy_from_reply(operation.kind(), reply.unwrap().payload)
             }))
-            .unwrap_or_else(|_| panic!("Unexpected: reply receiver is already dropped"));
+            .unwrap_or_else(|_| panic!("unexpected: reply receiver is already dropped"));
     }
 }
 

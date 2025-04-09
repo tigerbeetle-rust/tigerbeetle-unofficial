@@ -3,7 +3,7 @@ use std::{ffi::c_void, marker::PhantomData, mem, num::NonZeroU8, ptr};
 pub use sys::generated_safe::OperationKind;
 
 use super::callback::{UserData, UserDataPtr};
-use crate::error::SendError;
+use crate::error::{sys_safe, SendError};
 
 pub struct Packet<U>
 where
@@ -135,7 +135,9 @@ impl Operation {
         sys::generated_safe::MIN_OPERATION_CODE..=sys::generated_safe::MAX_OPERATION_CODE;
 
     pub fn kind(self) -> OperationKind {
-        if Self::CODE_RANGE.contains(&self.0) {
+        if Self::CODE_RANGE.contains(&self.0)
+            && !sys_safe::EXCLUDED_OPERATION_CODES.contains(&self.0)
+        {
             // SAFETY: We checked if it's in range right above.
             unsafe { mem::transmute::<u8, OperationKind>(self.0) }
         } else {
