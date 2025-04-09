@@ -341,16 +341,15 @@ impl Visit<'_> for TigerbeetleVisitor {
                     variants.remove(0);
                 }
 
-                let mut excluded_codes = vec![];
-                let mut variants_iter = variants.iter();
-                let mut j = variants_iter.next().unwrap().2;
-                for (_, _, i) in variants_iter {
-                    j += 1;
-                    if *i != j {
-                        excluded_codes.push(j);
-                        j += 1;
-                    }
-                }
+                let all_codes = variants
+                    .iter()
+                    .filter_map(|(_, _, c)| (*c != 0).then_some(*c))
+                    .collect::<Vec<_>>();
+                let min_code = *all_codes.iter().min().unwrap();
+                let max_code = *all_codes.iter().max().unwrap();
+                let excluded_codes = (min_code..=max_code)
+                    .filter(|c| !all_codes.contains(c))
+                    .collect::<Vec<_>>();
 
                 let minmax_prefix = enum_name
                     .strip_suffix("_RESULT")
@@ -367,7 +366,10 @@ impl Visit<'_> for TigerbeetleVisitor {
                     &format!("MAX_{minmax_prefix}{error}_CODE"),
                     proc_macro2::Span::call_site(),
                 );
-                let j = syn::LitInt::new(&j.to_string(), proc_macro2::Span::call_site());
+                let min_code =
+                    syn::LitInt::new(&min_code.to_string(), proc_macro2::Span::call_site());
+                let max_code =
+                    syn::LitInt::new(&max_code.to_string(), proc_macro2::Span::call_site());
                 let excluded_const = (!excluded_codes.is_empty()).then(|| {
                     let excl_name = syn::Ident::new(
                         &format!("EXCLUDED_{minmax_prefix}{error}_CODES"),
@@ -381,8 +383,8 @@ impl Visit<'_> for TigerbeetleVisitor {
                     }
                 });
                 let extra = quote! {
-                    pub const #min_name: #repr_type = 1;
-                    pub const #max_name: #repr_type = #j;
+                    pub const #min_name: #repr_type = #min_code;
+                    pub const #max_name: #repr_type = #max_code;
                     #excluded_const
                 };
 
