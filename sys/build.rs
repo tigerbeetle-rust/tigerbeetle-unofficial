@@ -10,15 +10,15 @@ use std::{
 };
 
 use quote::{quote, ToTokens as _};
-use syn::{visit::Visit, visit_mut::VisitMut};
+use syn::visit::Visit;
 
 /// Version of the used [TigerBeetle] release.
 ///
 /// [TigerBeetle]: https://github.com/tigerbeetle/tigerbeetle
-const TIGERBEETLE_RELEASE: &str = "0.16.35";
+const TIGERBEETLE_RELEASE: &str = "0.16.36";
 
 /// Commit hash of the [`TIGERBEETLE_RELEASE`].
-const TIGERBEETLE_COMMIT: &str = "66ed79d4b942a08afbe5fc1f61d3e33df9b00dd3";
+const TIGERBEETLE_COMMIT: &str = "c4a91e2e605f09910501c1357ba2da04b16d1b2f";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
@@ -177,12 +177,7 @@ fn main() {
         .generate()
         .expect("generating `tb_client` bindings");
 
-    // NOTE: `tb_client.h` has the `register_log_callback()` function name exported incorrectly, and
-    //       it doesn't link, so it should be to adjust it to link and work.
-    // TODO: Remove once `register_log_callback()` is renamed as `tb_client_register_log_callback()`
-    //       in `tb_client.h`.
-    let mut bindings = syn::parse_file(&bindings.to_string()).unwrap();
-    FixFnNamesVisitor.visit_file_mut(&mut bindings);
+    let bindings = syn::parse_file(&bindings.to_string()).unwrap();
 
     let bindings_path = out_dir.join("bindings.rs");
     fs::write(&bindings_path, bindings.to_token_stream().to_string())
@@ -199,20 +194,6 @@ fn main() {
         drop(f);
 
         rustfmt(generated_path);
-    }
-}
-
-// TODO: Remove once `register_log_callback()` is renamed as `tb_client_register_log_callback()`
-//       in `tb_client.h`.
-struct FixFnNamesVisitor;
-
-impl VisitMut for FixFnNamesVisitor {
-    fn visit_foreign_item_fn_mut(&mut self, i: &mut syn::ForeignItemFn) {
-        if i.sig.ident == "register_log_callback" {
-            i.sig.ident = syn::Ident::new("tb_client_register_log_callback", i.sig.ident.span());
-        }
-
-        syn::visit_mut::visit_foreign_item_fn_mut(self, i)
     }
 }
 
