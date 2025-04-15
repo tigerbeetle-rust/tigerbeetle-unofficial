@@ -15,7 +15,7 @@ tokio-rt-multi-thread = ["core/tokio-rt-multi-thread"]
 
 [dependencies]
 bytemuck = { version = "1.16", features = ["extern_crate_alloc"] }
-core = { version = "=0.11.0+0.16.35", package = "tigerbeetle-unofficial-core", path = "core" }
+core = { version = "=0.11.0+0.16.36", package = "tigerbeetle-unofficial-core", path = "core" }
 fastrand = "2.3"
 tokio = { version = "1.28.1", features = ["sync"] }
 
@@ -26,7 +26,7 @@ pollster = { version = "0.4", features = ["macro"] }
 members = ["sys", "core"]
 
 [workspace.package]
-version = "0.11.0+0.16.35"
+version = "0.11.0+0.16.36"
 authors = ["Daria Sukhonina <dariasukhonina@gmail.com>"]
 rust-version = "1.78"
 repository = "https://github.com/tigerbeetle-rust/tigerbeetle-unofficial"
