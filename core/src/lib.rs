@@ -15,7 +15,7 @@ pub mod query_filter;
 pub mod transfer;
 pub mod util;
 
-use std::{marker::PhantomData, mem, num::NonZeroU32, pin::Pin, cell::UnsafeCell};
+use std::{cell::UnsafeCell, marker::PhantomData, mem, num::NonZeroU32, pin::Pin};
 
 use error::{NewClientError, NewClientErrorKind};
 
