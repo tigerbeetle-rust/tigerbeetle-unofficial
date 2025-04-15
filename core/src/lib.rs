@@ -15,7 +15,7 @@ pub mod query_filter;
 pub mod transfer;
 pub mod util;
 
-use std::{marker::PhantomData, mem, num::NonZeroU32};
+use std::{cell::UnsafeCell, marker::PhantomData, mem, num::NonZeroU32, pin::Pin};
 
 use error::{NewClientError, NewClientErrorKind};
 
@@ -32,7 +32,7 @@ pub struct Client<F>
 where
     F: CallbacksPtr,
 {
-    raw: sys::tb_client_t,
+    raw: Pin<Box<UnsafeCell<sys::tb_client_t>>>,
     cb: *const F::Target,
     marker: PhantomData<F>,
 }
@@ -87,10 +87,10 @@ where
             address: &[u8],
             completion_ctx: usize,
             completion_callback: CompletionCallbackRawFn,
-        ) -> Result<sys::tb_client_t, NewClientError> {
-            let mut raw = mem::zeroed();
+        ) -> Result<Pin<Box<UnsafeCell<sys::tb_client_t>>>, NewClientError> {
+            let mut raw = Box::pin(UnsafeCell::new(mem::zeroed()));
             let status = sys::tb_client_init(
-                &mut raw,
+                raw.as_mut().get_unchecked_mut().get_mut(),
                 cluster_id.to_ne_bytes().as_ptr(),
                 address.as_ptr().cast(),
                 address
@@ -113,14 +113,8 @@ where
 
         Ok(Client {
             raw: unsafe {
-                match raw_with_callback(cluster_id, address.as_ref(), completion_ctx, completion_fn)
-                {
-                    Ok(x) => x,
-                    Err(e) => {
-                        F::from_raw_const_ptr(completion_cb);
-                        return Err(e);
-                    }
-                }
+                raw_with_callback(cluster_id, address.as_ref(), completion_ctx, completion_fn)
+                    .inspect_err(|_| drop(F::from_raw_const_ptr(completion_cb)))?
             },
             cb: completion_cb,
             marker: PhantomData,
@@ -143,13 +137,14 @@ where
         raw_packet.data_size = data_size;
         raw_packet.data = data.cast_mut().cast();
 
-        let mut raw_client = self.raw;
-
+        // SAFETY: Going from `&self` to `*mut sys::tb_client_t` is OK here, because multi-thread
+        //         access is synchronized by the `sys::tb_client_t` itself inside.
         unsafe {
+            let raw_client: *mut sys::tb_client_t = self.raw.get();
             // NOTE: We do omit checking the result to be `TB_CLIENT_INVALID` intentionally here,
             //       because it can be returned only if the `raw_client` is not yet inited, or was
             //       deinited already, which happens only in constructors and `Drop` respectively.
-            _ = sys::tb_client_submit(&mut raw_client, packet.raw);
+            _ = sys::tb_client_submit(raw_client, packet.raw);
         }
         mem::forget(packet); // avoid `Drop`ping `Packet`
     }
@@ -162,6 +157,7 @@ where
 {
     fn drop(&mut self) {
         unsafe {
+            let raw_client = self.raw.as_mut().get_unchecked_mut().get_mut();
             #[cfg(feature = "tokio-rt-multi-thread")]
             if tokio::runtime::Handle::try_current().is_ok_and(|h| {
                 matches!(
@@ -169,15 +165,16 @@ where
                     tokio::runtime::RuntimeFlavor::MultiThread
                 )
             }) {
-                _ = tokio::task::block_in_place(|| sys::tb_client_deinit(&mut self.raw));
+                _ = tokio::task::block_in_place(|| sys::tb_client_deinit(raw_client));
             } else {
-                _ = sys::tb_client_deinit(&mut self.raw);
+                _ = sys::tb_client_deinit(raw_client);
             }
             #[cfg(not(feature = "tokio-rt-multi-thread"))]
             {
-                _ = sys::tb_client_deinit(&mut self.raw);
+                _ = sys::tb_client_deinit(raw_client);
             }
-            F::from_raw_const_ptr(self.cb);
+
+            drop(F::from_raw_const_ptr(self.cb));
         }
     }
 }

@@ -6,6 +6,21 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.11.2+0.16.36] · 2025-04-15
+[0.11.2+0.16.36]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.11.2%2B0.16.36
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.11.1%2B0.16.36...v0.11.2%2B0.16.36) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/20)
+
+### Fixed
+
+- Incorrect handling of `sys::tb_client_t` inside `core::Client` resulting in deadlock. ([#63], [#59])
+
+[#59]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/issues/59
+[#63]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/62
+
+
+
+
 ## [0.11.1+0.16.36] · 2025-04-15
 [0.11.1+0.16.36]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.11.1%2B0.16.36
 
