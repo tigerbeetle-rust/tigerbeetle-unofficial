@@ -10,7 +10,7 @@ use std::{
 };
 
 use quote::{quote, ToTokens as _};
-use syn::{visit::Visit, visit_mut::VisitMut};
+use syn::visit::Visit;
 
 /// Version of the used [TigerBeetle] release.
 ///
@@ -177,12 +177,7 @@ fn main() {
         .generate()
         .expect("generating `tb_client` bindings");
 
-    // NOTE: `tb_client.h` has the `register_log_callback()` function name exported incorrectly, and
-    //       it doesn't link, so it should be to adjust it to link and work.
-    // TODO: Remove once `register_log_callback()` is renamed as `tb_client_register_log_callback()`
-    //       in `tb_client.h`.
-    let mut bindings = syn::parse_file(&bindings.to_string()).unwrap();
-    FixFnNamesVisitor.visit_file_mut(&mut bindings);
+    let bindings = syn::parse_file(&bindings.to_string()).unwrap();
 
     let bindings_path = out_dir.join("bindings.rs");
     fs::write(&bindings_path, bindings.to_token_stream().to_string())
@@ -199,20 +194,6 @@ fn main() {
         drop(f);
 
         rustfmt(generated_path);
-    }
-}
-
-// TODO: Remove once `register_log_callback()` is renamed as `tb_client_register_log_callback()`
-//       in `tb_client.h`.
-struct FixFnNamesVisitor;
-
-impl VisitMut for FixFnNamesVisitor {
-    fn visit_foreign_item_fn_mut(&mut self, i: &mut syn::ForeignItemFn) {
-        if i.sig.ident == "register_log_callback" {
-            i.sig.ident = syn::Ident::new("tb_client_register_log_callback", i.sig.ident.span());
-        }
-
-        syn::visit_mut::visit_foreign_item_fn_mut(self, i)
     }
 }
 
