@@ -6,6 +6,28 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.11.4+0.16.38] · 2025-04-29
+[0.11.4+0.16.38]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.11.4%2B0.16.38
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.11.3%2B0.16.37...v0.11.4%2B0.16.38) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/22)
+
+### Added
+
+- `sys` crate:
+    - `tb_client_init_parameters()` function. ([#65], [tigerbeetle/tigerbeetle#2665]) 
+    - `tb_init_parameters_t` struct. ([#65], [tigerbeetle/tigerbeetle#2665])
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.38 version][tb-0.16.38]. ([#65])
+
+[#65]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/65
+[tb-0.16.38]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.38/CHANGELOG.md#tigerbeetle-01638
+[tigerbeetle/tigerbeetle#2665]: https://github.com/tigerbeetle/tigerbeetle/pull/2665
+
+
+
+
 ## [0.11.3+0.16.37] · 2025-04-22
 [0.11.3+0.16.37]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.11.3%2B0.16.37
 
