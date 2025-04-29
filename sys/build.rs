@@ -10,15 +10,15 @@ use std::{
 };
 
 use quote::{quote, ToTokens as _};
-use syn::visit::Visit;
+use syn::{parse_quote, visit::Visit, visit_mut::VisitMut};
 
 /// Version of the used [TigerBeetle] release.
 ///
 /// [TigerBeetle]: https://github.com/tigerbeetle/tigerbeetle
-const TIGERBEETLE_RELEASE: &str = "0.16.37";
+const TIGERBEETLE_RELEASE: &str = "0.16.38";
 
 /// Commit hash of the [`TIGERBEETLE_RELEASE`].
-const TIGERBEETLE_COMMIT: &str = "4586ac040cf45f729bb8aa23cccdedf075753baa";
+const TIGERBEETLE_COMMIT: &str = "23714836441909f93f3d0ba80cdac4c27aa0a5d0";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
@@ -177,7 +177,8 @@ fn main() {
         .generate()
         .expect("generating `tb_client` bindings");
 
-    let bindings = syn::parse_file(&bindings.to_string()).unwrap();
+    let mut bindings = syn::parse_file(&bindings.to_string()).unwrap();
+    LintSuppressionVisitor.visit_file_mut(&mut bindings);
 
     let bindings_path = out_dir.join("bindings.rs");
     fs::write(&bindings_path, bindings.to_token_stream().to_string())
@@ -194,6 +195,22 @@ fn main() {
         drop(f);
 
         rustfmt(generated_path);
+    }
+}
+
+struct LintSuppressionVisitor;
+
+impl VisitMut for LintSuppressionVisitor {
+    fn visit_foreign_item_fn_mut(&mut self, i: &mut syn::ForeignItemFn) {
+        // As of MSRV 1.78, `u128` is FFI-compatible:
+        // https://blog.rust-lang.org/2024/03/30/i128-layout-update
+        if i.sig.ident == "tb_client_init_parameters" {
+            i.attrs.push(parse_quote! {
+                #[allow(improper_ctypes)]
+            });
+        }
+
+        syn::visit_mut::visit_foreign_item_fn_mut(self, i)
     }
 }
 
@@ -472,6 +489,14 @@ impl bindgen::callbacks::ParseCallbacks for TigerbeetleCallbacks {
         } = info
         {
             out.extend(["::bytemuck::Pod".into(), "::bytemuck::Zeroable".into()]);
+        };
+        if let bindgen::callbacks::DeriveInfo {
+            kind: bindgen::callbacks::TypeKind::Struct,
+            name: "tb_init_parameters_t",
+            ..
+        } = info
+        {
+            out.extend(["::bytemuck::Zeroable".into()]);
         };
         out.append(&mut self.inner.add_derives(info));
         out
