@@ -25,6 +25,8 @@ mod linked {
 
     use std::{mem, ptr};
 
+    use bytemuck::Zeroable as _;
+
     #[test]
     #[ignore = "only checks linkage"]
     fn tb_client_init() {
@@ -55,6 +57,18 @@ mod linked {
                 address.len().try_into().unwrap(),
                 ptr::null::<()>() as usize,
                 None,
+            );
+        }
+    }
+
+    #[test]
+    #[ignore = "only checks linkage"]
+    fn tb_client_init_parameters() {
+        unsafe {
+            let mut raw = mem::zeroed();
+            _ = crate::tb_client_init_parameters(
+                &mut raw,
+                &mut crate::tb_init_parameters_t::zeroed(),
             );
         }
     }
