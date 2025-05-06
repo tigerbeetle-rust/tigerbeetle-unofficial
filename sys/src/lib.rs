@@ -35,7 +35,7 @@ mod linked {
             let address = "3000".as_bytes();
             _ = crate::tb_client_init(
                 &mut raw,
-                1_u128.to_ne_bytes().as_ptr(),
+                1_u128.to_le_bytes().as_ptr(),
                 address.as_ptr().cast(),
                 address.len().try_into().unwrap(),
                 ptr::null::<()>() as usize,
@@ -52,7 +52,7 @@ mod linked {
             let address = "3000".as_bytes();
             _ = crate::tb_client_init_echo(
                 &mut raw,
-                1_u128.to_ne_bytes().as_ptr(),
+                1_u128.to_le_bytes().as_ptr(),
                 address.as_ptr().cast(),
                 address.len().try_into().unwrap(),
                 ptr::null::<()>() as usize,

@@ -91,7 +91,7 @@ where
             let mut raw = Box::pin(UnsafeCell::new(mem::zeroed()));
             let status = sys::tb_client_init(
                 raw.as_mut().get_unchecked_mut().get_mut(),
-                cluster_id.to_ne_bytes().as_ptr(),
+                cluster_id.to_le_bytes().as_ptr(),
                 address.as_ptr().cast(),
                 address
                     .len()
