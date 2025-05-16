@@ -2,7 +2,7 @@
 ========================
 
 [![crates.io](https://img.shields.io/crates/v/tigerbeetle-unofficial.svg "crates.io")](https://crates.io/crates/tigerbeetle-unofficial)
-[![Rust 1.78+](https://img.shields.io/badge/rustc-1.78+-lightgray.svg "Rust 1.78+")](https://blog.rust-lang.org/2024/05/02/Rust-1.78.0.html)  
+[![Rust 1.78+](https://img.shields.io/badge/rustc-1.78+-lightgray.svg "Rust 1.78+")](https://blog.rust-lang.org/2024/05/02/Rust-1.78.0.html)\
 [![CI](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/actions/workflows/ci.yml/badge.svg?branch=main "CI")](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/actions?query=workflow%3ACI+branch%3Amain)
 [![Rust docs](https://docs.rs/tigerbeetle-unofficial/badge.svg "Rust docs")](https://docs.rs/tigerbeetle-unofficial)
 
@@ -10,7 +10,7 @@
 
 Unofficial [TigerBeetle] bindings for [Rust].
 
-> **WARNING**: In [TigerBeetle] a client is **not [backward compatible][2]** with a cluster. You cannot run a newer client against an older cluster: clients are only [forward compatible][3] with replicas from their own version or newer (see the ["Oldest supported client version"](https://github.com/tigerbeetle/tigerbeetle/releases/tag/0.16.40) for the supported versions range).  
+> **WARNING**: In [TigerBeetle] a client is **not [backward compatible][2]** with a cluster. You cannot run a newer client against an older cluster: clients are only [forward compatible][3] with replicas from their own version or newer (see the ["Oldest supported client version"](https://github.com/tigerbeetle/tigerbeetle/releases/tag/0.16.40) for the supported versions range).
 > To avoid accidental use of a newer [TigerBeetle] client with an older cluster, it's highly recommended to pin the exact version if this crate in your `[dependencies]` and only change it with the cluster upgrade along:
 > ```toml
 > [dependencies]
