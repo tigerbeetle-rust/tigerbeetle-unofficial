@@ -6,6 +6,21 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.11.7+0.16.41] · 2025-05-20
+[0.11.7+0.16.41]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.11.7%2B0.16.41
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.11.6%2B0.16.40...v0.11.7%2B0.16.41) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/25)
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.41 version][tb-0.16.41]. ([#68])
+
+[#68]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/68
+[tb-0.16.41]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.41/CHANGELOG.md#tigerbeetle-01641
+
+
+
+
 ## [0.11.6+0.16.40] · 2025-05-13
 [0.11.6+0.16.40]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.11.6%2B0.16.40
 
@@ -44,7 +59,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 ### Added
 
 - `sys` crate:
-    - `tb_client_init_parameters()` function. ([#65], [tigerbeetle/tigerbeetle#2665]) 
+    - `tb_client_init_parameters()` function. ([#65], [tigerbeetle/tigerbeetle#2665])
     - `tb_init_parameters_t` struct. ([#65], [tigerbeetle/tigerbeetle#2665])
 
 ### Changed
@@ -255,7 +270,7 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
     - Remade `Packet::submit()` into `Client::submit()`. ([#49])
     - Removed `Client::packet()` (use `Packet::new()` instead). ([#49])
 - Main crate:
-    - Removed lifetime parameter from `Packet`. ([#49]) 
+    - Removed lifetime parameter from `Packet`. ([#49])
 
 ### Added
 
