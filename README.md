@@ -6,15 +6,15 @@
 [![CI](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/actions/workflows/ci.yml/badge.svg?branch=main "CI")](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/actions?query=workflow%3ACI+branch%3Amain)
 [![Rust docs](https://docs.rs/tigerbeetle-unofficial/badge.svg "Rust docs")](https://docs.rs/tigerbeetle-unofficial)
 
-[Changelog](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/blob/v0.11.7%2B0.16.41/CHANGELOG.md)
+[Changelog](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/blob/v0.11.7%2B0.16.42/CHANGELOG.md)
 
 Unofficial [TigerBeetle] bindings for [Rust].
 
-> **WARNING**: In [TigerBeetle] a client is **not [backward compatible][2]** with a cluster. You cannot run a newer client against an older cluster: clients are only [forward compatible][3] with replicas from their own version or newer (see the ["Oldest supported client version"](https://github.com/tigerbeetle/tigerbeetle/releases/tag/0.16.41) for the supported versions range).
+> **WARNING**: In [TigerBeetle] a client is **not [backward compatible][2]** with a cluster. You cannot run a newer client against an older cluster: clients are only [forward compatible][3] with replicas from their own version or newer (see the ["Oldest supported client version"](https://github.com/tigerbeetle/tigerbeetle/releases/tag/0.16.42) for the supported versions range).
 > To avoid accidental use of a newer [TigerBeetle] client with an older cluster, it's highly recommended to pin the exact version if this crate in your `[dependencies]` and only change it with the cluster upgrade along:
 > ```toml
 > [dependencies]
-> tigerbeetle-unofficial = "=0.11.7+0.16.41"
+> tigerbeetle-unofficial = "=0.11.7+0.16.42"
 > ```
 
 
@@ -44,9 +44,9 @@ The repository hosts the following libraries:
 
 ## License
 
-[TigerBeetle] is licensed under [Apache License, Version 2.0](https://github.com/tigerbeetle/tigerbeetle/blob/0.16.41/LICENSE).
+[TigerBeetle] is licensed under [Apache License, Version 2.0](https://github.com/tigerbeetle/tigerbeetle/blob/0.16.42/LICENSE).
 
-`tigerbeetle-unofficial` crates are licensed under the [Apache License, Version 2.0](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/blob/v0.11.7%2B0.16.41/LICENSE) (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at
+`tigerbeetle-unofficial` crates are licensed under the [Apache License, Version 2.0](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/blob/v0.11.7%2B0.16.42/LICENSE) (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at
 
 https://www.apache.org/licenses/LICENSE-2.0
 
