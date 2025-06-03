@@ -6,6 +6,31 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.12.0+0.16.43] · 2025-06-03
+[0.12.0+0.16.43]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.12.0%2B0.16.43
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.11.8%2B0.16.42...v0.12.0%2B0.16.43) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/27)
+
+### BC Breaks
+
+- `sys` crate:
+    - Renamed `TB_OPERATION_GET_EVENTS` value to `TB_OPERATION_GET_CHANGE_EVENTS` in `TB_OPERATION` enumeration. ([#70], [tigerbeetle/tigerbeetle#2917])
+    - `generated_safe`:
+        - Renamed `OperationKind::GetEvents` enum variant to `OperationKind::GetChangeEvents`. ([#70], [tigerbeetle/tigerbeetle#2917])
+- `core` crate:
+    - Renamed `OperationKind::GetEvents` enum variant to `OperationKind::GetChangeEvents`. ([#70], [tigerbeetle/tigerbeetle#2917])
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.43 version][tb-0.16.43]. ([#70])
+
+[#70]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/70
+[tb-0.16.43]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.43/CHANGELOG.md#tigerbeetle-01643
+[tigerbeetle/tigerbeetle#2917]: https://github.com/tigerbeetle/tigerbeetle/pull/2917
+
+
+
+
 ## [0.11.8+0.16.42] · 2025-05-27
 [0.11.8+0.16.42]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.11.8%2B0.16.42
 
