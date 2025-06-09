@@ -157,13 +157,7 @@ fn main() {
         fs::copy("src/wrapper.h", &wrapper).expect("copying `wrapper.h`");
     };
 
-    // TODO: Detect automatically, without bringing in heavy dependencies like `cargo-metadata`.
-    // MSRV: 1.78.0
-    let msrv = bindgen::RustTarget::stable(78, 0)
-        .unwrap_or_else(|e| panic!("invalid MSRV specified for `bindgen`: {e}"));
-
     let bindings = bindgen::Builder::default()
-        .rust_target(msrv)
         .header(
             wrapper
                 .to_str()
@@ -552,8 +546,8 @@ impl bindgen::callbacks::ParseCallbacks for TigerbeetleCallbacks {
             .enum_variant_name(enum_name, original_variant_name, variant_value)
     }
 
-    fn item_name(&self, original_item_name: &str) -> Option<String> {
-        self.inner.item_name(original_item_name)
+    fn item_name(&self, original_item: bindgen::callbacks::ItemInfo<'_>) -> Option<String> {
+        self.inner.item_name(original_item)
     }
 
     fn include_file(&self, filename: &str) {
