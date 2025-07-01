@@ -39,7 +39,7 @@ where
                 user_tag: 0,
                 operation: operation.into().0,
                 status: 0,
-                opaque: [0; 32],
+                opaque: [0; 64],
             })),
             _ptr: PhantomData,
         }
