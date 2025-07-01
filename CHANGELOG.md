@@ -6,6 +6,27 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.13.0+0.16.47] · 2025-07-01
+[0.13.0+0.16.47]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.13.0%2B0.16.47
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.12.3%2B0.16.46...v0.13.0%2B0.16.47) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/31)
+
+### BC Breaks
+
+- `sys` crate:
+    - Changed size of `opaque` field in `tb_packet_t` struct from 32 to 64 bytes. ([#75], [tigerbeetle/tigerbeetle#3038])
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.47 version][tb-0.16.47]. ([#75])
+
+[#75]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/75
+[tb-0.16.47]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.47/CHANGELOG.md#tigerbeetle-01647
+[tigerbeetle/tigerbeetle#3038]: https://github.com/tigerbeetle/tigerbeetle/pull/3038
+
+
+
+
 ## [0.12.3+0.16.46] · 2025-06-24
 [0.12.3+0.16.46]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.12.3%2B0.16.46
 
