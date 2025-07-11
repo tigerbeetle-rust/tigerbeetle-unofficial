@@ -169,14 +169,12 @@ impl core::Callbacks for Callbacks {
         let status = packet.status();
         let operation = packet.operation();
         let user_data = packet.into_user_data();
-        user_data
-            .reply_sender
-            .send(status.map(|()| {
-                // PANIC: Unwrapping is OK here, because the `reply` can only be `None` when the
-                //        `status` is `Err`.
-                Reply::copy_from_reply(operation.kind(), reply.unwrap().payload)
-            }))
-            .unwrap_or_else(|_| panic!("unexpected: reply receiver is already dropped"));
+        // Channel may be closed due `Future` cancellation so ignore the error.
+        drop(user_data.reply_sender.send(status.map(|()| {
+            // PANIC: Unwrapping is OK here, because the `reply` can only be `None` when the
+            //        `status` is `Err`.
+            Reply::copy_from_reply(operation.kind(), reply.unwrap().payload)
+        })));
     }
 }
 
