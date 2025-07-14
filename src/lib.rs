@@ -169,6 +169,8 @@ impl core::Callbacks for Callbacks {
         let status = packet.status();
         let operation = packet.operation();
         let user_data = packet.into_user_data();
+        // Channel may be closed due to the `Future` cancellation, so the `.send()` error should
+        // be ignored.
         user_data
             .reply_sender
             .send(status.map(|()| {
@@ -176,7 +178,7 @@ impl core::Callbacks for Callbacks {
                 //        `status` is `Err`.
                 Reply::copy_from_reply(operation.kind(), reply.unwrap().payload)
             }))
-            .unwrap_or_else(|_| panic!("unexpected: reply receiver is already dropped"));
+            .unwrap_or_else(drop);
     }
 }
 
