@@ -6,6 +6,20 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## main
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.13.2%2B0.16.49...main) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/34)
+
+### Fixed
+
+- `core` crate:
+    - `Callbacks` panic on `.submit()` `Future` cancellation. ([#78])
+
+[#78]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/78
+
+
+
+
 ## [0.13.2+0.16.49] · 2025-07-08
 [0.13.2+0.16.49]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.13.2%2B0.16.49
 
