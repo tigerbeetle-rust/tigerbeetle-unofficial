@@ -6,16 +6,23 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
-## main
+## [0.14.0+0.16.50] · 2025-07-16
+[0.14.0+0.16.50]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.14.0%2B0.16.50
 
-[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.13.2%2B0.16.49...main) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/34)
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.13.2%2B0.16.49...v0.14.0%2B0.16.50) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/34)
 
 ### Fixed
 
 - `core` crate:
     - `Callbacks` panic on `.submit()` `Future` cancellation. ([#78])
 
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.50 version][tb-0.16.50]. ([#79])
+
 [#78]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/78
+[#79]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/79
+[tb-0.16.50]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.50/CHANGELOG.md#tigerbeetle-01650
 
 
 
