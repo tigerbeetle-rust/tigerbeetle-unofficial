@@ -21,7 +21,12 @@ jobs:
   ################
 
   pr:
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'pull_request'
+         && needs.clippy.result == 'success'
+         && needs.example.result == 'success'
+         && needs.msrv.result == 'success'
+         && needs.rustfmt.result == 'success'
+         && needs.test.result == 'success' }}
     needs:
       - clippy
       - example
