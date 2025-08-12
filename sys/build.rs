@@ -15,10 +15,10 @@ use syn::{parse_quote, visit::Visit, visit_mut::VisitMut};
 /// Version of the used [TigerBeetle] release.
 ///
 /// [TigerBeetle]: https://github.com/tigerbeetle/tigerbeetle
-const TIGERBEETLE_RELEASE: &str = "0.16.53";
+const TIGERBEETLE_RELEASE: &str = "0.16.54";
 
 /// Commit hash of the [`TIGERBEETLE_RELEASE`].
-const TIGERBEETLE_COMMIT: &str = "5a4a577e54a9e92c4114d52b322414d14faef0c5";
+const TIGERBEETLE_COMMIT: &str = "3f330787b163f6dcb58639c7a80fb4d9ee93bf1e";
 
 fn target_to_lib_dir(target: &str) -> Option<&'static str> {
     match target {
@@ -45,11 +45,6 @@ fn target_to_tigerbeetle_target(target: &str) -> Option<&'static str> {
         _ => None,
     }
 }
-
-#[cfg(unix)]
-const SCRIPT_EXTENSION: &str = "sh";
-#[cfg(windows)]
-const SCRIPT_EXTENSION: &str = "bat";
 
 fn main() {
     assert!(env!("CARGO_PKG_VERSION").ends_with(TIGERBEETLE_RELEASE));
@@ -92,11 +87,13 @@ fn main() {
                 .collect(),
         );
 
-        let status = Command::new(
-            tigerbeetle_root
-                .join("zig/download")
-                .with_extension(SCRIPT_EXTENSION),
-        )
+        let status = if cfg!(windows) {
+            let mut cmd = Command::new("pwsh");
+            _ = cmd.arg(tigerbeetle_root.join("zig/download.win.ps1"));
+            cmd
+        } else {
+            Command::new(tigerbeetle_root.join("zig/download.sh"))
+        }
         .current_dir(&tigerbeetle_root)
         .status()
         .expect("running `download` script");
