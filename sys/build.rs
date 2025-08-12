@@ -88,7 +88,7 @@ fn main() {
         );
 
         let status = if cfg!(windows) {
-            let mut cmd = Command::new("powershell");
+            let mut cmd = Command::new("pwsh");
             _ = cmd.arg(tigerbeetle_root.join("zig/download.win.ps1"));
             cmd
         } else {
