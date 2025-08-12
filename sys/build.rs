@@ -49,7 +49,7 @@ fn target_to_tigerbeetle_target(target: &str) -> Option<&'static str> {
 #[cfg(unix)]
 const SCRIPT_EXTENSION: &str = "sh";
 #[cfg(windows)]
-const SCRIPT_EXTENSION: &str = "bat";
+const SCRIPT_EXTENSION: &str = "win.ps1";
 
 fn main() {
     assert!(env!("CARGO_PKG_VERSION").ends_with(TIGERBEETLE_RELEASE));
