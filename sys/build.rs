@@ -46,11 +46,6 @@ fn target_to_tigerbeetle_target(target: &str) -> Option<&'static str> {
     }
 }
 
-#[cfg(unix)]
-const SCRIPT_EXTENSION: &str = "sh";
-#[cfg(windows)]
-const SCRIPT_EXTENSION: &str = "ps1";
-
 fn main() {
     assert!(env!("CARGO_PKG_VERSION").ends_with(TIGERBEETLE_RELEASE));
     let out_dir: PathBuf = env::var("OUT_DIR").unwrap().into();
@@ -92,11 +87,13 @@ fn main() {
                 .collect(),
         );
 
-        let status = Command::new(
-            tigerbeetle_root
-                .join("zig/download")
-                .with_extension(SCRIPT_EXTENSION),
-        )
+        let status = if cfg!(windows) {
+            let mut cmd = Command::new("powershell");
+            _ = cmd.arg(tigerbeetle_root.join("zig/download.win.ps1"));
+            cmd
+        } else {
+            Command::new(tigerbeetle_root.join("zig/download.sh"))
+        }
         .current_dir(&tigerbeetle_root)
         .status()
         .expect("running `download` script");
