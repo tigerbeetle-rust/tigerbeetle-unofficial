@@ -6,6 +6,21 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## [0.14.5+0.16.55] · 2025-08-19
+[0.14.5+0.16.55]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.14.5%2B0.16.55
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.14.4%2B0.16.54...v0.14.5%2B0.16.55) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/39)
+
+### Changed
+
+- Upgraded [`tb_client` C library] to [0.16.55 version][tb-0.16.55]. ([#85])
+
+[#85]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/85
+[tb-0.16.55]: https://github.com/tigerbeetle/tigerbeetle/blob/0.16.55/CHANGELOG.md#tigerbeetle-01655
+
+
+
+
 ## [0.14.4+0.16.54] · 2025-08-12
 [0.14.4+0.16.54]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.14.4%2B0.16.54
 
