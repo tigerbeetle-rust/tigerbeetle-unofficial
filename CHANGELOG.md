@@ -6,6 +6,18 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
+## main
+
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.14.27%2B0.16.78...main) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/61)
+
+### Fixed
+
+- `zig/download.sh` script not following redirect during build time. ([todo])
+
+
+
+
+
 ## [0.14.27+0.16.78] · 2026-03-25
 [0.14.27+0.16.78]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.14.27%2B0.16.78
 

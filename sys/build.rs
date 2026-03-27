@@ -92,7 +92,22 @@ fn main() {
             _ = cmd.arg(tigerbeetle_root.join("zig/download.win.ps1"));
             cmd
         } else {
-            Command::new(tigerbeetle_root.join("zig/download.sh"))
+            // TODO: Use the original `zig/download.sh` once tigerbeetle/tigerbeetle@394d012c gets
+            //       released.
+
+            let orig_path = tigerbeetle_root.join("zig/download.sh");
+            let patched_path = out_dir.join("zig_download.patched.sh");
+
+            let download_script = fs::read_to_string(&orig_path)
+                .expect("failed to read `zig/download.sh`")
+                .replace(
+                    "curl --silent --output",
+                    "curl --location --silent --output",
+                );
+            fs::copy(&orig_path, &patched_path).expect("failed to copy `zig/download.sh`");
+            fs::write(&patched_path, download_script).expect("failed to patch `zig/download.sh`");
+
+            Command::new(patched_path)
         }
         .current_dir(&tigerbeetle_root)
         .status()
