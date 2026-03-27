@@ -6,9 +6,10 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 
 
-## main
+## [0.14.28+0.16.78] · 2026-03-27
+[0.14.28+0.16.78]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/tree/v0.14.28%2B0.16.78
 
-[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.14.27%2B0.16.78...main) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/61)
+[Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.14.27%2B0.16.78...v0.14.28%2B0.16.78) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/61)
 
 ### Added
 
@@ -16,9 +17,10 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 ### Fixed
 
-- `zig/download.sh` script not following redirect during build time. ([todo])
+- `zig/download.sh` script not following redirect during build time. ([8c462c0a])
 
 [#109]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/109
+[8c462c0a]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/commit/8c462c0a8ece4b1c8689e5364c9021423e7ad230
 
 
 
