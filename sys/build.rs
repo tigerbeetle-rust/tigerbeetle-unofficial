@@ -57,6 +57,7 @@ fn main() {
 
     println!("cargo:rerun-if-env-changed=DOCS_RS");
     println!("cargo:rerun-if-env-changed=TB_CLIENT_DEBUG");
+    println!("cargo:rerun-if-env-changed=ZIG_PATH");
     println!("cargo:rerun-if-changed=src/wrapper.h");
 
     let wrapper;
@@ -87,25 +88,37 @@ fn main() {
                 .collect(),
         );
 
-        let status = if cfg!(windows) {
-            let mut cmd = Command::new("pwsh");
-            _ = cmd.arg(tigerbeetle_root.join("zig/download.win.ps1"));
-            cmd
+        // Check for ZIG_PATH environment variable to use system zig instead of downloading
+        let zig_path: PathBuf = if let Ok(zig_path) = env::var("ZIG_PATH") {
+            // Use system zig, skip download
+            let path = PathBuf::from(&zig_path);
+            assert!(
+                path.exists(),
+                "ZIG_PATH is set to {zig_path:?} but the file does not exist"
+            );
+            path
         } else {
-            Command::new(tigerbeetle_root.join("zig/download.sh"))
-        }
-        .current_dir(&tigerbeetle_root)
-        .status()
-        .expect("running `download` script");
-        assert!(status.success(), "`download` script failed with {status:?}");
+            // Download zig using the bundled script
+            let status = if cfg!(windows) {
+                let mut cmd = Command::new("pwsh");
+                _ = cmd.arg(tigerbeetle_root.join("zig/download.win.ps1"));
+                cmd
+            } else {
+                Command::new(tigerbeetle_root.join("zig/download.sh"))
+            }
+            .current_dir(&tigerbeetle_root)
+            .status()
+            .expect("running `download` script");
+            assert!(status.success(), "`download` script failed with {status:?}");
 
-        let status = Command::new(
             tigerbeetle_root
                 .join("zig/zig")
                 .with_extension(env::consts::EXE_EXTENSION)
                 .canonicalize()
-                .unwrap(),
-        )
+                .unwrap()
+        };
+
+        let status = Command::new(&zig_path)
         .arg("build")
         .arg("clients:c")
         .args((!debug).then_some("-Drelease"))
