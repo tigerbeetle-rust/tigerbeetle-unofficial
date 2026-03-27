@@ -88,43 +88,44 @@ fn main() {
                 .collect(),
         );
 
-        // Check for ZIG_PATH environment variable to use system zig instead of downloading
-        let zig_path: PathBuf = if let Ok(zig_path) = env::var("ZIG_PATH") {
-            // Use system zig, skip download
+        // Check for `ZIG_PATH` env var to use system preinstalled Zig instead of downloading one.
+        let zig_path: PathBuf = if let Some(zig_path) = env::var_os("ZIG_PATH") {
             let path = PathBuf::from(&zig_path);
             assert!(
                 path.exists(),
-                "ZIG_PATH is set to {zig_path:?} but the file does not exist"
+                "`ZIG_PATH` is set to `{}` but the file does not exist",
+                path.display(),
             );
             path
         } else {
-            // Download zig using the bundled script
-        let status = if cfg!(windows) {
-            let mut cmd = Command::new("pwsh");
-            _ = cmd.arg(tigerbeetle_root.join("zig/download.win.ps1"));
-            cmd
-        } else {
-            // TODO: Use the original `zig/download.sh` once tigerbeetle/tigerbeetle@394d012c gets
-            //       released.
+            // Download ZIG using the bundled downloader script.
+            let status = if cfg!(windows) {
+                let mut cmd = Command::new("pwsh");
+                _ = cmd.arg(tigerbeetle_root.join("zig/download.win.ps1"));
+                cmd
+            } else {
+                // TODO: Use the original `zig/download.sh` once tigerbeetle/tigerbeetle@394d012c
+                //       gets released.
 
-            let orig_path = tigerbeetle_root.join("zig/download.sh");
-            let patched_path = out_dir.join("zig_download.patched.sh");
+                let orig_path = tigerbeetle_root.join("zig/download.sh");
+                let patched_path = out_dir.join("zig_download.patched.sh");
 
-            let download_script = fs::read_to_string(&orig_path)
-                .expect("failed to read `zig/download.sh`")
-                .replace(
-                    "curl --silent --output",
-                    "curl --location --silent --output",
-                );
-            fs::copy(&orig_path, &patched_path).expect("failed to copy `zig/download.sh`");
-            fs::write(&patched_path, download_script).expect("failed to patch `zig/download.sh`");
+                let download_script = fs::read_to_string(&orig_path)
+                    .expect("failed to read `zig/download.sh`")
+                    .replace(
+                        "curl --silent --output",
+                        "curl --location --silent --output",
+                    );
+                fs::copy(&orig_path, &patched_path).expect("failed to copy `zig/download.sh`");
+                fs::write(&patched_path, download_script)
+                    .expect("failed to patch `zig/download.sh`");
 
-            Command::new(patched_path)
-        }
-        .current_dir(&tigerbeetle_root)
-        .status()
-        .expect("running `download` script");
-        assert!(status.success(), "`download` script failed with {status:?}");
+                Command::new(patched_path)
+            }
+            .current_dir(&tigerbeetle_root)
+            .status()
+            .expect("running `download` script");
+            assert!(status.success(), "`download` script failed with {status:?}");
 
             tigerbeetle_root
                 .join("zig/zig")
@@ -134,17 +135,17 @@ fn main() {
         };
 
         let status = Command::new(&zig_path)
-        .arg("build")
-        .arg("clients:c")
-        .args((!debug).then_some("-Drelease"))
-        .arg(format!("-Dtarget={tigerbeetle_target}"))
-        .arg(format!("-Dconfig-release={TIGERBEETLE_RELEASE}"))
-        .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
-        .arg(format!("-Dgit-commit={TIGERBEETLE_COMMIT}"))
-        .current_dir(&tigerbeetle_root)
-        .env_remove("CI")
-        .status()
-        .expect("running `zig build` subcommand");
+            .arg("build")
+            .arg("clients:c")
+            .args((!debug).then_some("-Drelease"))
+            .arg(format!("-Dtarget={tigerbeetle_target}"))
+            .arg(format!("-Dconfig-release={TIGERBEETLE_RELEASE}"))
+            .arg(format!("-Dconfig-release-client-min={TIGERBEETLE_RELEASE}"))
+            .arg(format!("-Dgit-commit={TIGERBEETLE_COMMIT}"))
+            .current_dir(&tigerbeetle_root)
+            .env_remove("CI")
+            .status()
+            .expect("running `zig build` subcommand");
         assert!(status.success(), "`zig build` failed with {status:?}");
 
         let c_dir = tigerbeetle_root.join("src/clients/c/");
