@@ -10,10 +10,15 @@ All user visible changes to `tigerbeetle-unofficial`, `tigerbeetle-unofficial-co
 
 [Diff](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare/v0.14.27%2B0.16.78...main) | [Milestone](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/milestone/61)
 
+### Added
+
+- Ability to use custom [Zig] toolchain for building via `ZIG_PATH` env var. ([#109])
+
 ### Fixed
 
 - `zig/download.sh` script not following redirect during build time. ([todo])
 
+[#109]: https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/pull/109
 
 
 
@@ -1107,3 +1112,4 @@ See [Git log](https://github.com/tigerbeetle-rust/tigerbeetle-unofficial/compare
 [Git]: https://git-scm.com
 [MSRV]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-rust-version-field
 [Semantic Versioning 2.0.0]: https://semver.org
+[Zig]: https://ziglang.org
